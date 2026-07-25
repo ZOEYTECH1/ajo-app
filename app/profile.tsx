@@ -403,6 +403,12 @@ export default function ProfileRoute() {
 
         {/* Account actions */}
         <View style={[s.actionsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <TouchableOpacity onPress={() => router.push('/account/privacy' as any)} style={s.actionRow}>
+            <Ionicons name="shield-checkmark-outline" size={20} color={colors.textPrimary} />
+            <Text style={{ fontSize: FontSize.base, color: colors.textPrimary, marginLeft: 14, flex: 1 }}>Privacy Policy & Terms</Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+          </TouchableOpacity>
+          <View style={{ height: 1, backgroundColor: colors.border }} />
           <TouchableOpacity onPress={handleLogout} style={s.actionRow}>
             <Ionicons name="log-out-outline" size={20} color={colors.textPrimary} />
             <Text style={{ fontSize: FontSize.base, color: colors.textPrimary, marginLeft: 14, flex: 1 }}>Log out</Text>

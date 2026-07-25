@@ -132,12 +132,13 @@ export default function CategoryDetailScreen() {
   );
 
   const filteredProducts = (products ?? []).filter(p => {
+    const threshold = p.low_stock_threshold ?? 5;
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
     const matchesStock =
       stockFilter === 'all' ? true :
       stockFilter === 'out' ? p.quantity === 0 :
-      stockFilter === 'low' ? p.quantity > 0 && p.quantity < 5 :
-      p.quantity >= 5;
+      stockFilter === 'low' ? p.quantity > 0 && p.quantity < threshold :
+      p.quantity >= threshold;
     return matchesSearch && matchesStock;
   });
 
@@ -404,8 +405,9 @@ export default function CategoryDetailScreen() {
             </View>
 
             {filteredProducts.map((p, idx) => {
-              const color = stockColor(p.quantity);
-              const statusLabel = p.quantity === 0 ? 'Out' : p.quantity < 5 ? 'Low' : 'OK';
+              const threshold = p.low_stock_threshold ?? 5;
+              const color = p.quantity === 0 ? '#C62828' : p.quantity < threshold ? '#F57C00' : '#2E7D32';
+              const statusLabel = p.quantity === 0 ? 'Out' : p.quantity < threshold ? 'Low' : 'OK';
               const isLast = idx === filteredProducts.length - 1;
               return (
                 <TouchableOpacity

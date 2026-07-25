@@ -31,10 +31,11 @@ export default function ProductDetailScreen() {
   const router     = useRouter();
   const qc         = useQueryClient();
 
-  const [editModal, setEditModal]       = useState(false);
-  const [editName, setEditName]         = useState('');
-  const [editPrice, setEditPrice]       = useState('');
-  const [editBarcode, setEditBarcode]   = useState('');
+  const [editModal, setEditModal]         = useState(false);
+  const [editName, setEditName]           = useState('');
+  const [editPrice, setEditPrice]         = useState('');
+  const [editBarcode, setEditBarcode]     = useState('');
+  const [editThreshold, setEditThreshold] = useState('5');
   const [summaryDate, setSummaryDate]   = useState(new Date().toISOString().slice(0, 10));
   const [openingModal, setOpeningModal] = useState(false);
   const [openingInput, setOpeningInput] = useState('');
@@ -106,6 +107,7 @@ export default function ProductDetailScreen() {
       name: editName.trim(),
       price: editPrice.trim(),
       barcode: editBarcode.trim(),
+      low_stock_threshold: Math.max(0, parseInt(editThreshold, 10) || 5),
     }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['inventory-products', catIdNum] });
@@ -157,6 +159,7 @@ export default function ProductDetailScreen() {
     setEditName(product?.name ?? '');
     setEditPrice(product?.price ?? '');
     setEditBarcode(product?.barcode ?? '');
+    setEditThreshold(String(product?.low_stock_threshold ?? 5));
     setEditModal(true);
   };
 
@@ -233,6 +236,18 @@ export default function ProductDetailScreen() {
               placeholderTextColor={colors.textTertiary}
               autoCapitalize="none"
             />
+            <Text style={[s.modalLabel, { color: colors.textSecondary, marginTop: 14 }]}>Low stock alert threshold</Text>
+            <TextInput
+              value={editThreshold}
+              onChangeText={setEditThreshold}
+              style={[s.modalInput, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
+              placeholder="e.g. 5"
+              placeholderTextColor={colors.textTertiary}
+              keyboardType="number-pad"
+            />
+            <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 4 }}>
+              You'll be notified when stock drops below this number. Default is 5.
+            </Text>
             <TouchableOpacity
               onPress={() => saveEdit()}
               disabled={saving || !editName.trim() || !editPrice.trim()}

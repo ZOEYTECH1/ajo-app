@@ -30,6 +30,7 @@ export interface InventoryProduct {
   quantity: number;
   barcode: string;
   custom_fields: Record<string, string | number>;
+  low_stock_threshold: number;
   created_at: string;
   updated_at: string;
 }
@@ -88,7 +89,7 @@ export const createProduct = (
 
 export const updateProduct = (
   prodId: number,
-  data: Partial<{ name: string; price: string | number; barcode: string; custom_fields: Record<string, string | number> }>,
+  data: Partial<{ name: string; price: string | number; barcode: string; custom_fields: Record<string, string | number>; low_stock_threshold: number }>,
 ): Promise<InventoryProduct> =>
   api.patch(`/api/inventory/products/${prodId}/`, data).then(r => r.data);
 

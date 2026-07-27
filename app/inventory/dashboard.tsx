@@ -117,6 +117,46 @@ export default function InventoryDashboardScreen() {
             </>
           )}
 
+          {/* Expiry alerts */}
+          {(data?.expiring_soon_items ?? []).length > 0 && (
+            <>
+              <Text style={[s.sectionLabel, { color: colors.textPrimary, marginTop: 20 }]}>
+                Expiry Alerts{' '}
+                <Text style={{ color: data!.expiring_soon_items.some(i => i.urgent) ? '#C62828' : INV }}>
+                  ({data!.expiring_soon_items.length})
+                </Text>
+              </Text>
+              {data!.expiring_soon_items.map((item) => {
+                const bg    = item.urgent ? '#FFEBEE' : '#FFF3E0';
+                const color = item.urgent ? '#C62828' : INV;
+                const icon  = item.urgent ? 'alert-circle-outline' : 'time-outline';
+                const label = item.days_left === 0
+                  ? 'Expires today!'
+                  : item.days_left === 1
+                    ? 'Expires tomorrow'
+                    : `Expires in ${item.days_left} days`;
+                const fmtDate = new Date(item.expiry_date + 'T00:00:00')
+                  .toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+                return (
+                  <View key={item.id} style={[s.alertCard, { backgroundColor: bg, ...Shadow.card(colors.black) }]}>
+                    <Ionicons name={icon as any} size={18} color={color} />
+                    <View style={{ flex: 1, marginLeft: 10 }}>
+                      <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }}>{item.name}</Text>
+                      <Text style={{ fontSize: FontSize.xs, color, marginTop: 2 }}>
+                        {label} · {fmtDate}
+                      </Text>
+                    </View>
+                    {item.urgent && (
+                      <View style={{ backgroundColor: '#C62828', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3 }}>
+                        <Text style={{ fontSize: 10, color: '#fff', fontWeight: '800' }}>URGENT</Text>
+                      </View>
+                    )}
+                  </View>
+                );
+              })}
+            </>
+          )}
+
           {/* Quick links */}
           <Text style={[s.sectionLabel, { color: colors.textPrimary, marginTop: 24 }]}>Quick Actions</Text>
           <View style={s.row}>

@@ -31,6 +31,7 @@ export interface InventoryProduct {
   barcode: string;
   custom_fields: Record<string, string | number>;
   low_stock_threshold: number;
+  expiry_date: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -89,7 +90,7 @@ export const createProduct = (
 
 export const updateProduct = (
   prodId: number,
-  data: Partial<{ name: string; price: string | number; barcode: string; custom_fields: Record<string, string | number>; low_stock_threshold: number }>,
+  data: Partial<{ name: string; price: string | number; barcode: string; custom_fields: Record<string, string | number>; low_stock_threshold: number; expiry_date: string | null }>,
 ): Promise<InventoryProduct> =>
   api.patch(`/api/inventory/products/${prodId}/`, data).then(r => r.data);
 
@@ -255,6 +256,7 @@ export interface InventoryDashboard {
   opening_stock: number;
   closing_stock: number;
   low_stock_items: { id: number; name: string; quantity: number }[];
+  expiring_soon_items: { id: number; name: string; expiry_date: string; days_left: number; urgent: boolean }[];
 }
 
 export const getDashboard = (date?: string): Promise<InventoryDashboard> => {

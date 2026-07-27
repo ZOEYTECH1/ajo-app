@@ -4,6 +4,7 @@ import {
   StyleSheet, Alert, ActivityIndicator, Image,
   Modal, TextInput, KeyboardAvoidingView, Platform,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
@@ -31,11 +32,13 @@ export default function ProductDetailScreen() {
   const router     = useRouter();
   const qc         = useQueryClient();
 
-  const [editModal, setEditModal]         = useState(false);
-  const [editName, setEditName]           = useState('');
-  const [editPrice, setEditPrice]         = useState('');
-  const [editBarcode, setEditBarcode]     = useState('');
-  const [editThreshold, setEditThreshold] = useState('5');
+  const [editModal, setEditModal]             = useState(false);
+  const [editName, setEditName]               = useState('');
+  const [editPrice, setEditPrice]             = useState('');
+  const [editBarcode, setEditBarcode]         = useState('');
+  const [editThreshold, setEditThreshold]     = useState('5');
+  const [editExpiryDate, setEditExpiryDate]   = useState<string | null>(null);
+  const [showExpiryPicker, setShowExpiryPicker] = useState(false);
   const [summaryDate, setSummaryDate]   = useState(new Date().toISOString().slice(0, 10));
   const [openingModal, setOpeningModal] = useState(false);
   const [openingInput, setOpeningInput] = useState('');
@@ -108,6 +111,7 @@ export default function ProductDetailScreen() {
       price: editPrice.trim(),
       barcode: editBarcode.trim(),
       low_stock_threshold: Math.max(0, parseInt(editThreshold, 10) || 5),
+      expiry_date: editExpiryDate || null,
     }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['inventory-products', catIdNum] });
@@ -160,6 +164,8 @@ export default function ProductDetailScreen() {
     setEditPrice(product?.price ?? '');
     setEditBarcode(product?.barcode ?? '');
     setEditThreshold(String(product?.low_stock_threshold ?? 5));
+    setEditExpiryDate(product?.expiry_date ?? null);
+    setShowExpiryPicker(false);
     setEditModal(true);
   };
 
@@ -247,6 +253,47 @@ export default function ProductDetailScreen() {
             />
             <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 4 }}>
               You'll be notified when stock drops below this number. Default is 5.
+            </Text>
+            <Text style={[s.modalLabel, { color: colors.textSecondary, marginTop: 14 }]}>Expiry date (optional)</Text>
+            <TouchableOpacity
+              onPress={() => setShowExpiryPicker(true)}
+              style={[s.modalInput, { backgroundColor: colors.background, borderColor: colors.border,
+                flexDirection: 'row', alignItems: 'center', paddingVertical: 14 }]}
+            >
+              <Ionicons name="calendar-outline" size={16} color={editExpiryDate ? '#E65100' : colors.textSecondary} />
+              <Text style={{ flex: 1, marginLeft: 8, fontSize: FontSize.sm,
+                color: editExpiryDate ? colors.textPrimary : colors.textTertiary }}>
+                {editExpiryDate
+                  ? new Date(editExpiryDate + 'T00:00:00').toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
+                  : 'No expiry date set'}
+              </Text>
+              {!!editExpiryDate && (
+                <TouchableOpacity onPress={() => setEditExpiryDate(null)} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }}>
+                  <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
+                </TouchableOpacity>
+              )}
+            </TouchableOpacity>
+            {showExpiryPicker && (
+              <>
+                <DateTimePicker
+                  value={editExpiryDate ? new Date(editExpiryDate + 'T00:00:00') : new Date()}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={(_, selected) => {
+                    if (selected) setEditExpiryDate(selected.toISOString().slice(0, 10));
+                    if (Platform.OS !== 'ios') setShowExpiryPicker(false);
+                  }}
+                />
+                {Platform.OS === 'ios' && (
+                  <TouchableOpacity onPress={() => setShowExpiryPicker(false)}
+                    style={{ alignItems: 'center', paddingVertical: 8 }}>
+                    <Text style={{ color: '#E65100', fontWeight: '700', fontSize: FontSize.sm }}>Done</Text>
+                  </TouchableOpacity>
+                )}
+              </>
+            )}
+            <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 4 }}>
+              You'll get a push alert 30 days and 7 days before expiry.
             </Text>
             <TouchableOpacity
               onPress={() => saveEdit()}
@@ -468,6 +515,27 @@ export default function ProductDetailScreen() {
                 <Text style={{ fontSize: FontSize.xs, color: '#BF360C', fontFamily: 'monospace' }}>{product.barcode}</Text>
               </View>
             )}
+            {!!product.expiry_date && (() => {
+              const today = new Date().toISOString().slice(0, 10);
+              const daysLeft = Math.ceil((new Date(product.expiry_date).getTime() - new Date(today).getTime()) / 86400000);
+              const expired = daysLeft < 0;
+              const urgent  = !expired && daysLeft <= 7;
+              const warn    = !expired && !urgent && daysLeft <= 30;
+              const expiryColor = expired ? '#C62828' : urgent ? '#C62828' : warn ? '#E65100' : '#2E7D32';
+              const expiryBg    = expired ? '#FFEBEE' : urgent ? '#FFEBEE' : warn ? '#FFF3E0' : '#E8F5E9';
+              const icon = expired ? 'close-circle-outline' : (urgent || warn) ? 'time-outline' : 'checkmark-circle-outline';
+              const label = expired
+                ? `Expired ${Math.abs(daysLeft)} day${Math.abs(daysLeft) === 1 ? '' : 's'} ago`
+                : daysLeft === 0 ? 'Expires today!'
+                : `Expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'} · ${new Date(product.expiry_date + 'T00:00:00').toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+              return (
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10, gap: 6,
+                  backgroundColor: expiryBg, borderRadius: 8, padding: 8 }}>
+                  <Ionicons name={icon as any} size={15} color={expiryColor} />
+                  <Text style={{ fontSize: FontSize.xs, color: expiryColor, fontWeight: '700', flex: 1 }}>{label}</Text>
+                </View>
+              );
+            })()}
           </View>
         )}
 

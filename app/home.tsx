@@ -10,8 +10,9 @@ import { useTheme } from '../src/hooks/useTheme';
 import { useAuthStore } from '../src/store/useAppStore';
 import { groupService, type Group } from '../src/services/groupService';
 import { thriftService, type ThriftGroup } from '../src/services/thriftService';
-import { getCategories, type InventoryCategory } from '../src/services/inventoryService';
+import { getCategories, getBusinesses, type InventoryCategory } from '../src/services/inventoryService';
 import { getCategoryEmoji } from '../src/utils/inventoryHelpers';
+import { useInventoryStore } from '../src/store/useAppStore';
 import { FontSize, Radius, Shadow } from '../src/theme';
 import { Skeleton, Pill } from '../src/components';
 
@@ -188,6 +189,29 @@ export default function HomeRoute() {
     queryKey: ['inventory-categories'],
     queryFn: getCategories,
   });
+
+  const { data: businesses } = useQuery({
+    queryKey: ['inventory-businesses'],
+    queryFn: getBusinesses,
+    enabled: tab === 'inventory',
+  });
+
+  const {
+    selectedBusinessId,
+    selectedBusinessMode,
+    selectedBusinessRole,
+    selectedBusinessName,
+    setSelectedBusiness,
+  } = useInventoryStore();
+
+  // Auto-select the single business when the user has exactly one location.
+  React.useEffect(() => {
+    if (!businesses) return;
+    if (businesses.length === 1 && !selectedBusinessId) {
+      const b = businesses[0];
+      setSelectedBusiness(b.id, b.mode, b.my_role, b.name);
+    }
+  }, [businesses]);
 
   const handleLogout = () => { logout(); router.replace('/login'); };
 
@@ -471,28 +495,77 @@ export default function HomeRoute() {
         ) : (
           /* ── Inventory content ── */
           <>
-            {/* Quick-action bar */}
+            {/* Location switcher — only visible when user has 2+ businesses */}
+            {(businesses ?? []).length > 1 && (
+              <TouchableOpacity
+                onPress={() => router.push('/inventory/locations' as any)}
+                activeOpacity={0.82}
+                style={{
+                  flexDirection: 'row', alignItems: 'center',
+                  backgroundColor: '#FFF3E0', borderRadius: Radius.lg,
+                  paddingHorizontal: 14, paddingVertical: 12,
+                  marginBottom: 16, gap: 10,
+                }}
+              >
+                <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: '#FFE0B2', alignItems: 'center', justifyContent: 'center' }}>
+                  <Ionicons
+                    name={selectedBusinessMode === 'warehouse' ? 'cube-outline' : 'storefront-outline'}
+                    size={18} color="#E65100"
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: FontSize.xs, color: '#BF360C', fontWeight: '600' }}>CURRENT LOCATION</Text>
+                  <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: '#E65100', marginTop: 1 }}>
+                    {selectedBusinessName ?? 'Select a location'}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color="#E65100" />
+              </TouchableOpacity>
+            )}
+
+            {/* Quick-action bar — role & mode aware */}
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-              {[
-                { icon: 'bar-chart-outline',  label: 'Dashboard',    route: '/inventory/dashboard' },
-                { icon: 'cart-outline',        label: 'Record Sale',  route: '/inventory/new-sale' },
-                { icon: 'time-outline',        label: 'Sales',        route: '/inventory/sales' },
-                { icon: 'receipt-outline',     label: 'Expenses',     route: '/inventory/expenses' },
-                { icon: 'people-outline',      label: 'Customers',    route: '/inventory/customers' },
-                { icon: 'podium-outline',      label: 'Best Sellers', route: '/inventory/best-sellers' },
-                { icon: 'trending-up-outline', label: 'Analytics',    route: '/inventory/analytics' },
-                { icon: 'business-outline',    label: 'My Business',  route: '/inventory/business' },
-              ].map(({ icon, label, route }) => (
-                <TouchableOpacity
-                  key={route}
-                  onPress={() => router.push(route as any)}
-                  activeOpacity={0.8}
-                  style={{ backgroundColor: '#FFF3E0', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, alignItems: 'center', flexDirection: 'row', gap: 6 }}
-                >
-                  <Ionicons name={icon as any} size={16} color="#E65100" />
-                  <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: '#E65100' }}>{label}</Text>
-                </TouchableOpacity>
-              ))}
+              {(() => {
+                const isWarehouse = selectedBusinessMode === 'warehouse';
+                const isStaff     = selectedBusinessRole === 'staff';
+                const isOwnerOrMgr = selectedBusinessRole === 'owner' || selectedBusinessRole === 'manager';
+
+                const actions: { icon: string; label: string; route: string }[] = [
+                  { icon: 'bar-chart-outline',  label: 'Dashboard',      route: '/inventory/dashboard' },
+                  ...(!isWarehouse ? [
+                    { icon: 'cart-outline',      label: 'Record Sale',    route: '/inventory/new-sale' },
+                    { icon: 'time-outline',      label: 'Sales',          route: '/inventory/sales' },
+                    { icon: 'people-outline',    label: 'Customers',      route: '/inventory/customers' },
+                  ] : []),
+                  ...(isWarehouse ? [
+                    { icon: 'arrow-down-circle-outline', label: 'Receive Goods',  route: '/inventory/warehouse-receive' },
+                    { icon: 'arrow-up-circle-outline',   label: 'Dispatch Stock', route: '/inventory/warehouse-dispatch' },
+                  ] : []),
+                  { icon: 'receipt-outline',     label: 'Expenses',       route: '/inventory/expenses' },
+                  ...(!isStaff ? [
+                    { icon: 'podium-outline',    label: 'Best Sellers',   route: '/inventory/best-sellers' },
+                    { icon: 'trending-up-outline', label: 'Analytics',    route: '/inventory/analytics' },
+                  ] : []),
+                  ...(isOwnerOrMgr ? [
+                    { icon: 'business-outline',  label: 'My Business',    route: '/inventory/business' },
+                  ] : []),
+                  ...((businesses ?? []).length > 1 ? [
+                    { icon: 'location-outline',  label: 'Locations',      route: '/inventory/locations' },
+                  ] : []),
+                ];
+
+                return actions.map(({ icon, label, route }) => (
+                  <TouchableOpacity
+                    key={route}
+                    onPress={() => router.push(route as any)}
+                    activeOpacity={0.8}
+                    style={{ backgroundColor: '#FFF3E0', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, alignItems: 'center', flexDirection: 'row', gap: 6 }}
+                  >
+                    <Ionicons name={icon as any} size={16} color="#E65100" />
+                    <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: '#E65100' }}>{label}</Text>
+                  </TouchableOpacity>
+                ));
+              })()}
             </View>
 
             {(categories ?? []).length > 0 ? (

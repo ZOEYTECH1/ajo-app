@@ -39,6 +39,36 @@ interface AuthState {
   setHasHydrated: (value: boolean) => void;
 }
 
+// ─── Inventory store (persisted — remembers last selected location) ──────────
+
+interface InventoryState {
+  selectedBusinessId:   number | null;
+  selectedBusinessMode: 'retail' | 'warehouse' | null;
+  selectedBusinessRole: string | null;
+  selectedBusinessName: string | null;
+  setSelectedBusiness: (id: number, mode: 'retail' | 'warehouse', role: string, name: string) => void;
+  clearSelectedBusiness: () => void;
+}
+
+export const useInventoryStore = create<InventoryState>()(
+  persist(
+    (set) => ({
+      selectedBusinessId:   null,
+      selectedBusinessMode: null,
+      selectedBusinessRole: null,
+      selectedBusinessName: null,
+      setSelectedBusiness: (id, mode, role, name) =>
+        set({ selectedBusinessId: id, selectedBusinessMode: mode, selectedBusinessRole: role, selectedBusinessName: name }),
+      clearSelectedBusiness: () =>
+        set({ selectedBusinessId: null, selectedBusinessMode: null, selectedBusinessRole: null, selectedBusinessName: null }),
+    }),
+    {
+      name: 'ajo-inventory',
+      storage: createJSONStorage(() => secureStorage),
+    },
+  ),
+);
+
 // ─── Auth store (persisted to SecureStore) ────────────────────────────────────
 
 export const useAuthStore = create<AuthState>()(

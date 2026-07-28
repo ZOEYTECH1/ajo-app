@@ -1,4 +1,12 @@
 import api from './api';
+import { useInventoryStore } from '../store/useAppStore';
+
+// Returns { params: { business_id: N } } when a specific location is selected,
+// or {} for solo users (backend auto-resolves their single business).
+function bizP(): { params?: { business_id: number } } {
+  const id = useInventoryStore.getState().selectedBusinessId;
+  return id ? { params: { business_id: id } } : {};
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -54,13 +62,13 @@ export interface InventoryMovement {
 // ─── Category endpoints ───────────────────────────────────────────────────────
 
 export const getCategories = (): Promise<InventoryCategory[]> =>
-  api.get('/api/inventory/categories/').then(r => r.data);
+  api.get('/api/inventory/categories/', bizP()).then(r => r.data);
 
 export const createCategory = (data: {
   name: string;
   custom_field_defs?: CustomFieldDef[];
 }): Promise<InventoryCategory> =>
-  api.post('/api/inventory/categories/', data).then(r => r.data);
+  api.post('/api/inventory/categories/', data, bizP()).then(r => r.data);
 
 export const updateCategory = (
   catId: number,
@@ -120,11 +128,31 @@ export interface InventoryBusiness {
   updated_at: string;
 }
 
+export interface InventoryBusinessFull extends InventoryBusiness {
+  mode: 'retail' | 'warehouse';
+  is_active: boolean;
+  my_role: 'owner' | 'manager' | 'staff';
+}
+
+/** Legacy single-business endpoint (backwards-compat, solo users only). */
 export const getBusiness = (): Promise<InventoryBusiness | null> =>
   api.get('/api/inventory/business/').then(r => r.data);
 
 export const saveBusiness = (data: Partial<Omit<InventoryBusiness, 'id' | 'created_at' | 'updated_at'>>): Promise<InventoryBusiness> =>
   api.put('/api/inventory/business/', data).then(r => r.data);
+
+/** Multi-business API — returns all locations the current user belongs to, with their role. */
+export const getBusinesses = (): Promise<InventoryBusinessFull[]> =>
+  api.get('/api/inventory/businesses/').then(r => r.data);
+
+export const createBusiness = (data: { name: string; mode: 'retail' | 'warehouse' }): Promise<InventoryBusinessFull> =>
+  api.post('/api/inventory/businesses/', data).then(r => r.data);
+
+export const updateBusiness = (
+  bizId: number,
+  data: Partial<{ name: string; business_type: string; address: string; phone: string }>,
+): Promise<InventoryBusinessFull> =>
+  api.patch(`/api/inventory/businesses/${bizId}/`, data).then(r => r.data);
 
 // ─── Customers ────────────────────────────────────────────────────────────────
 
@@ -137,10 +165,10 @@ export interface InventoryCustomer {
 }
 
 export const getCustomers = (): Promise<InventoryCustomer[]> =>
-  api.get('/api/inventory/customers/').then(r => r.data);
+  api.get('/api/inventory/customers/', bizP()).then(r => r.data);
 
 export const createCustomer = (data: { name: string; phone?: string; notes?: string }): Promise<InventoryCustomer> =>
-  api.post('/api/inventory/customers/', data).then(r => r.data);
+  api.post('/api/inventory/customers/', data, bizP()).then(r => r.data);
 
 export const updateCustomer = (id: number, data: Partial<{ name: string; phone: string; notes: string }>): Promise<InventoryCustomer> =>
   api.patch(`/api/inventory/customers/${id}/`, data).then(r => r.data);
@@ -176,14 +204,14 @@ export interface CreateSaleItemPayload {
 }
 
 export const getSales = (): Promise<InventorySale[]> =>
-  api.get('/api/inventory/sales/').then(r => r.data);
+  api.get('/api/inventory/sales/', bizP()).then(r => r.data);
 
 export const recordSale = (data: {
   customer_id?: number | null;
   notes?: string;
   items: CreateSaleItemPayload[];
 }): Promise<InventorySale> =>
-  api.post('/api/inventory/sales/', data).then(r => r.data);
+  api.post('/api/inventory/sales/', data, bizP()).then(r => r.data);
 
 // ─── Expenses ─────────────────────────────────────────────────────────────────
 
@@ -211,7 +239,7 @@ export const PRESET_EXPENSE_CATEGORIES: { value: string; label: string }[] = [
 export const EXPENSE_CATEGORIES = PRESET_EXPENSE_CATEGORIES;
 
 export const getExpenses = (): Promise<InventoryExpense[]> =>
-  api.get('/api/inventory/expenses/').then(r => r.data);
+  api.get('/api/inventory/expenses/', bizP()).then(r => r.data);
 
 export const createExpense = (data: {
   category: string;
@@ -219,7 +247,7 @@ export const createExpense = (data: {
   amount: number;
   spent_at: string;
 }): Promise<InventoryExpense> =>
-  api.post('/api/inventory/expenses/', data).then(r => r.data);
+  api.post('/api/inventory/expenses/', data, bizP()).then(r => r.data);
 
 export const updateExpense = (id: number, data: Partial<{
   category: string; description: string; amount: number; spent_at: string;
@@ -260,8 +288,10 @@ export interface InventoryDashboard {
 }
 
 export const getDashboard = (date?: string): Promise<InventoryDashboard> => {
-  const params = date ? `?date=${date}` : '';
-  return api.get(`/api/inventory/dashboard/${params}`).then(r => r.data);
+  const { params: bizParams } = bizP() as { params?: { business_id: number } };
+  return api.get('/api/inventory/dashboard/', {
+    params: { ...(date ? { date } : {}), ...(bizParams ?? {}) },
+  }).then(r => r.data);
 };
 
 // ─── Best Sellers ─────────────────────────────────────────────────────────────
@@ -272,8 +302,10 @@ export interface BestSeller {
   total_revenue: string;
 }
 
-export const getBestSellers = (days = 30, limit = 10): Promise<BestSeller[]> =>
-  api.get(`/api/inventory/best-sellers/?days=${days}&limit=${limit}`).then(r => r.data);
+export const getBestSellers = (days = 30, limit = 10): Promise<BestSeller[]> => {
+  const { params: bizParams } = bizP() as { params?: { business_id: number } };
+  return api.get('/api/inventory/best-sellers/', { params: { days, limit, ...(bizParams ?? {}) } }).then(r => r.data);
+};
 
 // ─── Revenue Analytics ────────────────────────────────────────────────────────
 
@@ -285,8 +317,10 @@ export interface AnalyticsPoint {
   expense: number;
 }
 
-export const getAnalytics = (period: AnalyticsPeriod = 'daily', days = 30): Promise<AnalyticsPoint[]> =>
-  api.get(`/api/inventory/analytics/?period=${period}&days=${days}`).then(r => r.data);
+export const getAnalytics = (period: AnalyticsPeriod = 'daily', days = 30): Promise<AnalyticsPoint[]> => {
+  const { params: bizParams } = bizP() as { params?: { business_id: number } };
+  return api.get('/api/inventory/analytics/', { params: { period, days, ...(bizParams ?? {}) } }).then(r => r.data);
+};
 
 // ─── Product Daily Summary ────────────────────────────────────────────────────
 

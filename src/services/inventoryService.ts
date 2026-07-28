@@ -220,6 +220,7 @@ export interface InventoryCustomer {
   name: string;
   phone: string;
   notes: string;
+  credit_balance: string;
   created_at: string;
 }
 
@@ -234,6 +235,13 @@ export const updateCustomer = (id: number, data: Partial<{ name: string; phone: 
 
 export const deleteCustomer = (id: number): Promise<void> =>
   api.delete(`/api/inventory/customers/${id}/`).then(() => undefined);
+
+export const adjustCredit = (
+  id: number,
+  direction: 'charge' | 'payment',
+  amount: number,
+): Promise<InventoryCustomer> =>
+  api.post(`/api/inventory/customers/${id}/credit/`, { direction, amount }).then(r => r.data);
 
 // ─── Sales ────────────────────────────────────────────────────────────────────
 

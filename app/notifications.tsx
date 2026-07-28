@@ -38,6 +38,13 @@ function typeIcon(type: string, colors: any): { name: any; color: string; bg: st
     case 'thrift_cycle_restarted':   return { name: 'play-circle',           color: colors.successDark, bg: colors.successLight };
     case 'thrift_org_invite':        return { name: 'business',              color: colors.primary,     bg: colors.primaryTint  };
     case 'thrift_collector_report':  return { name: 'shield-outline',        color: colors.warningDark, bg: colors.warningLight };
+    // ── Inventory ──
+    case 'inventory_low_stock':      return { name: 'warning-outline',       color: '#E65100',          bg: '#FFF3E0'           };
+    case 'inventory_out_of_stock':   return { name: 'close-circle-outline',  color: '#C62828',          bg: '#FFEBEE'           };
+    case 'inventory_expiry_warning': return { name: 'time-outline',          color: '#F57F17',          bg: '#FFF9C4'           };
+    case 'inventory_expiry_soon':    return { name: 'alert-circle',          color: '#C62828',          bg: '#FFEBEE'           };
+    case 'inventory_staff_invite':   return { name: 'person-add-outline',    color: '#1565C0',          bg: '#E3F2FD'           };
+    case 'inventory_transfer':       return { name: 'swap-horizontal-outline', color: '#1565C0',        bg: '#E3F2FD'           };
     default:                         return { name: 'notifications',         color: colors.primary,     bg: colors.primaryTint  };
   }
 }
@@ -121,10 +128,27 @@ export default function NotificationsRoute() {
 
   const handlePress = (notif: AppNotification) => {
     if (!notif.is_read) markReadMutation.mutate(notif.id);
-    const thriftGroupId = notif.action_data?.thrift_group_id;
-    const groupId       = notif.action_data?.group_id;
-    if (thriftGroupId) router.push(`/thrift/${thriftGroupId}` as any);
-    else if (groupId)  router.push(`/group/${groupId}` as any);
+    const d = notif.action_data ?? {};
+
+    // Ajo groups
+    if (d.group_id)       { router.push(`/group/${d.group_id}` as any); return; }
+    // Thrift groups
+    if (d.thrift_group_id) { router.push(`/thrift/${d.thrift_group_id}` as any); return; }
+    // Inventory — product-level (low stock, out of stock, expiry)
+    if (d.category_id && d.product_id) {
+      router.push(`/inventory/${d.category_id}/${d.product_id}` as any);
+      return;
+    }
+    // Inventory — staff invite → staff management screen
+    if (notif.notif_type === 'inventory_staff_invite') {
+      router.push('/inventory/staff' as any);
+      return;
+    }
+    // Inventory — transfer notification → transfer history
+    if (notif.notif_type === 'inventory_transfer') {
+      router.push('/inventory/transfers' as any);
+      return;
+    }
   };
 
   return (

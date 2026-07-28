@@ -8,7 +8,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/hooks/useTheme';
 import { FontSize, Radius, Shadow } from '../../src/theme';
-import { getSales, getBusiness, type InventorySale } from '../../src/services/inventoryService';
+import { useInventoryStore } from '../../src/store/useAppStore';
+import { getSales, type InventorySale } from '../../src/services/inventoryService';
 import { exportCsv, exportPdf } from '../../src/utils/exportUtils';
 
 const INV = '#E65100';
@@ -33,15 +34,11 @@ function buildReceiptText(sale: InventorySale, businessName: string): string {
 export default function SalesHistoryScreen() {
   const { colors } = useTheme();
   const router = useRouter();
+  const businessName = useInventoryStore(s => s.selectedBusinessName) ?? 'My Store';
 
   const { data: sales, isLoading, isRefetching, refetch } = useQuery({
     queryKey: ['inventory-sales'],
     queryFn: getSales,
-  });
-
-  const { data: biz } = useQuery({
-    queryKey: ['inventory-business'],
-    queryFn: getBusiness,
   });
 
   const [expanded, setExpanded] = useState<number | null>(null);
@@ -103,7 +100,7 @@ export default function SalesHistoryScreen() {
   };
 
   const shareReceipt = async (sale: InventorySale) => {
-    const text = buildReceiptText(sale, biz?.name ?? '');
+    const text = buildReceiptText(sale, businessName);
     try {
       await Share.share({ message: text });
     } catch {

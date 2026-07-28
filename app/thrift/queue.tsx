@@ -213,7 +213,7 @@ export default function CollectorQueueScreen() {
 
   const reviewMut = useMutation({
     mutationFn: ({ groupId, memberId, action, reason }: {
-      groupId: number; memberId: number; action: string; reason?: string;
+      groupId: number; memberId: number; action: 'approve' | 'reject' | 'flag_amount'; reason?: string;
     }) => thriftService.reviewMember(groupId, memberId, { action, reason }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['thrift-collector-queue'] });

@@ -49,7 +49,7 @@ function BarChart({ data, colors }: { data: AnalyticsPoint[]; colors: any }) {
           {data.map((point, i) => (
             <Text key={i} style={{
               width: barW + 4, fontSize: 9, color: colors.textTertiary,
-              textAlign: 'center', numberOfLines: 1,
+              textAlign: 'center',
             }} numberOfLines={1}>
               {point.label}
             </Text>

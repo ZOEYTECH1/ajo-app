@@ -627,10 +627,10 @@ export default function ExpensesScreen() {
                   <TouchableOpacity
                     key={c.id}
                     onLongPress={() => confirmDeleteCat(c)}
-                    style={[s.userCatChip, { backgroundColor: CUSTOM_META.bg, borderColor: CUSTOM_META.color + '44' }]}
+                    style={[s.userCatChip, { backgroundColor: FALLBACK_META.bg, borderColor: FALLBACK_META.color + '44' }]}
                   >
-                    <Ionicons name="pricetag-outline" size={12} color={CUSTOM_META.color} />
-                    <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: CUSTOM_META.color, marginLeft: 5 }}>
+                    <Ionicons name="pricetag-outline" size={12} color={FALLBACK_META.color} />
+                    <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: FALLBACK_META.color, marginLeft: 5 }}>
                       {c.name}
                     </Text>
                   </TouchableOpacity>
@@ -694,12 +694,12 @@ export default function ExpensesScreen() {
                     key={c.id}
                     onPress={() => { setCategory(c.name); setOtherName(''); }}
                     style={[s.catTile, {
-                      backgroundColor: sel ? CUSTOM_META.color : colors.background,
-                      borderColor: sel ? CUSTOM_META.color : colors.border,
+                      backgroundColor: sel ? FALLBACK_META.color : colors.background,
+                      borderColor: sel ? FALLBACK_META.color : colors.border,
                     }]}
                     activeOpacity={0.8}
                   >
-                    <Ionicons name="pricetag-outline" size={22} color={sel ? '#fff' : CUSTOM_META.color} />
+                    <Ionicons name="pricetag-outline" size={22} color={sel ? '#fff' : FALLBACK_META.color} />
                     <Text style={{ fontSize: FontSize.xs, fontWeight: '700', marginTop: 6, textAlign: 'center',
                       color: sel ? '#fff' : colors.textPrimary }} numberOfLines={2}>
                       {c.name}

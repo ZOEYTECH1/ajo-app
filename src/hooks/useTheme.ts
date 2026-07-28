@@ -14,7 +14,7 @@ export function useTheme(): UseThemeReturn {
 
   const resolvedScheme: 'light' | 'dark' =
     preference === 'system'
-      ? (systemScheme ?? 'light')
+      ? (systemScheme === 'dark' ? 'dark' : 'light')
       : preference;
 
   return {

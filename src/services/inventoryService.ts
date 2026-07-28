@@ -177,6 +177,42 @@ export const inviteStaff = (bizId: number, email: string, role: MemberRole): Pro
 export const removeStaff = (bizId: number, memberId: number): Promise<void> =>
   api.delete(`/api/inventory/businesses/${bizId}/members/${memberId}/`).then(() => undefined);
 
+// ─── Transfers ────────────────────────────────────────────────────────────────
+
+export interface InventoryTransferItem {
+  id: number;
+  from_product: number;
+  to_product: number | null;
+  product_name: string;
+  quantity: number;
+}
+
+export interface InventoryTransfer {
+  id: number;
+  from_business: number;
+  from_business_name: string;
+  to_business: number;
+  to_business_name: string;
+  reference: string;
+  notes: string;
+  status: string;
+  transferred_at: string;
+  items: InventoryTransferItem[];
+}
+
+export interface CreateTransferPayload {
+  to_business_id: number;
+  reference?: string;
+  notes?: string;
+  items: { from_product_id: number; product_name: string; quantity: number }[];
+}
+
+export const createTransfer = (data: CreateTransferPayload): Promise<InventoryTransfer> =>
+  api.post('/api/inventory/transfers/', data, bizP()).then(r => r.data);
+
+export const getTransfers = (): Promise<InventoryTransfer[]> =>
+  api.get('/api/inventory/transfers/', bizP()).then(r => r.data);
+
 // ─── Customers ────────────────────────────────────────────────────────────────
 
 export interface InventoryCustomer {

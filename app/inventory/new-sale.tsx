@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView,
-  TextInput, StyleSheet, Alert, ActivityIndicator, Modal,
+  TextInput, StyleSheet, Alert, ActivityIndicator, Modal, Share,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -9,12 +9,38 @@ import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useTheme } from '../../src/hooks/useTheme';
 import { FontSize, Radius, Shadow } from '../../src/theme';
+import { useInventoryStore } from '../../src/store/useAppStore';
 import {
   getCategories, getProducts, getCustomers, recordSale, getProductByBarcode,
   type InventoryProduct, type InventoryCustomer, type CreateSaleItemPayload,
+  type InventorySale,
 } from '../../src/services/inventoryService';
 
 const INV = '#E65100';
+
+function buildReceiptText(sale: InventorySale, bizName: string): string {
+  const date = new Date(sale.sold_at).toLocaleString('en-NG', {
+    day: 'numeric', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+  const lines: string[] = [
+    '🧾 SALE RECEIPT',
+    '──────────────────',
+    `📍 ${bizName}`,
+    `📅 ${date}`,
+    sale.customer_name ? `👤 ${sale.customer_name}` : '👤 Walk-in Customer',
+    '──────────────────',
+    ...sale.items.map(i =>
+      `• ${i.product_name} x${i.quantity} @ ₦${Number(i.unit_price).toLocaleString()} = ₦${Number(i.subtotal).toLocaleString()}`
+    ),
+    '──────────────────',
+    `TOTAL: ₦${Number(sale.total).toLocaleString()}`,
+    ...(sale.notes ? [`📝 ${sale.notes}`] : []),
+    '',
+    'Thank you! 🙏',
+  ];
+  return lines.join('\n');
+}
 
 interface CartItem {
   product: InventoryProduct;
@@ -26,6 +52,7 @@ export default function NewSaleScreen() {
   const { colors } = useTheme();
   const router = useRouter();
   const qc = useQueryClient();
+  const selectedBusinessName = useInventoryStore(s => s.selectedBusinessName) ?? 'My Store';
 
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
 
@@ -40,6 +67,7 @@ export default function NewSaleScreen() {
   const [selectedCatId, setSelectedCatId] = useState<number | null>(null);
   const [qtyInput, setQtyInput] = useState<Record<number, string>>({});
   const [priceInput, setPriceInput] = useState<Record<number, string>>({});
+  const [completedSale, setCompletedSale] = useState<InventorySale | null>(null);
 
   // Barcode scanner state
   const [scannerModal, setScannerModal] = useState(false);
@@ -64,10 +92,10 @@ export default function NewSaleScreen() {
       }));
       return recordSale({ customer_id: selectedCustomer?.id ?? null, notes: notes.trim(), items });
     },
-    onSuccess: () => {
+    onSuccess: (sale) => {
       qc.invalidateQueries({ queryKey: ['inventory-categories'] });
       qc.invalidateQueries({ queryKey: ['inventory-sales'] });
-      Alert.alert('Sale Recorded', 'Stock has been updated.', [{ text: 'OK', onPress: () => router.back() }]);
+      setCompletedSale(sale);
     },
     onError: (e: any) => Alert.alert('Error', e?.response?.data?.items ?? 'Could not record sale.'),
   });
@@ -349,6 +377,78 @@ export default function NewSaleScreen() {
         </View>
       </Modal>
 
+      {/* Receipt modal */}
+      <Modal visible={!!completedSale} animationType="slide" transparent>
+        <View style={s.modalOverlay}>
+          <View style={[s.modalBox, { backgroundColor: colors.surface, paddingBottom: 48 }]}>
+            {/* Success header */}
+            <View style={{ alignItems: 'center', marginBottom: 20 }}>
+              <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: '#E8F5E9', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
+                <Ionicons name="checkmark-circle" size={32} color="#2E7D32" />
+              </View>
+              <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Sale Recorded</Text>
+              <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 4 }}>
+                {completedSale ? new Date(completedSale.sold_at).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}
+              </Text>
+            </View>
+
+            {/* Receipt card */}
+            <View style={[s.receiptCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
+              {completedSale?.customer_name && (
+                <View style={s.receiptRow}>
+                  <Ionicons name="person-outline" size={14} color={colors.textSecondary} />
+                  <Text style={[s.receiptLabel, { color: colors.textSecondary }]}>Customer</Text>
+                  <Text style={[s.receiptValue, { color: colors.textPrimary }]}>{completedSale.customer_name}</Text>
+                </View>
+              )}
+              <ScrollView style={{ maxHeight: 200 }} showsVerticalScrollIndicator={false}>
+                {(completedSale?.items ?? []).map((item, i) => (
+                  <View key={i} style={[s.receiptRow, { paddingVertical: 6 }]}>
+                    <Text style={{ flex: 2, fontSize: FontSize.xs, color: colors.textPrimary, fontWeight: '600' }}>{item.product_name}</Text>
+                    <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary }}>×{item.quantity}</Text>
+                    <Text style={{ minWidth: 80, textAlign: 'right', fontSize: FontSize.xs, color: colors.textPrimary, fontWeight: '700' }}>
+                      ₦{Number(item.subtotal).toLocaleString()}
+                    </Text>
+                  </View>
+                ))}
+              </ScrollView>
+              <View style={[s.receiptDivider, { borderColor: colors.border }]} />
+              <View style={[s.receiptRow, { paddingTop: 8 }]}>
+                <Text style={{ flex: 1, fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary }}>Total</Text>
+                <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: INV }}>
+                  ₦{Number(completedSale?.total ?? 0).toLocaleString()}
+                </Text>
+              </View>
+              {!!completedSale?.notes && (
+                <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 6, fontStyle: 'italic' }}>
+                  {completedSale.notes}
+                </Text>
+              )}
+            </View>
+
+            {/* Actions */}
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 20 }}>
+              <TouchableOpacity
+                onPress={() => { setCompletedSale(null); router.back(); }}
+                style={[s.receiptBtn, { flex: 1, backgroundColor: colors.background, borderWidth: 1.5, borderColor: colors.border }]}
+              >
+                <Text style={{ fontWeight: '700', color: colors.textPrimary, fontSize: FontSize.sm }}>Done</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  if (!completedSale) return;
+                  Share.share({ message: buildReceiptText(completedSale, selectedBusinessName) });
+                }}
+                style={[s.receiptBtn, { flex: 2, backgroundColor: INV }]}
+              >
+                <Ionicons name="share-social-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
+                <Text style={{ fontWeight: '800', color: '#fff', fontSize: FontSize.sm }}>Share Receipt</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Barcode scanner modal */}
       <Modal visible={scannerModal} animationType="slide" onRequestClose={closeScannerModal}>
         <View style={{ flex: 1, backgroundColor: '#000' }}>
@@ -503,6 +603,19 @@ const s = StyleSheet.create({
   },
   scannedIcon: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   scanActionBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    paddingVertical: 14, borderRadius: Radius.lg,
+  },
+  receiptCard: {
+    borderWidth: 1, borderRadius: Radius.md, padding: 14,
+  },
+  receiptRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 3,
+  },
+  receiptLabel: { fontSize: FontSize.xs, flex: 1 },
+  receiptValue: { fontSize: FontSize.xs, fontWeight: '600' },
+  receiptDivider: { borderBottomWidth: 1, marginVertical: 8 },
+  receiptBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     paddingVertical: 14, borderRadius: Radius.lg,
   },

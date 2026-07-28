@@ -1,16 +1,12 @@
 import { useState } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView,
-  StyleSheet, Linking, LayoutAnimation, Platform, UIManager,
+  StyleSheet, Linking, LayoutAnimation,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/hooks/useTheme';
 import { FontSize, Radius, Shadow } from '../../src/theme';
-
-if (Platform.OS === 'android') {
-  UIManager.setLayoutAnimationEnabledExperimental?.(true);
-}
 
 const SUPPORT_EMAIL = 'support@ajoapp.ng';
 const WHATSAPP_NUMBER = '+2348000000000'; // placeholder

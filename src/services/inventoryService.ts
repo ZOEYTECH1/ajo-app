@@ -154,6 +154,29 @@ export const updateBusiness = (
 ): Promise<InventoryBusinessFull> =>
   api.patch(`/api/inventory/businesses/${bizId}/`, data).then(r => r.data);
 
+// ─── Business members / staff ─────────────────────────────────────────────────
+
+export type MemberRole = 'owner' | 'manager' | 'staff';
+
+export interface InventoryMember {
+  id: number;
+  user: number;
+  user_name: string;
+  user_email: string;
+  role: MemberRole;
+  is_active: boolean;
+  joined_at: string;
+}
+
+export const getMembers = (bizId: number): Promise<InventoryMember[]> =>
+  api.get(`/api/inventory/businesses/${bizId}/members/`).then(r => r.data);
+
+export const inviteStaff = (bizId: number, email: string, role: MemberRole): Promise<InventoryMember> =>
+  api.post(`/api/inventory/businesses/${bizId}/invite/`, { email, role }).then(r => r.data);
+
+export const removeStaff = (bizId: number, memberId: number): Promise<void> =>
+  api.delete(`/api/inventory/businesses/${bizId}/members/${memberId}/`).then(() => undefined);
+
 // ─── Customers ────────────────────────────────────────────────────────────────
 
 export interface InventoryCustomer {

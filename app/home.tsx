@@ -547,6 +547,7 @@ export default function HomeRoute() {
                     { icon: 'trending-up-outline', label: 'Analytics',    route: '/inventory/analytics' },
                   ] : []),
                   ...(isOwnerOrMgr ? [
+                    { icon: 'people-outline',    label: 'Staff',          route: '/inventory/staff' },
                     { icon: 'business-outline',  label: 'My Business',    route: '/inventory/business' },
                   ] : []),
                   ...((businesses ?? []).length > 1 ? [

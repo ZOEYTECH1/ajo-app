@@ -547,9 +547,10 @@ export default function HomeRoute() {
                     { icon: 'trending-up-outline', label: 'Analytics',    route: '/inventory/analytics' },
                   ] : []),
                   ...(isOwnerOrMgr ? [
-                    { icon: 'swap-horizontal-outline', label: 'Transfer', route: '/inventory/transfer' },
-                    { icon: 'people-outline',    label: 'Staff',          route: '/inventory/staff' },
-                    { icon: 'business-outline',  label: 'My Business',    route: '/inventory/business' },
+                    { icon: 'swap-horizontal-outline', label: 'Transfer',         route: '/inventory/transfer' },
+                    { icon: 'git-compare-outline',     label: 'Transfer History', route: '/inventory/transfers' },
+                    { icon: 'people-outline',          label: 'Staff',            route: '/inventory/staff' },
+                    { icon: 'business-outline',        label: 'My Business',      route: '/inventory/business' },
                   ] : []),
                   ...((businesses ?? []).length > 1 ? [
                     { icon: 'location-outline',  label: 'Locations',      route: '/inventory/locations' },

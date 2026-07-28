@@ -1,10 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView,
   Platform, Image, ScrollView, Modal,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
@@ -35,8 +36,10 @@ export default function AddProductScreen() {
   const [quantity, setQuantity]     = useState('');
   const [discount, setDiscount]     = useState('');
   const [barcode, setBarcode]       = useState('');
-  const [imageUri, setImageUri]     = useState<string | null>(null);
-  const [uploadingImg, setUploadingImg] = useState(false);
+  const [imageUri, setImageUri]         = useState<string | null>(null);
+  const [uploadingImg, setUploadingImg]   = useState(false);
+  const [expiryDate, setExpiryDate]       = useState<string | null>(null);
+  const [showExpiryPicker, setShowExpiryPicker] = useState(false);
   const [scannerVisible, setScannerVisible] = useState(false);
   const [scanning, setScanning]     = useState(true);
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
@@ -81,6 +84,7 @@ export default function AddProductScreen() {
         quantity: parseInt(quantity, 10) || 0,
         discount_percent: discount ? parseFloat(discount) : 0,
         barcode: barcode.trim() || undefined,
+        expiry_date: expiryDate || undefined,
       } as any);
 
       // If image selected, upload it separately via PATCH
@@ -265,6 +269,47 @@ export default function AddProductScreen() {
             )}
           </View>
         </Modal>
+
+        {/* Expiry date */}
+        <Text style={[s.label, { color: colors.textSecondary, marginTop: 4 }]}>Expiry date (optional)</Text>
+        <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary, marginBottom: 10 }}>
+          You'll get a push alert 30 days and 7 days before this product expires.
+        </Text>
+        <TouchableOpacity
+          onPress={() => setShowExpiryPicker(true)}
+          style={[s.inputRow, { backgroundColor: colors.surface, borderColor: colors.border }]}
+        >
+          <Ionicons name="calendar-outline" size={18} color={expiryDate ? INV : colors.textTertiary} style={{ marginRight: 8 }} />
+          <Text style={{ flex: 1, fontSize: FontSize.sm, color: expiryDate ? colors.textPrimary : colors.textTertiary }}>
+            {expiryDate
+              ? new Date(expiryDate + 'T00:00:00').toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
+              : 'No expiry date'}
+          </Text>
+          {expiryDate && (
+            <TouchableOpacity onPress={() => setExpiryDate(null)} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }}>
+              <Ionicons name="close-circle" size={18} color={colors.textTertiary} />
+            </TouchableOpacity>
+          )}
+        </TouchableOpacity>
+        {showExpiryPicker && (
+          <>
+            <DateTimePicker
+              value={expiryDate ? new Date(expiryDate + 'T00:00:00') : new Date()}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={(_, selected) => {
+                if (selected) setExpiryDate(selected.toISOString().slice(0, 10));
+                if (Platform.OS !== 'ios') setShowExpiryPicker(false);
+              }}
+            />
+            {Platform.OS === 'ios' && (
+              <TouchableOpacity onPress={() => setShowExpiryPicker(false)}
+                style={{ alignItems: 'center', paddingVertical: 8 }}>
+                <Text style={{ color: INV, fontWeight: '700', fontSize: FontSize.sm }}>Done</Text>
+              </TouchableOpacity>
+            )}
+          </>
+        )}
 
         <TouchableOpacity
           onPress={handleSave}

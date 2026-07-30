@@ -9,7 +9,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Application from 'expo-application';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
-import { exchangeCodeAsync } from 'expo-auth-session';
+import { exchangeCodeAsync, makeRedirectUri } from 'expo-auth-session';
 import { FontSize, Radius } from './theme';
 import { Button, Input, Divider, OTPBox, LoadingOverlay, Bouncy, feedback } from './components';
 import Svg, { Path } from 'react-native-svg';
@@ -82,6 +82,7 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
     clientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || undefined,
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || undefined,
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || undefined,
+    redirectUri: makeRedirectUri({ useProxy: true }),
     scopes: ['openid', 'profile', 'email'],
   });
 
@@ -310,6 +311,7 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
     clientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || undefined,
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || undefined,
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || undefined,
+    redirectUri: makeRedirectUri({ useProxy: true }),
     scopes: ['openid', 'profile', 'email'],
   });
 

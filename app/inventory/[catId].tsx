@@ -14,6 +14,7 @@ import {
   type CustomFieldDef,
 } from '../../src/services/inventoryService';
 import { getCategoryEmoji, formatStock, stockColor } from '../../src/utils/inventoryHelpers';
+import { useInventoryStore } from '../../src/store/useAppStore';
 
 export default function CategoryDetailScreen() {
   const { catId } = useLocalSearchParams<{ catId: string }>();
@@ -21,6 +22,7 @@ export default function CategoryDetailScreen() {
   const { colors } = useTheme();
   const router = useRouter();
   const qc = useQueryClient();
+  const selectedBusinessId = useInventoryStore(s => s.selectedBusinessId);
 
   const [editModal, setEditModal] = useState(false);
   const [editName, setEditName]   = useState('');
@@ -36,8 +38,8 @@ export default function CategoryDetailScreen() {
   const [newFieldReq, setNewFieldReq]   = useState(false);
 
   const { data: categories, isRefetching, refetch } = useQuery({
-    queryKey: ['inventory-categories'],
-    queryFn: getCategories,
+    queryKey: ['inventory-categories', selectedBusinessId],
+    queryFn: () => getCategories(selectedBusinessId),
   });
   const cat = categories?.find(c => c.id === catIdNum);
   const emoji = cat ? getCategoryEmoji(cat.name) : '📦';

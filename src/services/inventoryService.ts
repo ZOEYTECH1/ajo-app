@@ -61,8 +61,8 @@ export interface InventoryMovement {
 
 // ─── Category endpoints ───────────────────────────────────────────────────────
 
-export const getCategories = (): Promise<InventoryCategory[]> =>
-  api.get('/api/inventory/categories/', bizP()).then(r => r.data);
+export const getCategories = (businessId?: number | null): Promise<InventoryCategory[]> =>
+  api.get('/api/inventory/categories/', businessId != null ? { params: { business_id: businessId } } : bizP()).then(r => r.data);
 
 export const createCategory = (data: {
   name: string;

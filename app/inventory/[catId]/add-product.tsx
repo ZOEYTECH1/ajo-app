@@ -13,6 +13,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../../../src/hooks/useTheme';
 import { FontSize, Radius } from '../../../src/theme';
 import { getCategories, createProduct } from '../../../src/services/inventoryService';
+import { useInventoryStore } from '../../../src/store/useAppStore';
 import { getCategoryEmoji } from '../../../src/utils/inventoryHelpers';
 import api from '../../../src/services/api';
 
@@ -24,10 +25,11 @@ export default function AddProductScreen() {
   const { colors } = useTheme();
   const router = useRouter();
   const qc = useQueryClient();
+  const selectedBusinessId = useInventoryStore(s => s.selectedBusinessId);
 
   const { data: categories } = useQuery({
-    queryKey: ['inventory-categories'],
-    queryFn: getCategories,
+    queryKey: ['inventory-categories', selectedBusinessId],
+    queryFn: () => getCategories(selectedBusinessId),
   });
   const cat = categories?.find(c => c.id === catIdNum);
 

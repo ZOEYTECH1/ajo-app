@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/hooks/useTheme';
 import { FontSize, Radius } from '../../src/theme';
 import { getCategories, recordMovement, type InventoryCategory, type InventoryProduct } from '../../src/services/inventoryService';
+import { useInventoryStore } from '../../src/store/useAppStore';
 
 const INV = '#1565C0';   // blue for warehouse screens
 
@@ -21,6 +22,7 @@ export default function WarehouseDispatchScreen() {
   const { colors } = useTheme();
   const router = useRouter();
   const qc = useQueryClient();
+  const selectedBusinessId = useInventoryStore(s => s.selectedBusinessId);
 
   const [selectedProduct, setSelectedProduct] = useState<InventoryProduct | null>(null);
   const [productPickerModal, setProductPickerModal] = useState(false);
@@ -30,8 +32,8 @@ export default function WarehouseDispatchScreen() {
   const [note, setNote] = useState('');
 
   const { data: categories } = useQuery({
-    queryKey: ['inventory-categories'],
-    queryFn: getCategories,
+    queryKey: ['inventory-categories', selectedBusinessId],
+    queryFn: () => getCategories(selectedBusinessId),
   });
 
   const { mutate: doDispatch, isPending } = useMutation({

@@ -53,10 +53,11 @@ export default function NewSaleScreen() {
   const router = useRouter();
   const qc = useQueryClient();
   const selectedBusinessName = useInventoryStore(s => s.selectedBusinessName) ?? 'My Store';
+  const selectedBusinessId   = useInventoryStore(s => s.selectedBusinessId);
 
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
 
-  const { data: categories } = useQuery({ queryKey: ['inventory-categories'], queryFn: getCategories });
+  const { data: categories } = useQuery({ queryKey: ['inventory-categories', selectedBusinessId], queryFn: () => getCategories(selectedBusinessId) });
   const { data: customers } = useQuery({ queryKey: ['inventory-customers'], queryFn: getCustomers });
 
   const [cart, setCart] = useState<CartItem[]>([]);

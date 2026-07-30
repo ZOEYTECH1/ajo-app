@@ -49,8 +49,8 @@ export default function TransferScreen() {
   });
 
   const { data: categories } = useQuery({
-    queryKey: ['inventory-categories'],
-    queryFn: getCategories,
+    queryKey: ['inventory-categories', selectedBusinessId],
+    queryFn: () => getCategories(selectedBusinessId),
   });
 
   const otherBusinesses = (businesses ?? []).filter(b => b.id !== selectedBusinessId);

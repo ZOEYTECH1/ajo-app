@@ -193,7 +193,7 @@ export default function HomeRoute() {
     setSelectedBusiness,
   } = useInventoryStore();
 
-  const { data: businesses } = useQuery({
+  const { data: businesses, refetch: refetchBusinesses } = useQuery({
     queryKey: ['inventory-businesses'],
     queryFn: getBusinesses,
     enabled: tab === 'inventory',
@@ -201,9 +201,7 @@ export default function HomeRoute() {
 
   const { data: categories, isLoading: invLoading, isError: invError, refetch: refetchInv, isRefetching: invRefetching } = useQuery({
     queryKey: ['inventory-categories', selectedBusinessId],
-    queryFn: getCategories,
-    // Only fire once a business is selected — prevents guaranteed 400 for
-    // multi-business users before auto-select or manual selection fires.
+    queryFn: () => getCategories(selectedBusinessId),
     enabled: tab === 'inventory' && !!selectedBusinessId,
   });
 
@@ -246,7 +244,13 @@ export default function HomeRoute() {
   const isLoading    = tab === 'ajo' ? ajoLoading    : tab === 'thrift' ? thriftLoading : invLoading;
   const isError      = tab === 'ajo' ? ajoError      : tab === 'thrift' ? thriftError   : invError;
   const isRefreshing = tab === 'ajo' ? ajoRefetching : tab === 'thrift' ? thriftRefetching : invRefetching;
-  const onRefresh    = tab === 'ajo' ? refetchAjo    : tab === 'thrift' ? refetchThrift : refetchInv;
+  // For inventory: refetch() bypasses enabled, so guard it — reload businesses when
+  // no business is selected so auto-select can run; refetch categories otherwise.
+  const refetchInventory = React.useCallback(() => {
+    if (!selectedBusinessId) return refetchBusinesses();
+    return refetchInv();
+  }, [selectedBusinessId, refetchBusinesses, refetchInv]);
+  const onRefresh    = tab === 'ajo' ? refetchAjo    : tab === 'thrift' ? refetchThrift : refetchInventory;
 
   const handleFab = () => {
     if (tab === 'ajo') {

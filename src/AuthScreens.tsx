@@ -9,6 +9,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Application from 'expo-application';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
+import { exchangeCodeAsync } from 'expo-auth-session';
 import { FontSize, Radius } from './theme';
 import { Button, Input, Divider, OTPBox, LoadingOverlay, Bouncy, feedback } from './components';
 import Svg, { Path } from 'react-native-svg';
@@ -77,30 +78,52 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState('');
 
-  const [, googleResponse, googlePromptAsync] = Google.useIdTokenAuthRequest({
+  const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
     clientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || undefined,
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || undefined,
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || undefined,
+    scopes: ['openid', 'profile', 'email'],
   });
 
   useEffect(() => {
-    if (!googleResponse) return;
-    if (googleResponse.type === 'success') {
-      const idToken = googleResponse.authentication?.idToken
-        ?? (googleResponse.params as any)?.id_token;
-      if (idToken) {
-        handleGoogleSignIn(idToken);
-      } else {
+    const processGoogleResponse = async () => {
+      if (!googleResponse || !googleRequest) return;
+      if (googleResponse.type === 'error') {
         setLoading(false);
-        setServerError('Google sign-in failed — no credentials returned. Please try again.');
+        const code = (googleResponse as any).error?.code ?? '';
+        if (code !== 'ERR_AUTH_DISMISSED') {
+          setServerError(googleResponse.error?.message || 'Google sign-in failed. Please try again.');
+        }
+        return;
       }
-    } else if (googleResponse.type === 'error') {
-      setLoading(false);
-      const code = (googleResponse as any).error?.code ?? '';
-      if (code !== 'ERR_AUTH_DISMISSED') {
-        setServerError(googleResponse.error?.message || 'Google sign-in failed. Please try again.');
+      if (googleResponse.type !== 'success') return;
+
+      // Proxy/Expo Go flow returns idToken directly on response.authentication
+      const directIdToken = googleResponse.authentication?.idToken
+        ?? (googleResponse.params as any)?.id_token;
+      if (directIdToken) { handleGoogleSignIn(directIdToken); return; }
+
+      // Native PKCE flow — exchange auth code for tokens (no client secret needed for native clients)
+      const code = googleResponse.params?.code;
+      if (!code) { setLoading(false); setServerError('Google sign-in failed — no code received.'); return; }
+      const platformClientId =
+        Platform.OS === 'android' ? (process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? '')
+        : Platform.OS === 'ios'   ? (process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ?? '')
+        :                           (process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '');
+      try {
+        const tokens = await exchangeCodeAsync(
+          { clientId: platformClientId, redirectUri: googleRequest.redirectUri, code,
+            extraParams: googleRequest.codeVerifier ? { code_verifier: googleRequest.codeVerifier } : {} },
+          { tokenEndpoint: 'https://oauth2.googleapis.com/token' },
+        );
+        if (tokens.idToken) { handleGoogleSignIn(tokens.idToken); }
+        else { setLoading(false); setServerError('Google sign-in failed — no ID token returned.'); }
+      } catch {
+        setLoading(false);
+        setServerError('Google sign-in failed. Please try again.');
       }
-    }
+    };
+    processGoogleResponse();
   }, [googleResponse]);
 
   const handleGoogleSignIn = async (idToken: string) => {
@@ -283,30 +306,52 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
 
-  const [, googleResponse, googlePromptAsync] = Google.useIdTokenAuthRequest({
+  const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
     clientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || undefined,
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || undefined,
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || undefined,
+    scopes: ['openid', 'profile', 'email'],
   });
 
   useEffect(() => {
-    if (!googleResponse) return;
-    if (googleResponse.type === 'success') {
-      const idToken = googleResponse.authentication?.idToken
-        ?? (googleResponse.params as any)?.id_token;
-      if (idToken) {
-        handleGoogleSignIn(idToken);
-      } else {
+    const processGoogleResponse = async () => {
+      if (!googleResponse || !googleRequest) return;
+      if (googleResponse.type === 'error') {
         setLoading(false);
-        setServerError('Google sign-in failed — no credentials returned. Please try again.');
+        const code = (googleResponse as any).error?.code ?? '';
+        if (code !== 'ERR_AUTH_DISMISSED') {
+          setServerError(googleResponse.error?.message || 'Google sign-in failed. Please try again.');
+        }
+        return;
       }
-    } else if (googleResponse.type === 'error') {
-      setLoading(false);
-      const code = (googleResponse as any).error?.code ?? '';
-      if (code !== 'ERR_AUTH_DISMISSED') {
-        setServerError(googleResponse.error?.message || 'Google sign-in failed. Please try again.');
+      if (googleResponse.type !== 'success') return;
+
+      // Proxy/Expo Go flow returns idToken directly on response.authentication
+      const directIdToken = googleResponse.authentication?.idToken
+        ?? (googleResponse.params as any)?.id_token;
+      if (directIdToken) { handleGoogleSignIn(directIdToken); return; }
+
+      // Native PKCE flow — exchange auth code for tokens (no client secret needed for native clients)
+      const code = googleResponse.params?.code;
+      if (!code) { setLoading(false); setServerError('Google sign-in failed — no code received.'); return; }
+      const platformClientId =
+        Platform.OS === 'android' ? (process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? '')
+        : Platform.OS === 'ios'   ? (process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ?? '')
+        :                           (process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '');
+      try {
+        const tokens = await exchangeCodeAsync(
+          { clientId: platformClientId, redirectUri: googleRequest.redirectUri, code,
+            extraParams: googleRequest.codeVerifier ? { code_verifier: googleRequest.codeVerifier } : {} },
+          { tokenEndpoint: 'https://oauth2.googleapis.com/token' },
+        );
+        if (tokens.idToken) { handleGoogleSignIn(tokens.idToken); }
+        else { setLoading(false); setServerError('Google sign-in failed — no ID token returned.'); }
+      } catch {
+        setLoading(false);
+        setServerError('Google sign-in failed. Please try again.');
       }
-    }
+    };
+    processGoogleResponse();
   }, [googleResponse]);
 
   const handleGoogleSignIn = async (idToken: string) => {

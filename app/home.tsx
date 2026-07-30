@@ -185,15 +185,18 @@ export default function HomeRoute() {
   });
   const queueCount = (collectorQueue?.pending_members.length ?? 0) + (collectorQueue?.disputed_payments.length ?? 0);
 
-  const { data: categories, isLoading: invLoading, isError: invError, refetch: refetchInv, isRefetching: invRefetching } = useQuery({
-    queryKey: ['inventory-categories'],
-    queryFn: getCategories,
-  });
-
   const { data: businesses } = useQuery({
     queryKey: ['inventory-businesses'],
     queryFn: getBusinesses,
     enabled: tab === 'inventory',
+  });
+
+  const { data: categories, isLoading: invLoading, isError: invError, refetch: refetchInv, isRefetching: invRefetching } = useQuery({
+    queryKey: ['inventory-categories', selectedBusinessId],
+    queryFn: getCategories,
+    // Wait until we know the business — avoids a guaranteed 400 on first load
+    // for multi-business users before auto-select or manual selection fires.
+    enabled: tab === 'inventory' || !!selectedBusinessId,
   });
 
   const {

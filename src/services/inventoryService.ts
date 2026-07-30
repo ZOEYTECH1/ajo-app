@@ -382,9 +382,29 @@ export interface AnalyticsPoint {
   label: string;
   revenue: number;
   expense: number;
+  units_received: number;
+  units_sold: number;
 }
 
-export const getAnalytics = (period: AnalyticsPeriod = 'daily', days = 30): Promise<AnalyticsPoint[]> => {
+export interface AnalyticsSummary {
+  stock_value: number;
+  avg_profit_margin: number | null;
+}
+
+export interface AnalyticsBestSeller {
+  product_name: string;
+  total_qty: number;
+  total_revenue: number;
+  profit_margin: number | null;
+}
+
+export interface AnalyticsResponse {
+  summary: AnalyticsSummary;
+  chart: AnalyticsPoint[];
+  best_sellers: AnalyticsBestSeller[];
+}
+
+export const getAnalytics = (period: AnalyticsPeriod = 'daily', days = 30): Promise<AnalyticsResponse> => {
   const { params: bizParams } = bizP() as { params?: { business_id: number } };
   return api.get('/api/inventory/analytics/', { params: { period, days, ...(bizParams ?? {}) } }).then(r => r.data);
 };

@@ -35,6 +35,7 @@ export default function AddProductScreen() {
 
   const [name, setName]             = useState('');
   const [price, setPrice]           = useState('');
+  const [costPrice, setCostPrice]   = useState('');
   const [quantity, setQuantity]     = useState('');
   const [discount, setDiscount]     = useState('');
   const [barcode, setBarcode]       = useState('');
@@ -83,6 +84,7 @@ export default function AddProductScreen() {
       const product = await createProduct(catIdNum, {
         name: name.trim(),
         price,
+        cost_price: costPrice || undefined,
         quantity: parseInt(quantity, 10) || 0,
         discount_percent: discount ? parseFloat(discount) : 0,
         barcode: barcode.trim() || undefined,
@@ -188,6 +190,25 @@ export default function AddProductScreen() {
             style={{ flex: 1, fontSize: FontSize.md, color: colors.textPrimary }}
             accessibilityLabel="Selling price"
             accessibilityHint="Enter price in Naira"
+          />
+        </View>
+
+        {/* Cost price */}
+        <Text style={[s.label, { color: colors.textSecondary, marginTop: 4 }]}>Cost / purchase price (₦) — optional</Text>
+        <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary, marginBottom: 10 }}>
+          What you paid for it. Used to calculate your profit margin.
+        </Text>
+        <View style={[s.inputRow, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Text style={{ fontSize: FontSize.md, color: colors.textSecondary, marginRight: 6 }}>₦</Text>
+          <TextInput
+            value={costPrice}
+            onChangeText={setCostPrice}
+            keyboardType="decimal-pad"
+            placeholder="0.00"
+            placeholderTextColor={colors.textTertiary}
+            style={{ flex: 1, fontSize: FontSize.md, color: colors.textPrimary }}
+            accessibilityLabel="Cost price"
+            accessibilityHint="Optional. What you paid per unit"
           />
         </View>
 

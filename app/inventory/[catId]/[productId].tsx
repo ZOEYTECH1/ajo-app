@@ -631,11 +631,16 @@ export default function ProductDetailScreen() {
                   <Text style={s.summaryCellSub}>units out</Text>
                 </View>
                 <View style={s.summaryCell}>
+                  <Text style={s.summaryCellLabel}>Received Today</Text>
+                  <Text style={[s.summaryCellValue, { color: '#1565C0' }]}>{summary?.units_received ?? 0}</Text>
+                  <Text style={s.summaryCellSub}>units in</Text>
+                </View>
+                <View style={[s.summaryCell, { width: '100%', borderTopWidth: 1, borderColor: colors.border }]}>
                   <Text style={s.summaryCellLabel}>Revenue</Text>
                   <Text style={[s.summaryCellValue, { color: '#2E7D32', fontSize: FontSize.md }]}>
                     ₦{parseFloat(summary?.revenue ?? '0').toLocaleString()}
                   </Text>
-                  <Text style={s.summaryCellSub}>from sales</Text>
+                  <Text style={s.summaryCellSub}>from sales today</Text>
                 </View>
               </View>
 

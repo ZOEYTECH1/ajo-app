@@ -185,6 +185,14 @@ export default function HomeRoute() {
   });
   const queueCount = (collectorQueue?.pending_members.length ?? 0) + (collectorQueue?.disputed_payments.length ?? 0);
 
+  const {
+    selectedBusinessId,
+    selectedBusinessMode,
+    selectedBusinessRole,
+    selectedBusinessName,
+    setSelectedBusiness,
+  } = useInventoryStore();
+
   const { data: businesses } = useQuery({
     queryKey: ['inventory-businesses'],
     queryFn: getBusinesses,
@@ -194,18 +202,10 @@ export default function HomeRoute() {
   const { data: categories, isLoading: invLoading, isError: invError, refetch: refetchInv, isRefetching: invRefetching } = useQuery({
     queryKey: ['inventory-categories', selectedBusinessId],
     queryFn: getCategories,
-    // Wait until we know the business — avoids a guaranteed 400 on first load
-    // for multi-business users before auto-select or manual selection fires.
-    enabled: tab === 'inventory' || !!selectedBusinessId,
+    // Only fire once a business is selected — prevents guaranteed 400 for
+    // multi-business users before auto-select or manual selection fires.
+    enabled: tab === 'inventory' && !!selectedBusinessId,
   });
-
-  const {
-    selectedBusinessId,
-    selectedBusinessMode,
-    selectedBusinessRole,
-    selectedBusinessName,
-    setSelectedBusiness,
-  } = useInventoryStore();
 
   // Auto-select the single business when the user has exactly one location.
   React.useEffect(() => {

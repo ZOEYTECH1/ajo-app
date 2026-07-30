@@ -108,10 +108,10 @@ export default function SubmitPaymentRoute() {
 
         {/* Header */}
         <View style={[lay.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-          <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}>
+          <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
             <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">
             Submit Payment
           </Text>
           <View style={{ width: 24 }} />
@@ -139,10 +139,12 @@ export default function SubmitPaymentRoute() {
 
           {receipt ? (
             <View style={[lay.receiptPreview, { borderColor: colors.border }]}>
-              <Image source={{ uri: receipt.uri }} style={lay.receiptImage} resizeMode="cover" />
+              <Image source={{ uri: receipt.uri }} style={lay.receiptImage} resizeMode="cover" accessible={true} accessibilityRole="image" accessibilityLabel="Payment receipt image" />
               <TouchableOpacity
                 onPress={() => setReceipt(null)}
                 style={[lay.removeBtn, { backgroundColor: colors.errorLight }]}
+                accessibilityRole="button"
+                accessibilityLabel="Remove receipt"
               >
                 <Ionicons name="close" size={16} color={colors.errorDark} />
                 <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.errorDark, marginLeft: 4 }}>
@@ -155,6 +157,8 @@ export default function SubmitPaymentRoute() {
               onPress={pickImage}
               activeOpacity={0.8}
               style={[lay.receiptPlaceholder, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              accessibilityRole="button"
+              accessibilityLabel="Upload payment receipt"
             >
               <Ionicons name="image-outline" size={32} color={colors.textTertiary} />
               <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 8, fontWeight: '600' }}>

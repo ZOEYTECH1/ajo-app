@@ -74,12 +74,16 @@ const ConfirmModal: React.FC<{
             <TouchableOpacity
               onPress={onCancel}
               style={[lay.modalBtn, { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 }]}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
             >
               <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textSecondary }}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={onConfirm}
               style={[lay.modalBtn, { backgroundColor: destructive ? colors.error : colors.primary }]}
+              accessibilityRole="button"
+              accessibilityLabel={confirmLabel}
             >
               <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: '#FFF' }}>{confirmLabel}</Text>
             </TouchableOpacity>
@@ -131,6 +135,8 @@ const StartCycleModal: React.FC<{
           <TouchableOpacity
             onPress={() => setPicking('start')}
             style={[lay.datePicker, { backgroundColor: colors.background, borderColor: colors.border }]}
+            accessibilityRole="button"
+            accessibilityLabel={`Start Date: ${fmt(toISODate(startDate))}`}
           >
             <Ionicons name="calendar-outline" size={16} color={colors.primary} />
             <Text style={{ fontSize: FontSize.sm, color: colors.textPrimary, marginLeft: 8 }}>
@@ -145,6 +151,8 @@ const StartCycleModal: React.FC<{
           <TouchableOpacity
             onPress={() => setPicking('end')}
             style={[lay.datePicker, { backgroundColor: colors.background, borderColor: colors.border }]}
+            accessibilityRole="button"
+            accessibilityLabel={`End Date: ${fmt(toISODate(endDate))}`}
           >
             <Ionicons name="calendar-outline" size={16} color={colors.primary} />
             <Text style={{ fontSize: FontSize.sm, color: colors.textPrimary, marginLeft: 8 }}>
@@ -175,7 +183,7 @@ const StartCycleModal: React.FC<{
             />
           )}
           {Platform.OS === 'ios' && picking !== null && (
-            <TouchableOpacity onPress={() => setPicking(null)} style={{ alignItems: 'center', marginTop: 8 }}>
+            <TouchableOpacity onPress={() => setPicking(null)} style={{ alignItems: 'center', marginTop: 8 }} accessibilityRole="button" accessibilityLabel="Done">
               <Text style={{ color: colors.primary, fontWeight: '700' }}>Done</Text>
             </TouchableOpacity>
           )}
@@ -184,6 +192,8 @@ const StartCycleModal: React.FC<{
             <TouchableOpacity
               onPress={handleCancel}
               style={[lay.modalBtn, { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 }]}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
             >
               <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textSecondary }}>Cancel</Text>
             </TouchableOpacity>
@@ -191,6 +201,8 @@ const StartCycleModal: React.FC<{
               onPress={handleConfirm}
               disabled={endDate <= startDate}
               style={[lay.modalBtn, { backgroundColor: endDate > startDate ? colors.primary : colors.border }]}
+              accessibilityRole="button"
+              accessibilityLabel="Start Cycle"
             >
               <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: '#FFF' }}>Start Cycle</Text>
             </TouchableOpacity>
@@ -252,6 +264,8 @@ const CycleCard: React.FC<{
             <TouchableOpacity
               onPress={() => onClose(cycle)}
               style={[lay.actionChip, { backgroundColor: colors.primaryTint }]}
+              accessibilityRole="button"
+              accessibilityLabel={`Close Cycle ${cycle.cycle_number}`}
             >
               <Ionicons name="checkmark-done-outline" size={14} color={colors.primary} />
               <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.primary, marginLeft: 4 }}>
@@ -263,6 +277,8 @@ const CycleCard: React.FC<{
             <TouchableOpacity
               onPress={() => onRequestEarly(cycle)}
               style={[lay.actionChip, { backgroundColor: colors.warningLight }]}
+              accessibilityRole="button"
+              accessibilityLabel={`Request early close for Cycle ${cycle.cycle_number}`}
             >
               <Ionicons name="hourglass-outline" size={14} color={colors.warningDark} />
               <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.warningDark, marginLeft: 4 }}>
@@ -274,6 +290,8 @@ const CycleCard: React.FC<{
             <TouchableOpacity
               onPress={() => onAcceptEarly(cycle)}
               style={[lay.actionChip, { backgroundColor: colors.successLight }]}
+              accessibilityRole="button"
+              accessibilityLabel={`Accept early close for Cycle ${cycle.cycle_number}`}
             >
               <Ionicons name="thumbs-up-outline" size={14} color={colors.successDark} />
               <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.successDark, marginLeft: 4 }}>
@@ -284,6 +302,8 @@ const CycleCard: React.FC<{
           <TouchableOpacity
             onPress={() => onViewDefaulters(cycle)}
             style={[lay.actionChip, { backgroundColor: graceActive ? colors.border : colors.errorLight }]}
+            accessibilityRole="button"
+            accessibilityLabel={`View defaulters for Cycle ${cycle.cycle_number}`}
           >
             <Ionicons
               name={graceActive ? 'time-outline' : 'warning-outline'}
@@ -432,10 +452,10 @@ export default function CyclesRoute() {
 
       {/* Header */}
       <View style={[lay.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Cycles</Text>
+        <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Cycles</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -452,6 +472,8 @@ export default function CyclesRoute() {
             onPress={() => setStartModalVisible(true)}
             style={[lay.startBtn, { backgroundColor: colors.primary }]}
             activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel="Start New Cycle"
           >
             <Ionicons name="play-circle-outline" size={20} color="#FFF" />
             <Text style={{ color: '#FFF', fontSize: FontSize.sm, fontWeight: '700', marginLeft: 8 }}>

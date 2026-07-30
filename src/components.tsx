@@ -45,7 +45,11 @@ export const Bouncy: React.FC<{
   delayLongPress?: number;
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
-}> = ({ children, scale = 0.96, onPress, onLongPress, delayLongPress, style, disabled }) => {
+  accessibilityRole?: React.ComponentProps<typeof Pressable>['accessibilityRole'];
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
+  accessibilityState?: React.ComponentProps<typeof Pressable>['accessibilityState'];
+}> = ({ children, scale = 0.96, onPress, onLongPress, delayLongPress, style, disabled, accessibilityRole = 'button', accessibilityLabel, accessibilityHint, accessibilityState }) => {
   const anim = useRef(new Animated.Value(1)).current;
 
   const onPressIn = () => {
@@ -82,6 +86,10 @@ export const Bouncy: React.FC<{
       onLongPress={() => { feedback('heavy'); onLongPress?.(); }}
       delayLongPress={delayLongPress}
       disabled={disabled}
+      accessibilityRole={accessibilityRole}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={accessibilityState ?? { disabled: !!disabled }}
       style={[containerStyle, { width: w, height: h, borderRadius }]}
     >
       <Animated.View style={[{ transform: [{ scale: anim }] }, layoutStyle]}>
@@ -129,7 +137,12 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ visible, message
 
   return (
     <Modal transparent visible={visible} animationType="fade">
-      <View style={[s.overlayBg, { backgroundColor: colors.overlay }]}>
+      <View
+        style={[s.overlayBg, { backgroundColor: colors.overlay }]}
+        accessible={true}
+        accessibilityLabel="Loading, please wait"
+        accessibilityLiveRegion="polite"
+      >
         <View style={[s.loaderCard, { backgroundColor: colors.surface, ...Shadow.strong(colors.black) }]}>
           <AjoLoader size={72} />
           <Text style={[s.loadingText, { color: colors.textPrimary, marginTop: 20 }]}>
@@ -152,10 +165,12 @@ interface ButtonProps {
   fullWidth?: boolean;
   style?: StyleProp<ViewStyle>;
   icon?: string;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
 export const Button: React.FC<ButtonProps> = ({
-  label, onPress, loading, disabled, variant = 'primary', size = 'lg', fullWidth = true, style, icon,
+  label, onPress, loading, disabled, variant = 'primary', size = 'lg', fullWidth = true, style, icon, accessibilityLabel, accessibilityHint,
 }) => {
   const { colors, isDark } = useTheme();
   const isOutline = variant === 'outline';
@@ -186,7 +201,14 @@ export const Button: React.FC<ButtonProps> = ({
   );
 
   return (
-    <Bouncy onPress={disabled || loading ? undefined : onPress} style={[{ width: fullWidth ? '100%' : undefined }, style]}>
+    <Bouncy
+      onPress={disabled || loading ? undefined : onPress}
+      style={[{ width: fullWidth ? '100%' : undefined }, style]}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled: !!disabled, busy: !!loading }}
+    >
       {isPrimary ? (
         <LinearGradient
           colors={gradient}
@@ -222,12 +244,15 @@ interface InputProps extends TextInputProps {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   containerStyle?: ViewStyle;
+  accessibilityLabel?: string;
+  accessibilityHint?: string;
 }
 
 export const Input: React.FC<InputProps> = ({
-  label, error, leftIcon, rightIcon, containerStyle, ...props
+  label, error, leftIcon, rightIcon, containerStyle, accessibilityLabel, accessibilityHint, ...props
 }) => {
   const { colors } = useTheme();
+  const derivedLabel = accessibilityLabel ?? label;
   return (
     <View style={[{ marginBottom: 16 }, containerStyle]}>
       {label && (
@@ -244,7 +269,9 @@ export const Input: React.FC<InputProps> = ({
       ]}>
         {leftIcon && <View style={s.inputIcon}>{leftIcon}</View>}
         <TextInput
-          placeholderTextColor={colors.textTertiary}
+          placeholderTextColor={colors.textPlaceholder}
+          accessibilityLabel={derivedLabel}
+          accessibilityHint={accessibilityHint}
           style={[s.inputField, { color: colors.textPrimary }, leftIcon ? { paddingLeft: 0 } : null]}
           {...props}
         />
@@ -306,7 +333,11 @@ export const Pill: React.FC<PillProps> = ({ label, color, bg, style }) => {
 export const Divider: React.FC<{ label?: string; style?: ViewStyle }> = ({ label, style }) => {
   const { colors } = useTheme();
   return (
-    <View style={[{ flexDirection: 'row', alignItems: 'center', marginVertical: 20 }, style]}>
+    <View
+      style={[{ flexDirection: 'row', alignItems: 'center', marginVertical: 20 }, style]}
+      accessible={false}
+      importantForAccessibility="no"
+    >
       <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
       {label && (
         <Text style={{ marginHorizontal: 12, color: colors.textSecondary, fontSize: FontSize.xs, fontWeight: '500' }}>
@@ -386,19 +417,26 @@ export const SectionHeader: React.FC<{ title: string; action?: string; onAction?
 interface OTPBoxProps {
   value: string;
   focused: boolean;
+  index?: number;
+  total?: number;
 }
 
-export const OTPBox: React.FC<OTPBoxProps> = ({ value, focused }) => {
+export const OTPBox: React.FC<OTPBoxProps> = ({ value, focused, index, total = 6 }) => {
   const { colors } = useTheme();
+  const label = index !== undefined ? `OTP digit ${index + 1} of ${total}` : undefined;
   return (
-    <View style={[
-      s.otpBox,
-      {
-        borderColor: focused ? colors.primary : colors.border,
-        backgroundColor: focused ? colors.surface : colors.surfaceInput,
-        ...(focused ? Shadow.soft(colors.primary) : {}),
-      },
-    ]}>
+    <View
+      style={[
+        s.otpBox,
+        {
+          borderColor: focused ? colors.primary : colors.border,
+          backgroundColor: focused ? colors.surface : colors.surfaceInput,
+          ...(focused ? Shadow.soft(colors.primary) : {}),
+        },
+      ]}
+      accessibilityRole="none"
+      accessibilityLabel={label}
+    >
       <Text style={{ fontSize: FontSize.xl, fontWeight: '700', color: colors.primary }}>{value}</Text>
     </View>
   );

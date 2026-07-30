@@ -75,6 +75,10 @@ function FAQItem({ q, a }: { q: string; a: string }) {
     <TouchableOpacity
       onPress={toggle}
       activeOpacity={0.8}
+      accessibilityRole="button"
+      accessibilityLabel={q}
+      accessibilityHint={open ? 'Collapse answer' : 'Expand answer'}
+      accessibilityState={{ selected: open }}
       style={[s.faqCard, { backgroundColor: colors.surface, borderColor: open ? colors.primary : colors.border }]}
     >
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
@@ -104,11 +108,11 @@ export default function HelpScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ marginLeft: 16 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Help & Support</Text>
+          <Text accessibilityRole="header" style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Help & Support</Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>Frequently asked questions</Text>
         </View>
       </View>
@@ -120,6 +124,8 @@ export default function HelpScreen() {
             onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}`)}
             style={[s.contactCard, { backgroundColor: colors.surface, borderColor: colors.border, flex: 1 }]}
             activeOpacity={0.8}
+            accessibilityRole="link"
+            accessibilityLabel="Email support at support@ajoapp.ng"
           >
             <View style={[s.contactIcon, { backgroundColor: '#E8F5E9' }]}>
               <Ionicons name="mail-outline" size={22} color="#2E7D32" />
@@ -132,6 +138,8 @@ export default function HelpScreen() {
             onPress={() => Linking.openURL(`https://wa.me/${WHATSAPP_NUMBER.replace('+', '')}`)}
             style={[s.contactCard, { backgroundColor: colors.surface, borderColor: colors.border, flex: 1 }]}
             activeOpacity={0.8}
+            accessibilityRole="link"
+            accessibilityLabel="Chat with support on WhatsApp"
           >
             <View style={[s.contactIcon, { backgroundColor: '#E8F5E9' }]}>
               <Ionicons name="logo-whatsapp" size={22} color="#25D366" />
@@ -141,7 +149,7 @@ export default function HelpScreen() {
           </TouchableOpacity>
         </View>
 
-        <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.textSecondary,
+        <Text accessibilityRole="header" style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.textSecondary,
           textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>
           Frequently Asked Questions
         </Text>

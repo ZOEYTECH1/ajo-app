@@ -116,16 +116,16 @@ export default function CustomersScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 16 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Customers</Text>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Customers</Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
             {(customers ?? []).length} contacts
           </Text>
         </View>
-        <TouchableOpacity onPress={openAdd} style={[s.addBtn, { backgroundColor: INV }]}>
+        <TouchableOpacity onPress={openAdd} style={[s.addBtn, { backgroundColor: INV }]} accessibilityRole="button" accessibilityLabel="Add new customer">
           <Ionicons name="add" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -140,6 +140,7 @@ export default function CustomersScreen() {
             placeholder="Search name or phone…"
             placeholderTextColor={colors.textTertiary}
             style={{ flex: 1, fontSize: FontSize.sm, color: colors.textPrimary }}
+            accessibilityLabel="Search customers"
           />
         </View>
       </View>
@@ -186,7 +187,7 @@ export default function CustomersScreen() {
                   style={[s.card, { backgroundColor: colors.surface, borderColor: hasCredit ? '#FFCC80' : colors.border,
                     borderWidth: hasCredit ? 1.5 : 1, ...Shadow.card(colors.black) }]}
                 >
-                  <TouchableOpacity onPress={() => openEdit(c)} activeOpacity={0.8} style={s.cardRow}>
+                  <TouchableOpacity onPress={() => openEdit(c)} activeOpacity={0.8} style={s.cardRow} accessibilityRole="button" accessibilityLabel={`Customer: ${c.name}`}>
                     <View style={[s.avatar, { backgroundColor: hasCredit ? '#FFF3E0' : colors.background }]}>
                       <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: hasCredit ? INV : colors.textSecondary }}>
                         {c.name.charAt(0).toUpperCase()}
@@ -206,7 +207,7 @@ export default function CustomersScreen() {
                         </View>
                       )}
                     </View>
-                    <TouchableOpacity onPress={() => confirmDelete(c)} hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+                    <TouchableOpacity onPress={() => confirmDelete(c)} hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }} accessibilityRole="button" accessibilityLabel={`Delete ${c.name}`} accessibilityHint="Double tap to permanently delete this customer">
                       <Ionicons name="trash-outline" size={18} color={colors.textTertiary} />
                     </TouchableOpacity>
                   </TouchableOpacity>
@@ -216,6 +217,7 @@ export default function CustomersScreen() {
                     <TouchableOpacity
                       onPress={() => openCredit(c, 'charge')}
                       style={[s.creditBtn, { backgroundColor: '#FFEBEE' }]}
+                      accessibilityRole="button" accessibilityLabel={`Charge credit for ${c.name}`}
                     >
                       <Ionicons name="add-circle-outline" size={14} color="#C62828" />
                       <Text style={{ fontSize: 11, fontWeight: '700', color: '#C62828', marginLeft: 4 }}>Charge credit</Text>
@@ -224,6 +226,7 @@ export default function CustomersScreen() {
                       <TouchableOpacity
                         onPress={() => openCredit(c, 'payment')}
                         style={[s.creditBtn, { backgroundColor: '#E8F5E9' }]}
+                        accessibilityRole="button" accessibilityLabel={`Record payment from ${c.name}`}
                       >
                         <Ionicons name="checkmark-circle-outline" size={14} color="#2E7D32" />
                         <Text style={{ fontSize: 11, fontWeight: '700', color: '#2E7D32', marginLeft: 4 }}>Record payment</Text>
@@ -247,20 +250,23 @@ export default function CustomersScreen() {
             <Text style={[s.label, { color: colors.textPrimary }]}>Name *</Text>
             <TextInput value={name} onChangeText={setName} placeholder="Customer name"
               placeholderTextColor={colors.textTertiary} autoFocus
-              style={[s.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }]} />
+              style={[s.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }]}
+              accessibilityLabel="Customer name" />
             <Text style={[s.label, { color: colors.textPrimary }]}>Phone</Text>
             <TextInput value={phone} onChangeText={setPhone} placeholder="+234…" keyboardType="phone-pad"
               placeholderTextColor={colors.textTertiary}
-              style={[s.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }]} />
+              style={[s.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }]}
+              accessibilityLabel="Phone number" />
             <Text style={[s.label, { color: colors.textPrimary }]}>Notes</Text>
             <TextInput value={notes} onChangeText={setNotes} placeholder="Optional note" multiline
               placeholderTextColor={colors.textTertiary}
-              style={[s.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary, minHeight: 70, textAlignVertical: 'top' }]} />
+              style={[s.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary, minHeight: 70, textAlignVertical: 'top' }]}
+              accessibilityLabel="Notes" />
             <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
-              <TouchableOpacity onPress={() => setEditModal(false)} style={[s.modalBtn, { backgroundColor: colors.background, flex: 1 }]}>
+              <TouchableOpacity onPress={() => setEditModal(false)} style={[s.modalBtn, { backgroundColor: colors.background, flex: 1 }]} accessibilityRole="button" accessibilityLabel="Cancel">
                 <Text style={{ color: colors.textPrimary, fontWeight: '700', fontSize: FontSize.sm }}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={handleSave} disabled={saving} style={[s.modalBtn, { backgroundColor: INV, flex: 1 }]}>
+              <TouchableOpacity onPress={handleSave} disabled={saving} style={[s.modalBtn, { backgroundColor: INV, flex: 1 }]} accessibilityRole="button" accessibilityLabel="Save customer">
                 {saving ? <ActivityIndicator color="#fff" size="small" /> : <Text style={{ color: '#fff', fontWeight: '800', fontSize: FontSize.sm }}>Save</Text>}
               </TouchableOpacity>
             </View>
@@ -301,11 +307,13 @@ export default function CustomersScreen() {
                 placeholderTextColor={colors.textTertiary}
                 autoFocus
                 style={{ flex: 1, fontSize: FontSize.md, color: colors.textPrimary }}
+                accessibilityLabel="Credit amount"
+                accessibilityHint="Enter amount in Naira"
               />
             </View>
 
             <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
-              <TouchableOpacity onPress={() => setCreditModal(false)} style={[s.modalBtn, { backgroundColor: colors.background, flex: 1 }]}>
+              <TouchableOpacity onPress={() => setCreditModal(false)} style={[s.modalBtn, { backgroundColor: colors.background, flex: 1 }]} accessibilityRole="button" accessibilityLabel="Cancel">
                 <Text style={{ color: colors.textPrimary, fontWeight: '700', fontSize: FontSize.sm }}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity

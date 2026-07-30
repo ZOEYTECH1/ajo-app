@@ -121,11 +121,11 @@ export default function MoveScreen() {
     >
       {/* Header */}
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Ionicons name={cfg.icon as any} size={22} color={cfg.color} style={{ marginLeft: 14 }} />
-        <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: cfg.color, marginLeft: 8, flex: 1 }}>
+        <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: cfg.color, marginLeft: 8, flex: 1 }} accessibilityRole="header">
           {cfg.title}
         </Text>
       </View>
@@ -163,6 +163,8 @@ export default function MoveScreen() {
           placeholderTextColor={cfg.color + '50'}
           style={[s.bigInput, { backgroundColor: cfg.bg, color: cfg.color, borderColor: cfg.color + '40' }]}
           autoFocus
+          accessibilityLabel={cfg.qtyLabel}
+          accessibilityHint={cfg.qtyHint}
         />
 
         {/* Optional note */}
@@ -177,6 +179,8 @@ export default function MoveScreen() {
           multiline
           numberOfLines={3}
           style={[s.noteInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.textPrimary }]}
+          accessibilityLabel="Extra note"
+          accessibilityHint="Optional note about this stock movement"
         />
 
         {/* Confirm button */}
@@ -185,6 +189,9 @@ export default function MoveScreen() {
           disabled={isPending}
           style={[s.confirmBtn, { backgroundColor: cfg.color }]}
           activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel={cfg.btnLabel.replace('✓  ', '')}
+          accessibilityState={{ disabled: isPending }}
         >
           {isPending
             ? <ActivityIndicator color="#fff" />

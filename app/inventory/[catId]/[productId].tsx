@@ -192,16 +192,16 @@ export default function ProductDetailScreen() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginLeft: 16, flex: 1 }} numberOfLines={1}>
+        <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginLeft: 16, flex: 1 }} numberOfLines={1} accessibilityRole="header">
           {product?.name ?? 'Product'}
         </Text>
-        <TouchableOpacity onPress={openEdit} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} style={{ marginRight: 14 }}>
+        <TouchableOpacity onPress={openEdit} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} style={{ marginRight: 14 }} accessibilityRole="button" accessibilityLabel={`Edit ${product?.name ?? 'product'}`}>
           <Ionicons name="pencil-outline" size={22} color={colors.textSecondary} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={confirmDelete} disabled={deleting} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={confirmDelete} disabled={deleting} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel={`Delete ${product?.name ?? 'product'}`} accessibilityHint="Double tap to permanently delete this product">
           {deleting
             ? <ActivityIndicator size="small" color={colors.error} />
             : <Ionicons name="trash-outline" size={22} color={colors.error} />
@@ -212,7 +212,7 @@ export default function ProductDetailScreen() {
       {/* Edit modal */}
       <Modal visible={editModal} transparent animationType="slide" onRequestClose={() => setEditModal(false)}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-          <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setEditModal(false)} />
+          <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setEditModal(false)} accessibilityRole="button" accessibilityLabel="Close edit product" />
           <View style={[s.modalSheet, { backgroundColor: colors.surface }]}>
             <Text style={[s.modalTitle, { color: colors.textPrimary }]}>Edit Product</Text>
             <Text style={[s.modalLabel, { color: colors.textSecondary }]}>Product name</Text>
@@ -223,6 +223,7 @@ export default function ProductDetailScreen() {
               placeholder="e.g. Indomie (70g)"
               placeholderTextColor={colors.textTertiary}
               autoFocus
+              accessibilityLabel="Product name"
             />
             <Text style={[s.modalLabel, { color: colors.textSecondary, marginTop: 14 }]}>Selling price (₦)</Text>
             <TextInput
@@ -232,6 +233,8 @@ export default function ProductDetailScreen() {
               placeholder="e.g. 150"
               placeholderTextColor={colors.textTertiary}
               keyboardType="decimal-pad"
+              accessibilityLabel="Selling price in naira"
+              accessibilityHint="Enter the price in naira"
             />
             <Text style={[s.modalLabel, { color: colors.textSecondary, marginTop: 14 }]}>Barcode (optional)</Text>
             <TextInput
@@ -241,6 +244,8 @@ export default function ProductDetailScreen() {
               placeholder="Scan or type barcode"
               placeholderTextColor={colors.textTertiary}
               autoCapitalize="none"
+              accessibilityLabel="Barcode"
+              accessibilityHint="Scan or type the product barcode"
             />
             <Text style={[s.modalLabel, { color: colors.textSecondary, marginTop: 14 }]}>Low stock alert threshold</Text>
             <TextInput
@@ -250,6 +255,8 @@ export default function ProductDetailScreen() {
               placeholder="e.g. 5"
               placeholderTextColor={colors.textTertiary}
               keyboardType="number-pad"
+              accessibilityLabel="Low stock alert threshold"
+              accessibilityHint="You will be alerted when stock drops below this number"
             />
             <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 4 }}>
               You'll be notified when stock drops below this number. Default is 5.
@@ -259,6 +266,8 @@ export default function ProductDetailScreen() {
               onPress={() => setShowExpiryPicker(true)}
               style={[s.modalInput, { backgroundColor: colors.background, borderColor: colors.border,
                 flexDirection: 'row', alignItems: 'center', paddingVertical: 14 }]}
+              accessibilityRole="button"
+              accessibilityLabel={editExpiryDate ? `Expiry date: ${new Date(editExpiryDate + 'T00:00:00').toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}` : 'Set expiry date'}
             >
               <Ionicons name="calendar-outline" size={16} color={editExpiryDate ? '#E65100' : colors.textSecondary} />
               <Text style={{ flex: 1, marginLeft: 8, fontSize: FontSize.sm,
@@ -268,7 +277,7 @@ export default function ProductDetailScreen() {
                   : 'No expiry date set'}
               </Text>
               {!!editExpiryDate && (
-                <TouchableOpacity onPress={() => setEditExpiryDate(null)} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }}>
+                <TouchableOpacity onPress={() => setEditExpiryDate(null)} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }} accessibilityRole="button" accessibilityLabel="Clear expiry date">
                   <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
                 </TouchableOpacity>
               )}
@@ -286,7 +295,7 @@ export default function ProductDetailScreen() {
                 />
                 {Platform.OS === 'ios' && (
                   <TouchableOpacity onPress={() => setShowExpiryPicker(false)}
-                    style={{ alignItems: 'center', paddingVertical: 8 }}>
+                    style={{ alignItems: 'center', paddingVertical: 8 }} accessibilityRole="button" accessibilityLabel="Done picking expiry date">
                     <Text style={{ color: '#E65100', fontWeight: '700', fontSize: FontSize.sm }}>Done</Text>
                   </TouchableOpacity>
                 )}
@@ -299,6 +308,9 @@ export default function ProductDetailScreen() {
               onPress={() => saveEdit()}
               disabled={saving || !editName.trim() || !editPrice.trim()}
               style={[s.modalSaveBtn, { backgroundColor: '#E65100', opacity: (saving || !editName.trim() || !editPrice.trim()) ? 0.5 : 1 }]}
+              accessibilityRole="button"
+              accessibilityLabel="Save changes"
+              accessibilityState={{ disabled: saving || !editName.trim() || !editPrice.trim() }}
             >
               {saving
                 ? <ActivityIndicator color="#fff" />
@@ -312,7 +324,7 @@ export default function ProductDetailScreen() {
       {/* Opening stock override modal */}
       <Modal visible={openingModal} transparent animationType="slide" onRequestClose={() => setOpeningModal(false)}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-          <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setOpeningModal(false)} />
+          <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setOpeningModal(false)} accessibilityRole="button" accessibilityLabel="Close opening stock" />
           <View style={[s.modalSheet, { backgroundColor: colors.surface }]}>
             <Text style={[s.modalTitle, { color: colors.textPrimary }]}>Set Opening Stock</Text>
             <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginBottom: 16 }}>
@@ -327,11 +339,16 @@ export default function ProductDetailScreen() {
               placeholderTextColor={colors.textTertiary}
               keyboardType="number-pad"
               autoFocus
+              accessibilityLabel="Opening stock quantity"
+              accessibilityHint="Enter how many units you had at the start of today"
             />
             <TouchableOpacity
               onPress={() => doSetOpening()}
               disabled={settingOpening || !openingInput.trim()}
               style={[s.modalSaveBtn, { backgroundColor: '#1565C0', opacity: (settingOpening || !openingInput.trim()) ? 0.5 : 1 }]}
+              accessibilityRole="button"
+              accessibilityLabel="Save opening stock"
+              accessibilityState={{ disabled: settingOpening || !openingInput.trim() }}
             >
               {settingOpening
                 ? <ActivityIndicator color="#fff" />
@@ -345,7 +362,7 @@ export default function ProductDetailScreen() {
       {/* Quick-sale modal */}
       <Modal visible={saleModal} transparent animationType="slide" onRequestClose={() => setSaleModal(false)}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-          <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setSaleModal(false)} />
+          <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setSaleModal(false)} accessibilityRole="button" accessibilityLabel="Close sale modal" />
           <View style={[s.modalSheet, { backgroundColor: colors.surface }]}>
             <Text style={[s.modalTitle, { color: colors.textPrimary }]}>I made a sale</Text>
             <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginBottom: 16 }}>
@@ -357,6 +374,9 @@ export default function ProductDetailScreen() {
               onPress={() => setCustPickerModal(true)}
               style={[s.modalInput, { backgroundColor: colors.background, borderColor: colors.border,
                 flexDirection: 'row', alignItems: 'center', paddingVertical: 14 }]}
+              accessibilityRole="button"
+              accessibilityLabel={saleCustomer ? `Customer: ${saleCustomer.name}` : 'Customer: Walk-in customer'}
+              accessibilityHint="Double tap to select a customer"
             >
               <Ionicons name="person-outline" size={16} color={colors.textSecondary} />
               <Text style={{ flex: 1, marginLeft: 8, fontSize: FontSize.sm,
@@ -375,6 +395,7 @@ export default function ProductDetailScreen() {
               placeholderTextColor={colors.textTertiary}
               keyboardType="number-pad"
               autoFocus
+              accessibilityLabel="Quantity sold"
             />
 
             <Text style={[s.modalLabel, { color: colors.textSecondary, marginTop: 14 }]}>Unit price (₦)</Text>
@@ -385,6 +406,8 @@ export default function ProductDetailScreen() {
               placeholder="0"
               placeholderTextColor={colors.textTertiary}
               keyboardType="decimal-pad"
+              accessibilityLabel="Unit price in naira"
+              accessibilityHint="Enter the price per unit in naira"
             />
 
             {!!saleQty && !!salePrice && (
@@ -407,6 +430,10 @@ export default function ProductDetailScreen() {
               disabled={recordingSale || !saleQty.trim() || !salePrice.trim()}
               style={[s.modalSaveBtn, { backgroundColor: '#C62828',
                 opacity: (recordingSale || !saleQty.trim() || !salePrice.trim()) ? 0.5 : 1 }]}
+              accessibilityRole="button"
+              accessibilityLabel="Confirm sale"
+              accessibilityHint="Records the sale and deducts from stock"
+              accessibilityState={{ disabled: recordingSale || !saleQty.trim() || !salePrice.trim() }}
             >
               {recordingSale
                 ? <ActivityIndicator color="#fff" />
@@ -426,6 +453,8 @@ export default function ProductDetailScreen() {
               onPress={() => { setSaleCustomer(null); setCustPickerModal(false); }}
               style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 14,
                 borderBottomWidth: 1, borderBottomColor: colors.border }}
+              accessibilityRole="button"
+              accessibilityLabel="Walk-in customer"
             >
               <Ionicons name="walk-outline" size={18} color={colors.textSecondary} />
               <Text style={{ marginLeft: 10, fontSize: FontSize.sm, color: colors.textSecondary }}>Walk-in customer</Text>
@@ -437,6 +466,8 @@ export default function ProductDetailScreen() {
                   onPress={() => { setSaleCustomer(c); setCustPickerModal(false); }}
                   style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 14,
                     borderBottomWidth: 1, borderBottomColor: colors.border }}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Select customer ${c.name}`}
                 >
                   <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: '#FFEBEE',
                     alignItems: 'center', justifyContent: 'center' }}>
@@ -452,6 +483,8 @@ export default function ProductDetailScreen() {
             <TouchableOpacity
               onPress={() => setCustPickerModal(false)}
               style={[s.modalSaveBtn, { backgroundColor: colors.background, marginTop: 8 }]}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
             >
               <Text style={{ color: colors.textPrimary, fontWeight: '700', fontSize: FontSize.sm }}>Cancel</Text>
             </TouchableOpacity>
@@ -465,7 +498,7 @@ export default function ProductDetailScreen() {
           <View style={[s.infoCard, { backgroundColor: '#FFF3E0' }]}>
             {/* Product image */}
             {product.image_url && (
-              <Image source={{ uri: product.image_url }} style={s.productImg} />
+              <Image source={{ uri: product.image_url }} style={s.productImg} accessible={true} accessibilityRole="image" accessibilityLabel={`${product.name} product image`} />
             )}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <View>
@@ -543,7 +576,7 @@ export default function ProductDetailScreen() {
         <View style={[s.summaryCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           {/* Date navigator */}
           <View style={s.summaryNav}>
-            <TouchableOpacity onPress={() => shiftDate(-1)} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }}>
+            <TouchableOpacity onPress={() => shiftDate(-1)} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }} accessibilityRole="button" accessibilityLabel="Previous day">
               <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
             </TouchableOpacity>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -554,7 +587,11 @@ export default function ProductDetailScreen() {
             </View>
             <TouchableOpacity onPress={() => shiftDate(1)} disabled={isToday}
               hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }}
-              style={{ opacity: isToday ? 0.3 : 1 }}>
+              style={{ opacity: isToday ? 0.3 : 1 }}
+              accessibilityRole="button"
+              accessibilityLabel="Next day"
+              accessibilityState={{ disabled: isToday }}
+            >
               <Ionicons name="chevron-forward" size={20} color={colors.textPrimary} />
             </TouchableOpacity>
           </View>
@@ -571,6 +608,8 @@ export default function ProductDetailScreen() {
                       <TouchableOpacity
                         onPress={() => { setOpeningInput(String(summary?.opening_stock ?? 0)); setOpeningModal(true); }}
                         hitSlop={{ top: 6, left: 6, bottom: 6, right: 6 }}
+                        accessibilityRole="button"
+                        accessibilityLabel="Edit opening stock"
                       >
                         <Ionicons name="pencil" size={11} color="#888" />
                       </TouchableOpacity>
@@ -623,6 +662,9 @@ export default function ProductDetailScreen() {
                       disabled={closingStock}
                       style={[s.closeStockBtn, { backgroundColor: '#1565C0' }]}
                       activeOpacity={0.85}
+                      accessibilityRole="button"
+                      accessibilityLabel="Close today's stock"
+                      accessibilityHint="Records the current quantity as today's closing stock"
                     >
                       {closingStock
                         ? <ActivityIndicator color="#fff" size="small" />
@@ -648,6 +690,9 @@ export default function ProductDetailScreen() {
             onPress={() => router.push(`/inventory/${catId}/${productId}/move?type=in` as any)}
             style={[s.actionCard, { backgroundColor: '#E8F5E9' }]}
             activeOpacity={0.82}
+            accessibilityRole="button"
+            accessibilityLabel="I bought goods"
+            accessibilityHint="Record new stock you received"
           >
             <Ionicons name="arrow-down-circle" size={32} color="#2E7D32" />
             <Text style={[s.actionTitle, { color: '#2E7D32' }]}>I bought goods</Text>
@@ -661,6 +706,9 @@ export default function ProductDetailScreen() {
             }}
             style={[s.actionCard, { backgroundColor: '#FFEBEE' }]}
             activeOpacity={0.82}
+            accessibilityRole="button"
+            accessibilityLabel="I made a sale"
+            accessibilityHint="Records revenue and deducts from stock"
           >
             <Ionicons name="cash-outline" size={32} color="#C62828" />
             <Text style={[s.actionTitle, { color: '#C62828' }]}>I made a sale</Text>
@@ -671,6 +719,9 @@ export default function ProductDetailScreen() {
             onPress={() => router.push(`/inventory/${catId}/${productId}/move?type=adjustment` as any)}
             style={[s.actionCard, { backgroundColor: '#E3F2FD', width: '100%' }]}
             activeOpacity={0.82}
+            accessibilityRole="button"
+            accessibilityLabel="Fix or correct my count"
+            accessibilityHint="Count your goods and update the stock record"
           >
             <Ionicons name="checkmark-circle-outline" size={28} color="#1565C0" />
             <Text style={[s.actionTitle, { color: '#1565C0' }]}>Fix / correct my count</Text>

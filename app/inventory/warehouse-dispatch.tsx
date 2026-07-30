@@ -77,11 +77,11 @@ export default function WarehouseDispatchScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 16 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Dispatch Stock</Text>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Dispatch Stock</Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>Record outgoing stock from the warehouse</Text>
         </View>
       </View>
@@ -92,6 +92,9 @@ export default function WarehouseDispatchScreen() {
         <TouchableOpacity
           onPress={() => setProductPickerModal(true)}
           style={[s.selectorRow, { backgroundColor: colors.surface, borderColor: selectedProduct ? INV : colors.border }]}
+          accessibilityRole="button"
+          accessibilityLabel={selectedProduct ? `Selected product: ${selectedProduct.name}` : 'Choose product'}
+          accessibilityHint="Double tap to open the product picker"
         >
           <Ionicons name="cube-outline" size={18} color={selectedProduct ? INV : colors.textTertiary} />
           <Text style={{ flex: 1, marginLeft: 10, fontSize: FontSize.sm, color: selectedProduct ? colors.textPrimary : colors.textTertiary }}>
@@ -115,6 +118,8 @@ export default function WarehouseDispatchScreen() {
             placeholder="e.g. 20"
             placeholderTextColor={colors.textTertiary}
             style={{ flex: 1, fontSize: FontSize.md, color: colors.textPrimary }}
+            accessibilityLabel="Quantity to dispatch"
+            accessibilityHint="Enter the number of units to dispatch"
           />
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary }}>units</Text>
         </View>
@@ -139,6 +144,8 @@ export default function WarehouseDispatchScreen() {
           placeholder="e.g. Surulere Branch, Main Shop"
           placeholderTextColor={colors.textTertiary}
           style={[s.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.textPrimary }]}
+          accessibilityLabel="Destination"
+          accessibilityHint="Optional name of the destination branch or shop"
         />
 
         {/* Reference */}
@@ -150,6 +157,8 @@ export default function WarehouseDispatchScreen() {
           placeholderTextColor={colors.textTertiary}
           autoCapitalize="characters"
           style={[s.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.textPrimary, fontFamily: 'monospace' }]}
+          accessibilityLabel="Dispatch reference number"
+          accessibilityHint="Optional dispatch reference number"
         />
 
         {/* Note */}
@@ -161,6 +170,8 @@ export default function WarehouseDispatchScreen() {
           placeholderTextColor={colors.textTertiary}
           multiline
           style={[s.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.textPrimary, minHeight: 70, textAlignVertical: 'top' }]}
+          accessibilityLabel="Notes"
+          accessibilityHint="Optional notes about this dispatch"
         />
 
         <TouchableOpacity
@@ -168,6 +179,10 @@ export default function WarehouseDispatchScreen() {
           disabled={isPending}
           style={[s.saveBtn, { backgroundColor: '#C62828', opacity: isPending ? 0.6 : 1 }]}
           activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="Confirm dispatch"
+          accessibilityHint="Records the goods as dispatched and deducts from stock"
+          accessibilityState={{ disabled: isPending }}
         >
           {isPending
             ? <ActivityIndicator color="#fff" />
@@ -196,6 +211,8 @@ export default function WarehouseDispatchScreen() {
                       key={p.id}
                       onPress={() => { setSelectedProduct(p); setProductPickerModal(false); }}
                       style={[s.productRow, { borderBottomColor: colors.border }]}
+                      accessibilityRole="button"
+                      accessibilityLabel={p.quantity === 0 ? `${p.name}, out of stock` : `${p.name}, ${p.quantity} in stock`}
                     >
                       <View style={{ flex: 1 }}>
                         <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textPrimary }}>{p.name}</Text>
@@ -220,6 +237,8 @@ export default function WarehouseDispatchScreen() {
             <TouchableOpacity
               onPress={() => setProductPickerModal(false)}
               style={[s.saveBtn, { backgroundColor: colors.background, marginTop: 12 }]}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
             >
               <Text style={{ color: colors.textPrimary, fontWeight: '700' }}>Cancel</Text>
             </TouchableOpacity>

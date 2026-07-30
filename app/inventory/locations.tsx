@@ -60,11 +60,11 @@ export default function LocationsScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 16 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>My Locations</Text>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">My Locations</Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
             Select the location you're working at
           </Text>
@@ -73,6 +73,7 @@ export default function LocationsScreen() {
           onPress={() => setAddModal(true)}
           hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}
           style={{ backgroundColor: '#FFF3E0', borderRadius: Radius.md, padding: 8 }}
+          accessibilityRole="button" accessibilityLabel="Add new business location"
         >
           <Ionicons name="add" size={22} color={INV} />
         </TouchableOpacity>
@@ -103,6 +104,9 @@ export default function LocationsScreen() {
                     ...Shadow.card(colors.black),
                   },
                 ]}
+                accessibilityRole="button"
+                accessibilityLabel={`Switch to ${biz.name}`}
+                accessibilityState={{ selected: isSelected }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                   <View style={[s.modeIcon, { backgroundColor: mode.bg }]}>
@@ -155,6 +159,7 @@ export default function LocationsScreen() {
             placeholder="e.g. Surulere Branch, Main Warehouse"
             placeholderTextColor={colors.textTertiary}
             autoFocus
+            accessibilityLabel="Location name"
           />
 
           <Text style={[s.modalLabel, { color: colors.textSecondary, marginTop: 16 }]}>Type</Text>
@@ -171,6 +176,9 @@ export default function LocationsScreen() {
                     borderColor: active ? b.color : colors.border,
                     flex: 1,
                   }]}
+                  accessibilityRole="button"
+                  accessibilityLabel={b.label}
+                  accessibilityState={{ selected: active }}
                 >
                   <Ionicons name={b.icon} size={18} color={active ? b.color : colors.textSecondary} />
                   <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: active ? b.color : colors.textSecondary, marginLeft: 6 }}>
@@ -193,6 +201,7 @@ export default function LocationsScreen() {
             }}
             disabled={creating}
             style={[s.saveBtn, { backgroundColor: INV, opacity: creating ? 0.6 : 1 }]}
+            accessibilityRole="button" accessibilityLabel="Create location"
           >
             {creating
               ? <ActivityIndicator color="#fff" />

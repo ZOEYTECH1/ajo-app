@@ -74,6 +74,8 @@ function MemberCard({
           onPress={onApprove}
           disabled={busy}
           activeOpacity={0.75}
+          accessibilityRole="button"
+          accessibilityLabel={`Approve ${fullName}`}
         >
           <Ionicons name="checkmark" size={15} color={colors.success} />
           <Text style={[s.actionLabel, { color: colors.success }]}>Approve</Text>
@@ -84,6 +86,8 @@ function MemberCard({
           onPress={onFlag}
           disabled={busy}
           activeOpacity={0.75}
+          accessibilityRole="button"
+          accessibilityLabel={`Flag amount for ${fullName}`}
         >
           <Ionicons name="flag-outline" size={15} color={colors.warning} />
           <Text style={[s.actionLabel, { color: colors.warning }]}>Flag Amount</Text>
@@ -94,6 +98,8 @@ function MemberCard({
           onPress={onReject}
           disabled={busy}
           activeOpacity={0.75}
+          accessibilityRole="button"
+          accessibilityLabel={`Reject ${fullName}`}
         >
           <Ionicons name="close" size={15} color={colors.error} />
           <Text style={[s.actionLabel, { color: colors.error }]}>Reject</Text>
@@ -127,6 +133,8 @@ function DisputeCard({ item, onViewGroup }: { item: QueuePayment; onViewGroup: (
         style={[s.viewGroupBtn, { borderColor: colors.border }]}
         onPress={onViewGroup}
         activeOpacity={0.75}
+        accessibilityRole="button"
+        accessibilityLabel={`Open ${item.group_name} to resolve dispute`}
       >
         <Text style={[s.viewGroupLabel, { color: colors.textSecondary }]}>Open group to resolve</Text>
         <Ionicons name="chevron-forward" size={14} color={colors.textTertiary} />
@@ -159,7 +167,7 @@ function FlagModal({
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={s.overlay}>
         <View style={[s.sheet, { backgroundColor: colors.surface }]}>
-          <Text style={[s.sheetTitle, { color: colors.textPrimary }]}>Flag Contribution Amount</Text>
+          <Text style={[s.sheetTitle, { color: colors.textPrimary }]} accessibilityRole="header">Flag Contribution Amount</Text>
           <Text style={[s.sheetSub, { color: colors.textSecondary }]}>
             Tell the payer what's wrong with the amount they requested.
           </Text>
@@ -171,12 +179,16 @@ function FlagModal({
             onChangeText={setReason}
             multiline
             numberOfLines={3}
+            accessibilityLabel="Reason for flagging"
+            accessibilityHint="Describe what is wrong with the contribution amount"
           />
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
             <TouchableOpacity
               style={[s.sheetBtn, { backgroundColor: colors.background, flex: 1 }]}
               onPress={onClose}
               disabled={busy}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
             >
               <Text style={{ color: colors.textSecondary, fontWeight: '600' }}>Cancel</Text>
             </TouchableOpacity>
@@ -184,6 +196,8 @@ function FlagModal({
               style={[s.sheetBtn, { backgroundColor: colors.warning, flex: 1, opacity: reason.trim().length < 3 ? 0.5 : 1 }]}
               onPress={submit}
               disabled={busy || reason.trim().length < 3}
+              accessibilityRole="button"
+              accessibilityLabel="Send flag"
             >
               {busy
                 ? <ActivityIndicator color="#FFF" size="small" />
@@ -240,10 +254,10 @@ export default function CollectorQueueScreen() {
     <View style={[s.root, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={[s.header, { paddingTop: insets.top + 8, backgroundColor: colors.background, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={12}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={12} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={[s.headerTitle, { color: colors.textPrimary }]}>Approval Queue</Text>
+        <Text style={[s.headerTitle, { color: colors.textPrimary }]} accessibilityRole="header">Approval Queue</Text>
         {total > 0 && (
           <View style={[s.badge, { backgroundColor: colors.error }]}>
             <Text style={s.badgeText}>{total > 99 ? '99+' : total}</Text>

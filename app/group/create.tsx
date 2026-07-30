@@ -71,6 +71,9 @@ const MonthDayModal: React.FC<{
                     lay.monthCell,
                     { backgroundColor: active ? colors.primary : colors.background, borderColor: active ? colors.primary : colors.border },
                   ]}
+                  accessibilityRole="radio"
+                  accessibilityLabel={d.label}
+                  accessibilityState={{ checked: active }}
                 >
                   <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: active ? '#FFF' : colors.textSecondary }}>
                     {d.label}
@@ -79,7 +82,7 @@ const MonthDayModal: React.FC<{
               );
             })}
           </View>
-          <TouchableOpacity onPress={onClose} style={{ alignItems: 'center', marginTop: 16 }}>
+          <TouchableOpacity onPress={onClose} style={{ alignItems: 'center', marginTop: 16 }} accessibilityRole="button" accessibilityLabel="Close">
             <Text style={{ color: colors.primary, fontWeight: '600', fontSize: FontSize.sm }}>Cancel</Text>
           </TouchableOpacity>
         </Pressable>
@@ -114,6 +117,8 @@ const DateField: React.FC<{
           },
         ]}
         activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityLabel={`${label}: ${fmtDate(value)}`}
       >
         <Ionicons name="calendar-outline" size={18} color={colors.primary} />
         <Text style={{ fontSize: FontSize.sm, color: colors.textPrimary, marginLeft: 10, flex: 1 }}>
@@ -122,7 +127,7 @@ const DateField: React.FC<{
         <Ionicons name="chevron-down" size={16} color={colors.textTertiary} />
       </TouchableOpacity>
       {!!error && (
-        <Text style={{ fontSize: FontSize.xs, color: colors.error, marginTop: 4 }}>{error}</Text>
+        <Text style={{ fontSize: FontSize.xs, color: colors.error, marginTop: 4 }} accessibilityRole="alert" accessibilityLiveRegion="assertive">{error}</Text>
       )}
       {open && (
         <DateTimePicker
@@ -137,7 +142,7 @@ const DateField: React.FC<{
         />
       )}
       {Platform.OS === 'ios' && open && (
-        <TouchableOpacity onPress={() => setOpen(false)} style={{ alignItems: 'flex-end', marginTop: 4 }}>
+        <TouchableOpacity onPress={() => setOpen(false)} style={{ alignItems: 'flex-end', marginTop: 4 }} accessibilityRole="button" accessibilityLabel="Done">
           <Text style={{ color: colors.primary, fontWeight: '700', fontSize: FontSize.sm }}>Done</Text>
         </TouchableOpacity>
       )}
@@ -238,10 +243,10 @@ export default function CreateGroupRoute() {
 
         {/* Header */}
         <View style={[lay.header, { backgroundColor: colors.surface, borderBottomColor: colors.border, paddingTop: insets.top + 12 }]}>
-          <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}>
+          <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
             <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">
             Create Group
           </Text>
           <View style={{ width: 24 }} />
@@ -310,6 +315,9 @@ export default function CreateGroupRoute() {
                     lay.freqBtn,
                     { backgroundColor: active ? colors.primary : colors.surface, borderColor: active ? colors.primary : colors.border },
                   ]}
+                  accessibilityRole="radio"
+                  accessibilityLabel={opt.label}
+                  accessibilityState={{ checked: active }}
                 >
                   <Ionicons name={opt.icon as any} size={18} color={active ? '#FFF' : colors.textSecondary} />
                   <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: active ? '#FFF' : colors.textSecondary, marginTop: 4 }}>
@@ -337,6 +345,9 @@ export default function CreateGroupRoute() {
                         lay.weekChip,
                         { backgroundColor: active ? colors.primary : colors.surface, borderColor: active ? colors.primary : (errors.collectionDay ? colors.error : colors.border) },
                       ]}
+                      accessibilityRole="radio"
+                      accessibilityLabel={d.label}
+                      accessibilityState={{ checked: active }}
                     >
                       <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: active ? '#FFF' : colors.textSecondary }}>
                         {d.label}
@@ -363,6 +374,8 @@ export default function CreateGroupRoute() {
                   { backgroundColor: colors.surfaceInput, borderColor: errors.collectionDay ? colors.error : colors.border },
                 ]}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel={monthdayLabel ? `Collection day: ${monthdayLabel}` : 'Select collection day of month'}
               >
                 <Ionicons name="calendar-number-outline" size={18} color={colors.primary} />
                 <Text style={{ fontSize: FontSize.sm, color: monthdayLabel ? colors.textPrimary : colors.textTertiary, marginLeft: 10, flex: 1 }}>

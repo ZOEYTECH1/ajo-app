@@ -71,6 +71,9 @@ const NotifRow: React.FC<{
     <TouchableOpacity
       onPress={() => onPress(notif)}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={`${notif.title}: ${notif.body}`}
+      accessibilityState={notif.is_read ? undefined : { selected: true }}
       style={[
         s.row,
         { backgroundColor: notif.is_read ? colors.surface : colors.primaryTint, borderBottomColor: colors.border },
@@ -156,11 +159,14 @@ export default function NotificationsRoute() {
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
 
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Alerts</Text>
+        <Text accessibilityRole="header" style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Alerts</Text>
         {unreadCount > 0 && (
           <TouchableOpacity
             onPress={() => markAllMutation.mutate()}
             disabled={markAllMutation.isPending}
+            accessibilityRole="button"
+            accessibilityLabel="Mark all notifications as read"
+            accessibilityState={{ disabled: markAllMutation.isPending }}
             style={[s.markAllBtn, { borderColor: colors.border }]}
           >
             <Text style={{ fontSize: FontSize.xs, fontWeight: '600', color: colors.primary }}>Mark all read</Text>

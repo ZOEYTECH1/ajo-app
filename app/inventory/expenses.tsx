@@ -448,16 +448,16 @@ export default function ExpensesScreen() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* ── Header ── */}
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 16 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Expenses</Text>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Expenses</Text>
         </View>
-        <TouchableOpacity onPress={promptExport} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }} style={{ marginRight: 12 }}>
+        <TouchableOpacity onPress={promptExport} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }} style={{ marginRight: 12 }} accessibilityRole="button" accessibilityLabel="Export expenses">
           <Ionicons name="download-outline" size={22} color={INV} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={openAdd} style={[s.addBtn, { backgroundColor: INV }]}>
+        <TouchableOpacity onPress={openAdd} style={[s.addBtn, { backgroundColor: INV }]} accessibilityRole="button" accessibilityLabel="Add new expense">
           <Ionicons name="add" size={22} color="#fff" />
           <Text style={{ color: '#fff', fontWeight: '700', fontSize: FontSize.xs, marginLeft: 4 }}>Add</Text>
         </TouchableOpacity>
@@ -469,7 +469,8 @@ export default function ExpensesScreen() {
           const label = p === 'month' ? 'This Month' : p === 'week' ? 'This Week' : 'All Time';
           return (
             <TouchableOpacity key={p} onPress={() => setPeriod(p)}
-              style={[s.tab, period === p && { borderBottomColor: INV, borderBottomWidth: 2 }]}>
+              style={[s.tab, period === p && { borderBottomColor: INV, borderBottomWidth: 2 }]}
+              accessibilityRole="tab" accessibilityLabel={`${label} period`} accessibilityState={{ selected: period === p }}>
               <Text style={{ fontSize: FontSize.sm, fontWeight: period === p ? '700' : '400',
                 color: period === p ? INV : colors.textSecondary }}>
                 {label}
@@ -582,6 +583,8 @@ export default function ExpensesScreen() {
                       onLongPress={() => confirmDelete(e)}
                       activeOpacity={0.85}
                       style={[s.row, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Expense: ${e.category_label}${e.description ? ', ' + e.description : ''}, ₦${Number(e.amount).toLocaleString()}`}
                     >
                       <View style={[s.rowIcon, { backgroundColor: meta.bg }]}>
                         <Ionicons name={meta.icon as any} size={18} color={meta.color} />
@@ -604,6 +607,9 @@ export default function ExpensesScreen() {
                           onPress={() => confirmDelete(e)}
                           hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
                           style={{ marginTop: 6 }}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Delete expense: ${e.category_label}`}
+                          accessibilityHint="Double tap to permanently delete this expense"
                         >
                           <Ionicons name="trash-outline" size={14} color={colors.textTertiary} />
                         </TouchableOpacity>
@@ -724,6 +730,7 @@ export default function ExpensesScreen() {
                     color: colors.textPrimary, marginBottom: 4 }]}
                   autoCapitalize="words"
                   maxLength={MAX_CAT_CHARS}
+                  accessibilityLabel="Expense category name"
                 />
                 {/* Character countdown — shown right below the input */}
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -751,6 +758,8 @@ export default function ExpensesScreen() {
               keyboardType="decimal-pad"
               placeholderTextColor={colors.textTertiary}
               style={[s.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }]}
+              accessibilityLabel="Expense amount"
+              accessibilityHint="Enter amount in Naira"
             />
 
             {/* ── Date ── */}
@@ -780,6 +789,8 @@ export default function ExpensesScreen() {
                 placeholder="YYYY-MM-DD  e.g. 2026-07-20"
                 placeholderTextColor={colors.textTertiary}
                 style={[s.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }]}
+                accessibilityLabel="Custom date"
+                accessibilityHint="Enter date in format YYYY-MM-DD"
               />
             )}
 
@@ -793,16 +804,19 @@ export default function ExpensesScreen() {
               placeholderTextColor={colors.textTertiary}
               style={[s.input, { backgroundColor: colors.background, borderColor: colors.border,
                 color: colors.textPrimary, minHeight: 70, textAlignVertical: 'top' }]}
+              accessibilityLabel="Expense note"
             />
 
             <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
               <TouchableOpacity onPress={() => setModal(false)}
                 style={[s.modalBtn, { backgroundColor: colors.background, borderWidth: 1.5,
-                  borderColor: colors.border, flex: 1 }]}>
+                  borderColor: colors.border, flex: 1 }]}
+                accessibilityRole="button" accessibilityLabel="Cancel">
                 <Text style={{ color: colors.textPrimary, fontWeight: '700', fontSize: FontSize.sm }}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={handleSave} disabled={saving}
-                style={[s.modalBtn, { backgroundColor: INV, flex: 2, opacity: saving ? 0.6 : 1 }]}>
+                style={[s.modalBtn, { backgroundColor: INV, flex: 2, opacity: saving ? 0.6 : 1 }]}
+                accessibilityRole="button" accessibilityLabel="Save expense">
                 {saving
                   ? <ActivityIndicator color="#fff" size="small" />
                   : <Text style={{ color: '#fff', fontWeight: '800', fontSize: FontSize.sm }}>Save Expense</Text>

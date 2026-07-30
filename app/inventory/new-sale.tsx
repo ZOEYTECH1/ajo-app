@@ -191,11 +191,11 @@ export default function NewSaleScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 16 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Record Sale</Text>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Record Sale</Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>Select products and confirm</Text>
         </View>
       </View>
@@ -206,6 +206,8 @@ export default function NewSaleScreen() {
         <TouchableOpacity
           onPress={() => setCustomerModal(true)}
           style={[s.rowBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          accessibilityRole="button"
+          accessibilityLabel={selectedCustomer ? `Selected customer: ${selectedCustomer.name}` : 'Select a customer'}
         >
           <Ionicons name="person-outline" size={18} color={colors.textSecondary} />
           <Text style={{ flex: 1, marginLeft: 10, fontSize: FontSize.sm, color: selectedCustomer ? colors.textPrimary : colors.textTertiary }}>
@@ -218,11 +220,11 @@ export default function NewSaleScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 20, marginBottom: 10 }}>
           <Text style={[s.sectionLabel, { color: colors.textPrimary, marginTop: 0 }]}>Items</Text>
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <TouchableOpacity onPress={openScannerModal} style={[s.smallAddBtn, { backgroundColor: colors.surface, borderWidth: 1.5, borderColor: INV }]}>
+            <TouchableOpacity onPress={openScannerModal} style={[s.smallAddBtn, { backgroundColor: colors.surface, borderWidth: 1.5, borderColor: INV }]} accessibilityRole="button" accessibilityLabel="Scan barcode">
               <Ionicons name="barcode-outline" size={16} color={INV} />
               <Text style={{ color: INV, fontWeight: '700', fontSize: FontSize.xs, marginLeft: 4 }}>Scan</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setProductModal(true)} style={[s.smallAddBtn, { backgroundColor: INV }]}>
+            <TouchableOpacity onPress={() => setProductModal(true)} style={[s.smallAddBtn, { backgroundColor: INV }]} accessibilityRole="button" accessibilityLabel="Add new product">
               <Ionicons name="add" size={16} color="#fff" />
               <Text style={{ color: '#fff', fontWeight: '700', fontSize: FontSize.xs, marginLeft: 4 }}>Add Item</Text>
             </TouchableOpacity>
@@ -243,7 +245,7 @@ export default function NewSaleScreen() {
                   {ci.quantity} × ₦{ci.unit_price.toLocaleString()} = ₦{(ci.quantity * ci.unit_price).toLocaleString()}
                 </Text>
               </View>
-              <TouchableOpacity onPress={() => removeFromCart(ci.product.id)} hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+              <TouchableOpacity onPress={() => removeFromCart(ci.product.id)} hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }} accessibilityRole="button" accessibilityLabel={`Remove ${ci.product.name} from sale`}>
                 <Ionicons name="close-circle" size={22} color={colors.error ?? '#D32F2F'} />
               </TouchableOpacity>
             </View>
@@ -259,6 +261,7 @@ export default function NewSaleScreen() {
           placeholderTextColor={colors.textTertiary}
           multiline
           style={[s.notesInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.textPrimary }]}
+          accessibilityLabel="Sale notes"
         />
       </ScrollView>
 
@@ -273,6 +276,7 @@ export default function NewSaleScreen() {
           disabled={isPending || cart.length === 0}
           activeOpacity={0.85}
           style={[s.recordBtn, { backgroundColor: INV, opacity: isPending || cart.length === 0 ? 0.5 : 1 }]}
+          accessibilityRole="button" accessibilityLabel="Confirm sale" accessibilityHint="Double tap to record this sale"
         >
           {isPending ? <ActivityIndicator color="#fff" /> : <Text style={{ color: '#fff', fontWeight: '800', fontSize: FontSize.md }}>Record Sale</Text>}
         </TouchableOpacity>
@@ -284,14 +288,16 @@ export default function NewSaleScreen() {
           <View style={[s.modalBox, { backgroundColor: colors.surface }]}>
             <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary, marginBottom: 16 }}>Select Customer</Text>
             <TouchableOpacity onPress={() => { setSelectedCustomer(null); setCustomerModal(false); }}
-              style={[s.custRow, { borderBottomColor: colors.border }]}>
+              style={[s.custRow, { borderBottomColor: colors.border }]}
+              accessibilityRole="button" accessibilityLabel="Walk-in customer">
               <Ionicons name="walk-outline" size={18} color={colors.textSecondary} />
               <Text style={{ marginLeft: 10, fontSize: FontSize.sm, color: colors.textSecondary }}>Walk-in customer</Text>
             </TouchableOpacity>
             <ScrollView style={{ maxHeight: 300 }}>
               {(customers ?? []).map((c) => (
                 <TouchableOpacity key={c.id} onPress={() => { setSelectedCustomer(c); setCustomerModal(false); }}
-                  style={[s.custRow, { borderBottomColor: colors.border }]}>
+                  style={[s.custRow, { borderBottomColor: colors.border }]}
+                  accessibilityRole="button" accessibilityLabel={`Customer: ${c.name}`}>
                   <View style={[s.miniAvatar, { backgroundColor: '#FFF3E0' }]}>
                     <Text style={{ color: INV, fontWeight: '700' }}>{c.name.charAt(0).toUpperCase()}</Text>
                   </View>
@@ -302,7 +308,7 @@ export default function NewSaleScreen() {
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            <TouchableOpacity onPress={() => setCustomerModal(false)} style={[s.cancelBtn, { backgroundColor: colors.background }]}>
+            <TouchableOpacity onPress={() => setCustomerModal(false)} style={[s.cancelBtn, { backgroundColor: colors.background }]} accessibilityRole="button" accessibilityLabel="Cancel">
               <Text style={{ color: colors.textPrimary, fontWeight: '700', fontSize: FontSize.sm }}>Cancel</Text>
             </TouchableOpacity>
           </View>
@@ -320,7 +326,8 @@ export default function NewSaleScreen() {
                 <ScrollView style={{ maxHeight: 340 }}>
                   {(categories ?? []).map((cat) => (
                     <TouchableOpacity key={cat.id} onPress={() => setSelectedCatId(cat.id)}
-                      style={[s.custRow, { borderBottomColor: colors.border }]}>
+                      style={[s.custRow, { borderBottomColor: colors.border }]}
+                      accessibilityRole="button" accessibilityLabel={`Category: ${cat.name}`}>
                       <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textPrimary }}>{cat.name}</Text>
                       <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} style={{ marginLeft: 'auto' }} />
                     </TouchableOpacity>
@@ -329,7 +336,7 @@ export default function NewSaleScreen() {
               </>
             ) : (
               <>
-                <TouchableOpacity onPress={() => setSelectedCatId(null)} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                <TouchableOpacity onPress={() => setSelectedCatId(null)} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }} accessibilityRole="button" accessibilityLabel="Back to categories">
                   <Ionicons name="arrow-back" size={16} color={INV} />
                   <Text style={{ color: INV, fontSize: FontSize.sm, marginLeft: 4 }}>Back to categories</Text>
                 </TouchableOpacity>
@@ -361,7 +368,7 @@ export default function NewSaleScreen() {
                             style={[s.miniInput, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }]}
                           />
                         </View>
-                        <TouchableOpacity onPress={() => addToCart(p)} style={[s.addItemBtn, { backgroundColor: INV }]}>
+                        <TouchableOpacity onPress={() => addToCart(p)} style={[s.addItemBtn, { backgroundColor: INV }]} accessibilityRole="button" accessibilityLabel={`Add ${p.name} to sale`}>
                           <Text style={{ color: '#fff', fontWeight: '800', fontSize: FontSize.xs }}>Add</Text>
                         </TouchableOpacity>
                       </View>
@@ -371,7 +378,8 @@ export default function NewSaleScreen() {
               </>
             )}
             <TouchableOpacity onPress={() => { setProductModal(false); setSelectedCatId(null); }}
-              style={[s.cancelBtn, { backgroundColor: colors.background, marginTop: 8 }]}>
+              style={[s.cancelBtn, { backgroundColor: colors.background, marginTop: 8 }]}
+              accessibilityRole="button" accessibilityLabel="Close">
               <Text style={{ color: colors.textPrimary, fontWeight: '700', fontSize: FontSize.sm }}>Close</Text>
             </TouchableOpacity>
           </View>
@@ -432,6 +440,7 @@ export default function NewSaleScreen() {
               <TouchableOpacity
                 onPress={() => { setCompletedSale(null); router.back(); }}
                 style={[s.receiptBtn, { flex: 1, backgroundColor: colors.background, borderWidth: 1.5, borderColor: colors.border }]}
+                accessibilityRole="button" accessibilityLabel="Done"
               >
                 <Text style={{ fontWeight: '700', color: colors.textPrimary, fontSize: FontSize.sm }}>Done</Text>
               </TouchableOpacity>
@@ -441,6 +450,7 @@ export default function NewSaleScreen() {
                   Share.share({ message: buildReceiptText(completedSale, selectedBusinessName) });
                 }}
                 style={[s.receiptBtn, { flex: 2, backgroundColor: INV }]}
+                accessibilityRole="button" accessibilityLabel="Share receipt"
               >
                 <Ionicons name="share-social-outline" size={16} color="#fff" style={{ marginRight: 6 }} />
                 <Text style={{ fontWeight: '800', color: '#fff', fontSize: FontSize.sm }}>Share Receipt</Text>
@@ -465,7 +475,7 @@ export default function NewSaleScreen() {
             >
               {/* Scanner overlay */}
               <View style={s.scanOverlay}>
-                <TouchableOpacity onPress={closeScannerModal} style={s.scanCloseBtn}>
+                <TouchableOpacity onPress={closeScannerModal} style={s.scanCloseBtn} accessibilityRole="button" accessibilityLabel="Close scanner">
                   <Ionicons name="close" size={28} color="#fff" />
                 </TouchableOpacity>
                 <View style={s.scanFrame} />
@@ -505,6 +515,7 @@ export default function NewSaleScreen() {
                       onChangeText={setScanQty}
                       keyboardType="numeric"
                       style={[s.miniInput, { backgroundColor: '#F5F5F5', borderColor: '#DDD', color: '#111' }]}
+                      accessibilityLabel="Quantity"
                     />
                   </View>
                   <View style={{ flex: 2 }}>
@@ -514,6 +525,8 @@ export default function NewSaleScreen() {
                       onChangeText={setScanPrice}
                       keyboardType="decimal-pad"
                       style={[s.miniInput, { backgroundColor: '#F5F5F5', borderColor: '#DDD', color: '#111' }]}
+                      accessibilityLabel="Unit price"
+                      accessibilityHint="Enter price in Naira"
                     />
                   </View>
                 </View>
@@ -521,12 +534,14 @@ export default function NewSaleScreen() {
                   <TouchableOpacity
                     onPress={() => { setScannedProduct(null); setScanning(true); }}
                     style={[s.scanActionBtn, { backgroundColor: '#F5F5F5', flex: 1 }]}
+                    accessibilityRole="button" accessibilityLabel="Scan again"
                   >
                     <Text style={{ fontWeight: '700', color: '#333', fontSize: FontSize.sm }}>Scan Again</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={addScannedToCart}
                     style={[s.scanActionBtn, { backgroundColor: INV, flex: 2 }]}
+                    accessibilityRole="button" accessibilityLabel={`Add ${scannedProduct?.name ?? 'product'} to cart`}
                   >
                     <Ionicons name="cart" size={16} color="#fff" style={{ marginRight: 6 }} />
                     <Text style={{ fontWeight: '800', color: '#fff', fontSize: FontSize.sm }}>Add to Cart</Text>

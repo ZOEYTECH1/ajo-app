@@ -113,21 +113,22 @@ export default function SalesHistoryScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 16 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Sales History</Text>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Sales History</Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
             {(sales ?? []).length} transactions · ₦{totalRevenue.toLocaleString()} total
           </Text>
         </View>
-        <TouchableOpacity onPress={promptExport} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }} style={{ marginRight: 12 }}>
+        <TouchableOpacity onPress={promptExport} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }} style={{ marginRight: 12 }} accessibilityRole="button" accessibilityLabel="Export sales">
           <Ionicons name="download-outline" size={22} color={INV} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => router.push('/inventory/new-sale' as any)}
           style={[s.addBtn, { backgroundColor: INV }]}
+          accessibilityRole="button" accessibilityLabel="Record new sale"
         >
           <Ionicons name="add" size={20} color="#fff" />
         </TouchableOpacity>
@@ -153,6 +154,7 @@ export default function SalesHistoryScreen() {
               <TouchableOpacity
                 onPress={() => router.push('/inventory/new-sale' as any)}
                 style={[s.emptyBtn, { backgroundColor: INV }]}
+                accessibilityRole="button" accessibilityLabel="Record new sale"
               >
                 <Text style={{ color: '#fff', fontWeight: '800', fontSize: FontSize.sm }}>Record Sale</Text>
               </TouchableOpacity>
@@ -168,6 +170,8 @@ export default function SalesHistoryScreen() {
                     onPress={() => setExpanded(isOpen ? null : sale.id)}
                     activeOpacity={0.8}
                     style={s.cardTop}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Sale of ₦${Number(sale.total).toLocaleString()} on ${date.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}`}
                   >
                     <View style={[s.dateBadge, { backgroundColor: '#FFF3E0' }]}>
                       <Text style={{ fontSize: FontSize.xs, fontWeight: '800', color: INV }}>
@@ -215,6 +219,7 @@ export default function SalesHistoryScreen() {
                         onPress={() => shareReceipt(sale)}
                         style={[s.shareBtn, { borderColor: INV }]}
                         activeOpacity={0.8}
+                        accessibilityRole="button" accessibilityLabel="Share receipt via WhatsApp"
                       >
                         <Ionicons name="share-social-outline" size={16} color={INV} />
                         <Text style={{ color: INV, fontWeight: '700', fontSize: FontSize.xs, marginLeft: 6 }}>

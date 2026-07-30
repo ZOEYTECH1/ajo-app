@@ -34,8 +34,11 @@ const ReceiptModal: React.FC<{
             source={{ uri }}
             style={{ width: '100%', height: 360, borderRadius: Radius.lg }}
             resizeMode="contain"
+            accessible={true}
+            accessibilityRole="image"
+            accessibilityLabel="Payment receipt image"
           />
-          <TouchableOpacity onPress={onClose} style={{ marginTop: 16, alignItems: 'center' }}>
+          <TouchableOpacity onPress={onClose} style={{ marginTop: 16, alignItems: 'center' }} accessibilityRole="button" accessibilityLabel="Close">
             <Text style={{ color: colors.primary, fontWeight: '700', fontSize: FontSize.sm }}>Close</Text>
           </TouchableOpacity>
         </View>
@@ -66,7 +69,7 @@ const RejectModal: React.FC<{
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleCancel}>
       <Pressable style={lay.receiptOverlay} onPress={handleCancel}>
         <Pressable style={[lay.modalBox, { backgroundColor: colors.surface }]} onPress={() => {}}>
-          <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary, marginBottom: 6 }}>
+          <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary, marginBottom: 6 }} accessibilityRole="header">
             Reject payment
           </Text>
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginBottom: 16, lineHeight: 20 }}>
@@ -87,17 +90,23 @@ const RejectModal: React.FC<{
                 color: colors.textPrimary,
               },
             ]}
+            accessibilityLabel="Rejection reason"
+            accessibilityHint="Optionally describe why this payment is being rejected"
           />
           <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
             <TouchableOpacity
               onPress={handleCancel}
               style={[lay.modalBtn, { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 }]}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
             >
               <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textSecondary }}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleConfirm}
               style={[lay.modalBtn, { backgroundColor: colors.error }]}
+              accessibilityRole="button"
+              accessibilityLabel="Reject payment"
             >
               <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: '#FFF' }}>Reject</Text>
             </TouchableOpacity>
@@ -120,7 +129,7 @@ const ApproveModal: React.FC<{
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <Pressable style={lay.receiptOverlay} onPress={onCancel}>
         <Pressable style={[lay.modalBox, { backgroundColor: colors.surface }]} onPress={() => {}}>
-          <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary, marginBottom: 8 }}>
+          <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary, marginBottom: 8 }} accessibilityRole="header">
             Approve payment?
           </Text>
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, lineHeight: 20, marginBottom: 24 }}>
@@ -131,12 +140,17 @@ const ApproveModal: React.FC<{
             <TouchableOpacity
               onPress={onCancel}
               style={[lay.modalBtn, { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 }]}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
             >
               <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textSecondary }}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={onConfirm}
               style={[lay.modalBtn, { backgroundColor: colors.success ?? colors.primary }]}
+              accessibilityRole="button"
+              accessibilityLabel="Approve payment"
+              accessibilityHint="Marks this payment as confirmed"
             >
               <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: '#FFF' }}>Approve</Text>
             </TouchableOpacity>
@@ -210,6 +224,8 @@ const PaymentCard: React.FC<{
           <TouchableOpacity
             onPress={() => onViewReceipt(payment.receipt_image!)}
             style={[lay.chip, { backgroundColor: colors.primaryTint }]}
+            accessibilityRole="button"
+            accessibilityLabel="View receipt"
           >
             <Ionicons name="image-outline" size={14} color={colors.primary} />
             <Text style={{ fontSize: FontSize.xs, fontWeight: '600', color: colors.primary, marginLeft: 4 }}>
@@ -222,6 +238,9 @@ const PaymentCard: React.FC<{
             <TouchableOpacity
               onPress={() => onApprove(payment)}
               style={[lay.chip, { backgroundColor: colors.successLight }]}
+              accessibilityRole="button"
+              accessibilityLabel="Approve payment"
+              accessibilityHint="Marks this payment as confirmed"
             >
               <Ionicons name="checkmark" size={14} color={colors.successDark} />
               <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.successDark, marginLeft: 4 }}>
@@ -231,6 +250,8 @@ const PaymentCard: React.FC<{
             <TouchableOpacity
               onPress={() => onReject(payment)}
               style={[lay.chip, { backgroundColor: colors.errorLight }]}
+              accessibilityRole="button"
+              accessibilityLabel="Reject payment"
             >
               <Ionicons name="close" size={14} color={colors.errorDark} />
               <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.errorDark, marginLeft: 4 }}>
@@ -321,10 +342,10 @@ export default function PaymentsRoute() {
 
       {/* Header */}
       <View style={[lay.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Payments</Text>
+        <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Payments</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -337,6 +358,9 @@ export default function PaymentsRoute() {
               key={f.key}
               onPress={() => { setFilter(f.key); feedback('light'); }}
               style={[lay.filterTab, { borderBottomColor: active ? colors.primary : 'transparent' }]}
+              accessibilityRole="button"
+              accessibilityLabel={`Filter: ${f.label}`}
+              accessibilityState={{ selected: active }}
             >
               <Text style={{ fontSize: FontSize.xs, fontWeight: active ? '700' : '500', color: active ? colors.primary : colors.textSecondary }}>
                 {f.label}

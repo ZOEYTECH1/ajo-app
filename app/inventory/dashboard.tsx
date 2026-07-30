@@ -46,25 +46,25 @@ export default function InventoryDashboardScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 16 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Daily Dashboard</Text>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Daily Dashboard</Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>P&L · Stock · Alerts</Text>
         </View>
       </View>
 
       {/* Date nav */}
       <View style={[s.dateNav, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={goBack} style={s.navArrow} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={goBack} style={s.navArrow} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Previous day">
           <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary, textAlign: 'center', flex: 1 }}>
           {formatDate(date)}
         </Text>
         <TouchableOpacity onPress={goForward} style={[s.navArrow, { opacity: isToday ? 0.3 : 1 }]} disabled={isToday}
-          hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+          hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Next day">
           <Ionicons name="chevron-forward" size={22} color={colors.textPrimary} />
         </TouchableOpacity>
       </View>
@@ -85,7 +85,8 @@ export default function InventoryDashboardScreen() {
             <StatCard label="Revenue" value={`₦${Number(data?.revenue ?? 0).toLocaleString()}`} icon="trending-up-outline" bg="#E8F5E9" iconColor="#2E7D32" colors={colors} />
             <StatCard label="Expenses" value={`₦${Number(data?.expenses ?? 0).toLocaleString()}`} icon="trending-down-outline" bg="#FFEBEE" iconColor="#C62828" colors={colors} />
           </View>
-          <View style={[s.profitCard, { backgroundColor: profit >= 0 ? '#E8F5E9' : '#FFEBEE', ...Shadow.card(colors.black) }]}>
+          <View style={[s.profitCard, { backgroundColor: profit >= 0 ? '#E8F5E9' : '#FFEBEE', ...Shadow.card(colors.black) }]}
+            accessible={true} accessibilityLabel={`Net Profit: ${profit >= 0 ? '+' : ''}₦${Math.abs(profit).toLocaleString()}`} accessibilityRole="text">
             <Text style={{ fontSize: FontSize.sm, color: profitColor, fontWeight: '600' }}>Net Profit</Text>
             <Text style={{ fontSize: 28, fontWeight: '900', color: profitColor, marginTop: 4 }}>
               {profit >= 0 ? '+' : ''}₦{Math.abs(profit).toLocaleString()}
@@ -106,8 +107,9 @@ export default function InventoryDashboardScreen() {
                 Low Stock Alerts <Text style={{ color: '#C62828' }}>({data!.low_stock_items.length})</Text>
               </Text>
               {data!.low_stock_items.map((item) => (
-                <View key={item.id} style={[s.alertCard, { backgroundColor: '#FFF3E0', ...Shadow.card(colors.black) }]}>
-                  <Ionicons name="warning-outline" size={18} color={INV} />
+                <View key={item.id} style={[s.alertCard, { backgroundColor: '#FFF3E0', ...Shadow.card(colors.black) }]}
+                  accessible={true} accessibilityLabel={`${item.name}: low stock, ${item.quantity} remaining`} accessibilityRole="text">
+                  <Ionicons name="warning-outline" size={18} color={INV} accessible={false} importantForAccessibility="no" />
                   <View style={{ flex: 1, marginLeft: 10 }}>
                     <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }}>{item.name}</Text>
                     <Text style={{ fontSize: FontSize.xs, color: INV, marginTop: 2 }}>Only {item.quantity} left in stock</Text>
@@ -183,8 +185,8 @@ export default function InventoryDashboardScreen() {
 
 function StatCard({ label, value, icon, bg, iconColor, colors }: any) {
   return (
-    <View style={[s.statCard, { backgroundColor: bg, flex: 1 }]}>
-      <Ionicons name={icon} size={20} color={iconColor} />
+    <View style={[s.statCard, { backgroundColor: bg, flex: 1 }]} accessible={true} accessibilityLabel={`${label}: ${value}`} accessibilityRole="text">
+      <Ionicons name={icon} size={20} color={iconColor} accessible={false} importantForAccessibility="no" />
       <Text style={{ fontSize: FontSize.xs, color: '#555', marginTop: 6 }}>{label}</Text>
       <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: '#111', marginTop: 2 }}>{value}</Text>
     </View>
@@ -194,7 +196,8 @@ function StatCard({ label, value, icon, bg, iconColor, colors }: any) {
 function QuickLink({ icon, label, onPress, colors }: any) {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}
-      style={[s.quickLink, { backgroundColor: colors.surface, ...Shadow.card(colors.black), flex: 1 }]}>
+      style={[s.quickLink, { backgroundColor: colors.surface, ...Shadow.card(colors.black), flex: 1 }]}
+      accessibilityRole="button" accessibilityLabel={label}>
       <Ionicons name={icon} size={22} color={INV} />
       <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.textPrimary, marginTop: 6, textAlign: 'center' }}>{label}</Text>
     </TouchableOpacity>

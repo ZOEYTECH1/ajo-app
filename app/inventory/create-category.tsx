@@ -59,11 +59,11 @@ export default function CreateCategoryScreen() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ marginLeft: 16 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">
             What do you sell?
           </Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
@@ -93,15 +93,17 @@ export default function CreateCategoryScreen() {
             placeholderTextColor={colors.textTertiary}
             autoFocus
             style={[s.textInput, { backgroundColor: colors.surface, borderColor: '#E65100', color: colors.textPrimary }]}
+            accessibilityLabel="Category name"
           />
           <TouchableOpacity
             onPress={saveCustom}
             style={[s.bigBtn, { backgroundColor: '#E65100' }]}
             activeOpacity={0.85}
+            accessibilityRole="button" accessibilityLabel="Add new category"
           >
             <Text style={{ color: '#fff', fontWeight: '800', fontSize: FontSize.md }}>Continue →</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setShowCustom(false)} style={{ marginTop: 16, alignItems: 'center' }}>
+          <TouchableOpacity onPress={() => setShowCustom(false)} style={{ marginTop: 16, alignItems: 'center' }} accessibilityRole="button" accessibilityLabel="Go back to categories">
             <Text style={{ color: colors.textSecondary, fontSize: FontSize.sm }}>← Go back</Text>
           </TouchableOpacity>
         </View>
@@ -114,6 +116,7 @@ export default function CreateCategoryScreen() {
               onPress={() => pick(label)}
               style={[s.tile, { backgroundColor: colors.surface, ...Shadow.card(colors.black) }]}
               activeOpacity={0.78}
+              accessibilityRole="button" accessibilityLabel={`Add new category: ${label}`}
             >
               <Text style={s.tileEmoji}>{emoji}</Text>
               <Text style={[s.tileLabel, { color: colors.textPrimary }]} numberOfLines={2}>

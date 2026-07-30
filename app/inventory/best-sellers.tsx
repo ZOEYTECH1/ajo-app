@@ -32,11 +32,11 @@ export default function BestSellersScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 16 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Best Sellers</Text>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Best Sellers</Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>Top products by units sold</Text>
         </View>
       </View>
@@ -48,6 +48,9 @@ export default function BestSellersScreen() {
             key={p.days}
             onPress={() => setDays(p.days)}
             style={[s.tab, days === p.days && { borderBottomColor: INV, borderBottomWidth: 2 }]}
+            accessibilityRole="tab"
+            accessibilityLabel={`${p.label} period`}
+            accessibilityState={{ selected: days === p.days }}
           >
             <Text style={{ fontSize: FontSize.sm, fontWeight: days === p.days ? '700' : '400', color: days === p.days ? INV : colors.textSecondary }}>
               {p.label}

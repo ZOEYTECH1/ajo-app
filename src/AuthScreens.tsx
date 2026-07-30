@@ -23,7 +23,7 @@ WebBrowser.maybeCompleteAuthSession();
 const SmallLogo = () => {
   const { colors } = useTheme();
   return (
-    <View style={{ alignItems: 'center', marginBottom: 12 }}>
+    <View style={{ alignItems: 'center', marginBottom: 12 }} accessible={true} accessibilityLabel="Ajo logo" accessibilityRole="image">
       <Svg width={56} height={60} viewBox="0 0 220 240">
         <Path
           d="M110 12 L196 42 L196 118 C196 162 154 195 110 215 C66 195 24 162 24 118 L24 42 Z"
@@ -52,7 +52,7 @@ const AuthHeader: React.FC<{ title: string; subtitle: string; showLogo?: boolean
   return (
     <View style={layout.authHeader}>
       {showLogo && <SmallLogo />}
-      <Text style={{ fontSize: FontSize.xxl, fontWeight: '800', color: colors.primary, textAlign: 'center', marginBottom: 8, letterSpacing: -0.3 }}>
+      <Text accessibilityRole="header" style={{ fontSize: FontSize.xxl, fontWeight: '800', color: colors.primary, textAlign: 'center', marginBottom: 8, letterSpacing: -0.3 }}>
         {title}
       </Text>
       <Text style={{ fontSize: FontSize.base, color: colors.textSecondary, textAlign: 'center', lineHeight: 22 }}>
@@ -214,7 +214,7 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
         <AuthHeader title="Create account" subtitle="Join Ajo — your circle, your record." />
 
         {serverError ? (
-          <View style={[layout.errorBanner, { backgroundColor: colors.errorLight, borderLeftColor: colors.error }]}>
+          <View style={[layout.errorBanner, { backgroundColor: colors.errorLight, borderLeftColor: colors.error }]} accessibilityRole="alert" accessibilityLiveRegion="assertive">
             <Text style={{ color: colors.error, fontSize: FontSize.sm, fontWeight: '500' }}>⚠️  {serverError}</Text>
           </View>
         ) : null}
@@ -224,24 +224,33 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
           label="Full Name" placeholder="Ada Okonkwo" value={form.name}
           onChangeText={(v) => setForm({ ...form, name: v })} error={errors.name}
           autoCapitalize="words" leftIcon={<Ionicons name="person-outline" size={18} color={colors.primary} />}
+          accessibilityLabel="Full name"
         />
         <Input
           label="Email Address" placeholder="ada@email.com" value={form.email}
           onChangeText={(v) => setForm({ ...form, email: v })} error={errors.email}
           keyboardType="email-address" autoCapitalize="none"
           leftIcon={<Ionicons name="mail-outline" size={18} color={colors.primary} />}
+          accessibilityLabel="Email address"
         />
         <Input
           label="Phone Number" placeholder="+234 800 000 0000" value={form.phone}
           onChangeText={(v) => setForm({ ...form, phone: v })} error={errors.phone}
           keyboardType="phone-pad" leftIcon={<Ionicons name="call-outline" size={18} color={colors.primary} />}
+          accessibilityLabel="Phone number" accessibilityHint="Enter your 11-digit Nigerian phone number"
         />
         <Input
           label="Password" placeholder="Minimum 8 characters" value={form.password}
           onChangeText={(v) => setForm({ ...form, password: v })} error={errors.password}
           secureTextEntry={!showPass} leftIcon={<Ionicons name="lock-closed-outline" size={18} color={colors.primary} />}
+          accessibilityLabel="Password" accessibilityHint="Minimum 8 characters"
           rightIcon={
-            <TouchableOpacity onPress={() => { feedback('light'); setShowPass(!showPass); }}>
+            <TouchableOpacity
+              onPress={() => { feedback('light'); setShowPass(!showPass); }}
+              accessibilityRole="button"
+              accessibilityLabel={showPass ? 'Hide password' : 'Show password'}
+              accessibilityState={{ checked: showPass }}
+            >
               <Ionicons name={showPass ? "eye-off-outline" : "eye-outline"} size={20} color={colors.textSecondary} />
             </TouchableOpacity>
           }
@@ -250,6 +259,7 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
           label="Confirm Password" placeholder="Repeat your password" value={form.confirm}
           onChangeText={(v) => setForm({ ...form, confirm: v })} error={errors.confirm}
           secureTextEntry={!showPass} leftIcon={<Ionicons name="lock-closed-outline" size={18} color={colors.primary} />}
+          accessibilityLabel="Confirm password"
         />
 
         <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, textAlign: 'center', lineHeight: 18, marginBottom: 20, marginTop: 4 }}>
@@ -273,6 +283,8 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
             googlePromptAsync();
           }}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Sign in with Google"
         >
           <MaterialCommunityIcons name="google" size={20} color="#DB4437" />
           <Text style={{ fontSize: FontSize.base, fontWeight: '600', color: colors.textPrimary, marginLeft: 10 }}>
@@ -280,7 +292,7 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
           </Text>
         </TouchableOpacity>
 
-        <Bouncy onPress={onLogin} style={[layout.switchRow, { marginTop: 20 }]}>
+        <Bouncy onPress={onLogin} style={[layout.switchRow, { marginTop: 20 }]} accessibilityRole="link" accessibilityLabel="Go to login">
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, textAlign: 'center' }}>
             Already have an account?{' '}
             <Text style={{ color: colors.primary, fontWeight: '700' }}>Log in</Text>
@@ -407,7 +419,7 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
         <AuthHeader title="Welcome back" subtitle="Log in to your Ajo account." />
 
         {serverError ? (
-          <View style={[layout.errorBanner, { backgroundColor: colors.errorLight, borderLeftColor: colors.error }]}>
+          <View style={[layout.errorBanner, { backgroundColor: colors.errorLight, borderLeftColor: colors.error }]} accessibilityRole="alert" accessibilityLiveRegion="assertive">
             <Text style={{ color: colors.error, fontSize: FontSize.sm, fontWeight: '500' }}>⚠️  {serverError}</Text>
           </View>
         ) : null}
@@ -417,23 +429,30 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
           onChangeText={(v) => setForm({ ...form, email: v })}
           keyboardType="email-address" autoCapitalize="none"
           leftIcon={<Ionicons name="mail-outline" size={18} color={colors.primary} />}
+          accessibilityLabel="Email address"
         />
         <Input
           label="Password" placeholder="Your password" value={form.password}
           onChangeText={(v) => setForm({ ...form, password: v })}
           secureTextEntry={!showPass} leftIcon={<Ionicons name="lock-closed-outline" size={18} color={colors.primary} />}
+          accessibilityLabel="Password"
           rightIcon={
-            <TouchableOpacity onPress={() => { feedback('light'); setShowPass(!showPass); }}>
+            <TouchableOpacity
+              onPress={() => { feedback('light'); setShowPass(!showPass); }}
+              accessibilityRole="button"
+              accessibilityLabel={showPass ? 'Hide password' : 'Show password'}
+              accessibilityState={{ checked: showPass }}
+            >
               <Ionicons name={showPass ? "eye-off-outline" : "eye-outline"} size={20} color={colors.textSecondary} />
             </TouchableOpacity>
           }
         />
 
-        <Bouncy onPress={onForgot} style={{ alignSelf: 'flex-end', marginTop: -8, marginBottom: 20 }}>
+        <Bouncy onPress={onForgot} style={{ alignSelf: 'flex-end', marginTop: -8, marginBottom: 20 }} accessibilityRole="button" accessibilityLabel="Forgot password" accessibilityHint="Double tap to reset your password">
           <Text style={{ color: colors.primary, fontWeight: '600' }}>Forgot password?</Text>
         </Bouncy>
 
-        <Button label="Log In" onPress={handleLogin} loading={loading} />
+        <Button label="Log In" onPress={handleLogin} loading={loading} accessibilityHint="Double tap to log in" />
 
         <Divider label="or" />
 
@@ -448,6 +467,8 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
             googlePromptAsync();
           }}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Sign in with Google"
         >
           <MaterialCommunityIcons name="google" size={20} color="#DB4437" />
           <Text style={{ fontSize: FontSize.base, fontWeight: '600', color: colors.textPrimary, marginLeft: 10 }}>
@@ -455,7 +476,7 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
           </Text>
         </TouchableOpacity>
 
-        <Bouncy onPress={onRegister} style={[layout.switchRow, { marginTop: 20 }]}>
+        <Bouncy onPress={onRegister} style={[layout.switchRow, { marginTop: 20 }]} accessibilityRole="link" accessibilityLabel="Go to register">
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, textAlign: 'center' }}>
             Don't have an account?{' '}
             <Text style={{ color: colors.primary, fontWeight: '700' }}>Sign up</Text>
@@ -593,7 +614,7 @@ export const OTPScreen: React.FC<OTPProps> = ({ email, phone_number, onSuccess, 
       <LoadingOverlay visible={loading || switching} message={switching ? 'Sending code…' : 'Verifying…'} />
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
 
-      <Bouncy onPress={onBack} style={layout.backBtn}>
+      <Bouncy onPress={onBack} style={layout.backBtn} accessibilityRole="button" accessibilityLabel="Go back">
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Ionicons name="arrow-back" size={24} color={colors.primary} />
           <Text style={{ color: colors.primary, fontSize: FontSize.base, fontWeight: '600', marginLeft: 4 }}>Back</Text>
@@ -620,6 +641,9 @@ export const OTPScreen: React.FC<OTPProps> = ({ email, phone_number, onSuccess, 
               },
             ]}
             disabled={switching}
+            accessibilityRole="button"
+            accessibilityLabel="Receive code via email"
+            accessibilityState={{ selected: channel === 'email' }}
           >
             <Ionicons
               name="mail-outline"
@@ -674,22 +698,23 @@ export const OTPScreen: React.FC<OTPProps> = ({ email, phone_number, onSuccess, 
         </View>
 
         {error ? (
-          <View style={[layout.errorBanner, { backgroundColor: colors.errorLight, borderLeftColor: colors.error }]}>
+          <View style={[layout.errorBanner, { backgroundColor: colors.errorLight, borderLeftColor: colors.error }]} accessibilityRole="alert" accessibilityLiveRegion="assertive">
             <Text style={{ color: colors.error, fontSize: FontSize.sm, fontWeight: '500' }}>⚠️  {error}</Text>
           </View>
         ) : null}
 
         {/* ── OTP boxes ── */}
-        <View style={layout.otpRow}>
+        <View style={layout.otpRow} accessibilityLiveRegion="polite">
           {otp.map((digit, idx) => (
             <View key={idx} style={{ position: 'relative' }}>
-              <OTPBox value={digit} focused={focusIdx === idx} />
+              <OTPBox value={digit} focused={focusIdx === idx} index={idx} total={6} />
               <TextInput
                 ref={(r) => { inputs.current[idx] = r; }}
                 style={layout.hiddenInput} value={digit}
                 onChangeText={(v) => handleChange(v, idx)}
                 onFocus={() => { feedback('light'); setFocusIdx(idx); }}
                 keyboardType="numeric" maxLength={1} caretHidden
+                accessibilityLabel={`OTP digit ${idx + 1} of 6`}
               />
             </View>
           ))}
@@ -703,7 +728,7 @@ export const OTPScreen: React.FC<OTPProps> = ({ email, phone_number, onSuccess, 
           style={{ marginTop: 32, marginBottom: 20 }}
         />
 
-        <Bouncy onPress={handleResend} disabled={timer > 0} style={layout.switchRow}>
+        <Bouncy onPress={handleResend} disabled={timer > 0} style={layout.switchRow} accessibilityRole="button" accessibilityLabel={timer > 0 ? `Resend code in 0:${timer.toString().padStart(2, '0')}` : 'Resend code'} accessibilityState={{ disabled: timer > 0 }}>
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, textAlign: 'center' }}>
             {timer > 0
               ? `Resend code in 0:${timer.toString().padStart(2, '0')}`
@@ -751,7 +776,7 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.background }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
-      <TouchableOpacity style={layout.backBtn} onPress={onBack}>
+      <TouchableOpacity style={layout.backBtn} onPress={onBack} accessibilityRole="button" accessibilityLabel="Go back">
         <Text style={{ color: colors.primary, fontSize: FontSize.base, fontWeight: '600' }}>← Back</Text>
       </TouchableOpacity>
       <ScrollView
@@ -771,7 +796,7 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) 
         {!sent ? (
           <>
             {!!error && (
-              <View style={[layout.errorBanner, { backgroundColor: colors.errorLight, borderLeftColor: colors.error }]}>
+              <View style={[layout.errorBanner, { backgroundColor: colors.errorLight, borderLeftColor: colors.error }]} accessibilityRole="alert" accessibilityLiveRegion="assertive">
                 <Text style={{ color: colors.error, fontSize: FontSize.sm, fontWeight: '500' }}>{error}</Text>
               </View>
             )}
@@ -783,8 +808,9 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) 
               autoCapitalize="none"
               placeholder="you@example.com"
               leftIcon={<Ionicons name="mail-outline" size={18} color={colors.textDisabled} />}
+              accessibilityLabel="Email address"
             />
-            <Button label="Send Code" onPress={handleSubmit} loading={loading} style={{ marginTop: 8 }} />
+            <Button label="Send Code" onPress={handleSubmit} loading={loading} style={{ marginTop: 8 }} accessibilityHint="Double tap to send a reset code" />
           </>
         ) : (
           <View style={{ alignItems: 'center', paddingTop: 12 }}>

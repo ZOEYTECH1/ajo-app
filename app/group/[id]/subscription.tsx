@@ -48,6 +48,9 @@ function CycleChip({
           borderColor:     selected ? colors.primary : colors.border,
         },
       ]}
+      accessibilityRole="radio"
+      accessibilityLabel={label}
+      accessibilityState={{ checked: selected }}
     >
       <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: selected ? '#fff' : colors.textPrimary }}>
         {label}
@@ -171,10 +174,10 @@ export default function SubscriptionRoute() {
 
       {/* Header */}
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>
+        <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">
           Platform Fee
         </Text>
         <View style={{ width: 24 }} />

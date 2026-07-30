@@ -123,10 +123,10 @@ export default function CreateThriftRoute() {
 
       {/* Header */}
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>New Contribution Group</Text>
+        <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">New Contribution Group</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -157,6 +157,9 @@ export default function CreateThriftRoute() {
           return (
             <TouchableOpacity key={f.value} onPress={() => setFrequency(f.value)} activeOpacity={0.8}
               style={[s.optionRow, { backgroundColor: active ? colors.successLight : colors.surface, borderColor: active ? colors.success : colors.border, ...Shadow.card(colors.black) }]}
+              accessibilityRole="radio"
+              accessibilityLabel={`${f.label}: ${f.desc}`}
+              accessibilityState={{ checked: active }}
             >
               <View style={[s.dot, { backgroundColor: active ? colors.success : colors.border }]} />
               <View style={{ flex: 1, marginLeft: 12 }}>
@@ -174,6 +177,9 @@ export default function CreateThriftRoute() {
           return (
             <TouchableOpacity key={c.value} onPress={() => setCycleType(c.value)} activeOpacity={0.8}
               style={[s.optionRow, { backgroundColor: active ? colors.primaryTint : colors.surface, borderColor: active ? colors.primary : colors.border, ...Shadow.card(colors.black) }]}
+              accessibilityRole="radio"
+              accessibilityLabel={`${c.label}: ${c.desc}`}
+              accessibilityState={{ checked: active }}
             >
               <Ionicons name={c.icon as any} size={20} color={active ? colors.primary : colors.textSecondary} />
               <View style={{ flex: 1, marginLeft: 12 }}>
@@ -238,6 +244,9 @@ export default function CreateThriftRoute() {
               }}
               activeOpacity={0.8}
               style={[s.optionRow, { backgroundColor: active ? colors.primaryTint : colors.surface, borderColor: active ? colors.primary : colors.border, ...Shadow.card(colors.black) }]}
+              accessibilityRole="radio"
+              accessibilityLabel={org.name}
+              accessibilityState={{ checked: active }}
             >
               <View style={[s.orgIcon, { backgroundColor: active ? colors.primary : colors.border }]}>
                 <Ionicons name="business-outline" size={14} color={colors.white} />
@@ -278,7 +287,7 @@ export default function CreateThriftRoute() {
         )}
 
         {errors.general ? (
-          <Text style={{ color: colors.error, fontSize: FontSize.sm, marginTop: 12, textAlign: 'center' }}>{errors.general}</Text>
+          <Text style={{ color: colors.error, fontSize: FontSize.sm, marginTop: 12, textAlign: 'center' }} accessibilityRole="alert" accessibilityLiveRegion="assertive">{errors.general}</Text>
         ) : null}
 
         <View style={{ height: 1, backgroundColor: colors.border, marginTop: 24, marginBottom: 20 }} />

@@ -80,11 +80,11 @@ export default function AnalyticsScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 16 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Revenue Analytics</Text>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Revenue Analytics</Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>Revenue vs Expenses over time</Text>
         </View>
       </View>
@@ -96,6 +96,9 @@ export default function AnalyticsScreen() {
             key={t.period}
             onPress={() => setTab(i)}
             style={[s.tab, tab === i && { borderBottomColor: INV, borderBottomWidth: 2 }]}
+            accessibilityRole="tab"
+            accessibilityLabel={`${t.label} period`}
+            accessibilityState={{ selected: tab === i }}
           >
             <Text style={{ fontSize: FontSize.sm, fontWeight: tab === i ? '700' : '400', color: tab === i ? INV : colors.textSecondary }}>
               {t.label}
@@ -116,19 +119,19 @@ export default function AnalyticsScreen() {
         >
           {/* Summary cards */}
           <View style={s.statsRow}>
-            <View style={[s.statBox, { backgroundColor: '#E8F5E9' }]}>
+            <View style={[s.statBox, { backgroundColor: '#E8F5E9' }]} accessible={true} accessibilityLabel={`Revenue: ₦${totalRevenue.toLocaleString()}`} accessibilityRole="text">
               <Text style={{ fontSize: FontSize.xs, color: '#2E7D32' }}>Revenue</Text>
               <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: '#2E7D32', marginTop: 2 }}>
                 ₦{totalRevenue.toLocaleString()}
               </Text>
             </View>
-            <View style={[s.statBox, { backgroundColor: '#FFEBEE' }]}>
+            <View style={[s.statBox, { backgroundColor: '#FFEBEE' }]} accessible={true} accessibilityLabel={`Expenses: ₦${totalExpense.toLocaleString()}`} accessibilityRole="text">
               <Text style={{ fontSize: FontSize.xs, color: '#C62828' }}>Expenses</Text>
               <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: '#C62828', marginTop: 2 }}>
                 ₦{totalExpense.toLocaleString()}
               </Text>
             </View>
-            <View style={[s.statBox, { backgroundColor: totalProfit >= 0 ? '#E8F5E9' : '#FFEBEE' }]}>
+            <View style={[s.statBox, { backgroundColor: totalProfit >= 0 ? '#E8F5E9' : '#FFEBEE' }]} accessible={true} accessibilityLabel={`Profit: ${totalProfit >= 0 ? '+' : ''}₦${Math.abs(totalProfit).toLocaleString()}`} accessibilityRole="text">
               <Text style={{ fontSize: FontSize.xs, color: profitColor }}>Profit</Text>
               <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: profitColor, marginTop: 2 }}>
                 {totalProfit >= 0 ? '+' : ''}₦{Math.abs(totalProfit).toLocaleString()}

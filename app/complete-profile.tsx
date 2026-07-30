@@ -97,10 +97,10 @@ export default function CompleteProfileRoute() {
 
         {/* Header */}
         <View style={{ alignItems: 'center', marginBottom: 36 }}>
-          <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: colors.primaryTint, alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+          <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: colors.primaryTint, alignItems: 'center', justifyContent: 'center', marginBottom: 20 }} accessible={false} importantForAccessibility="no">
             <Ionicons name={step === 'phone' ? 'call-outline' : 'shield-checkmark-outline'} size={28} color={colors.primary} />
           </View>
-          <Text style={{ fontSize: FontSize.xxl, fontWeight: '800', color: colors.primary, textAlign: 'center', letterSpacing: -0.3 }}>
+          <Text accessibilityRole="header" style={{ fontSize: FontSize.xxl, fontWeight: '800', color: colors.primary, textAlign: 'center', letterSpacing: -0.3 }}>
             {step === 'phone' ? 'Add Your Phone' : 'Verify Your Phone'}
           </Text>
           <Text style={{ fontSize: FontSize.base, color: colors.textSecondary, textAlign: 'center', marginTop: 8, lineHeight: 22 }}>
@@ -112,7 +112,7 @@ export default function CompleteProfileRoute() {
 
         {/* Error banner */}
         {!!error && (
-          <View style={{ borderRadius: Radius.md, padding: 14, marginBottom: 16, borderLeftWidth: 3, backgroundColor: colors.errorLight, borderLeftColor: colors.error }}>
+          <View style={{ borderRadius: Radius.md, padding: 14, marginBottom: 16, borderLeftWidth: 3, backgroundColor: colors.errorLight, borderLeftColor: colors.error }} accessibilityRole="alert" accessibilityLiveRegion="assertive">
             <Text style={{ color: colors.error, fontSize: FontSize.sm, fontWeight: '500' }}>⚠️  {error}</Text>
           </View>
         )}
@@ -126,15 +126,17 @@ export default function CompleteProfileRoute() {
               onChangeText={(v) => { setPhone(v); setError(''); }}
               keyboardType="phone-pad"
               leftIcon={<Ionicons name="call-outline" size={18} color={colors.primary} />}
+              accessibilityLabel="Phone number"
+              accessibilityHint="Enter your 11-digit Nigerian phone number"
             />
-            <Button label="Send Verification Code" onPress={handleSetPhone} loading={loading} style={{ marginTop: 8 }} />
+            <Button label="Send Verification Code" onPress={handleSetPhone} loading={loading} style={{ marginTop: 8 }} accessibilityHint="Double tap to send a verification code" />
           </>
         ) : (
           <>
             {/* OTP boxes */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4, marginBottom: 24 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4, marginBottom: 24 }} accessibilityLiveRegion="polite">
               {Array.from({ length: 6 }).map((_, i) => (
-                <OTPBox key={i} value={otp[i] ?? ''} focused={otp.length === i} />
+                <OTPBox key={i} value={otp[i] ?? ''} focused={otp.length === i} index={i} total={6} />
               ))}
             </View>
 
@@ -143,6 +145,8 @@ export default function CompleteProfileRoute() {
               activeOpacity={1}
               onPress={() => {}}
               style={{ position: 'absolute', opacity: 0, width: 1, height: 1 }}
+              accessible={false}
+              importantForAccessibility="no"
             />
 
             <Input
@@ -153,18 +157,19 @@ export default function CompleteProfileRoute() {
               keyboardType="number-pad"
               maxLength={6}
               leftIcon={<Ionicons name="keypad-outline" size={18} color={colors.primary} />}
+              accessibilityLabel="6-digit verification code"
             />
 
-            <Button label="Verify Phone" onPress={handleVerifyOtp} loading={loading} style={{ marginTop: 8 }} />
+            <Button label="Verify Phone" onPress={handleVerifyOtp} loading={loading} style={{ marginTop: 8 }} accessibilityHint="Double tap to verify your phone number" />
 
-            <Bouncy onPress={handleResend} style={{ alignItems: 'center', marginTop: 20 }}>
+            <Bouncy onPress={handleResend} style={{ alignItems: 'center', marginTop: 20 }} accessibilityRole="button" accessibilityLabel="Resend verification code">
               <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary }}>
                 Didn't receive a code?{' '}
                 <Text style={{ color: colors.primary, fontWeight: '700' }}>Resend</Text>
               </Text>
             </Bouncy>
 
-            <Bouncy onPress={() => { setStep('phone'); setOtp(''); setError(''); }} style={{ alignItems: 'center', marginTop: 12 }}>
+            <Bouncy onPress={() => { setStep('phone'); setOtp(''); setError(''); }} style={{ alignItems: 'center', marginTop: 12 }} accessibilityRole="button" accessibilityLabel="Change phone number">
               <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary }}>
                 Wrong number?{' '}
                 <Text style={{ color: colors.primary, fontWeight: '700' }}>Change it</Text>

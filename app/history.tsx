@@ -32,12 +32,15 @@ function TopTabBar({ active, showAjo, showThrift, onChange }: {
   const { colors } = useTheme();
   if (!showAjo || !showThrift) return null; // only render when user has both
   return (
-    <View style={[ts.topTabRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+    <View accessibilityRole="tablist" style={[ts.topTabRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
       {showAjo && (
         <TouchableOpacity
           style={[ts.topTab, { borderBottomColor: active === 'ajo' ? colors.primary : 'transparent' }]}
           onPress={() => onChange('ajo')}
           activeOpacity={0.7}
+          accessibilityRole="tab"
+          accessibilityLabel="Ajo tab"
+          accessibilityState={{ selected: active === 'ajo' }}
         >
           <Text style={[ts.topTabLabel, { color: active === 'ajo' ? colors.primary : colors.textSecondary }]}>
             Ajo
@@ -49,6 +52,9 @@ function TopTabBar({ active, showAjo, showThrift, onChange }: {
           style={[ts.topTab, { borderBottomColor: active === 'thrift' ? colors.success : 'transparent' }]}
           onPress={() => onChange('thrift')}
           activeOpacity={0.7}
+          accessibilityRole="tab"
+          accessibilityLabel="Contributions tab"
+          accessibilityState={{ selected: active === 'thrift' }}
         >
           <Text style={[ts.topTabLabel, { color: active === 'thrift' ? colors.success : colors.textSecondary }]}>
             Contributions
@@ -67,7 +73,7 @@ function FilterRow({ filter, counts, onChange }: {
 }) {
   const { colors } = useTheme();
   return (
-    <View style={[ts.filterRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+    <View accessibilityRole="tablist" style={[ts.filterRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
       {(['all', 'pending', 'approved', 'rejected'] as AjoFilter[]).map((f) => {
         const active = filter === f;
         return (
@@ -75,6 +81,9 @@ function FilterRow({ filter, counts, onChange }: {
             key={f}
             onPress={() => onChange(f)}
             activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel={`${f.charAt(0).toUpperCase() + f.slice(1)} filter`}
+            accessibilityState={{ selected: active }}
             style={[ts.filterTab, { borderBottomColor: active ? colors.primary : 'transparent' }]}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
@@ -105,12 +114,15 @@ function ThriftRoleBar({ active, showCollector, showPayer, onChange }: {
   const { colors } = useTheme();
   if (!showCollector || !showPayer) return null;
   return (
-    <View style={[ts.filterRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+    <View accessibilityRole="tablist" style={[ts.filterRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
       {showCollector && (
         <TouchableOpacity
           style={[ts.filterTab, { borderBottomColor: active === 'collector' ? colors.success : 'transparent' }]}
           onPress={() => onChange('collector')}
           activeOpacity={0.7}
+          accessibilityRole="tab"
+          accessibilityLabel="As Collector tab"
+          accessibilityState={{ selected: active === 'collector' }}
         >
           <Text style={[ts.filterLabel, { color: active === 'collector' ? colors.success : colors.textSecondary, fontWeight: active === 'collector' ? '700' : '500' }]}>
             As Collector
@@ -122,6 +134,9 @@ function ThriftRoleBar({ active, showCollector, showPayer, onChange }: {
           style={[ts.filterTab, { borderBottomColor: active === 'payer' ? colors.success : 'transparent' }]}
           onPress={() => onChange('payer')}
           activeOpacity={0.7}
+          accessibilityRole="tab"
+          accessibilityLabel="My Payments tab"
+          accessibilityState={{ selected: active === 'payer' }}
         >
           <Text style={[ts.filterLabel, { color: active === 'payer' ? colors.success : colors.textSecondary, fontWeight: active === 'payer' ? '700' : '500' }]}>
             My Payments
@@ -141,6 +156,8 @@ function AjoPaymentCard({ payment, onPress }: { payment: Payment; onPress: () =>
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
+      accessibilityRole="button"
+      accessibilityLabel={`Payment of ${fmtAmt(payment.amount_entered)} to ${payment.group_name}, status ${payment.status}, submitted ${fmtDate(payment.submitted_at)}`}
       style={[ts.card, { backgroundColor: colors.surface, ...Shadow.soft(colors.black) }]}
     >
       <View style={ts.cardTop}>
@@ -337,7 +354,7 @@ export default function HistoryRoute() {
       <View style={[ts.root, { backgroundColor: colors.background }]}>
         <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
         <View style={[ts.header, { backgroundColor: colors.surface, borderBottomColor: colors.border, paddingTop: insets.top + 12 }]}>
-          <Text style={[ts.title, { color: colors.textPrimary }]}>History</Text>
+          <Text accessibilityRole="header" style={[ts.title, { color: colors.textPrimary }]}>History</Text>
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 2 }}>Organisation activity — invites, approvals and reports</Text>
         </View>
         {loading ? (
@@ -394,7 +411,7 @@ export default function HistoryRoute() {
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
 
       <View style={[ts.header, { backgroundColor: colors.surface, borderBottomColor: colors.border, paddingTop: insets.top + 12 }]}>
-        <Text style={[ts.title, { color: colors.textPrimary }]}>History</Text>
+        <Text accessibilityRole="header" style={[ts.title, { color: colors.textPrimary }]}>History</Text>
         <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 2 }}>{headerSubtitle}</Text>
       </View>
 

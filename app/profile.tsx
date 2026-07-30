@@ -28,7 +28,7 @@ const ConfirmModal: React.FC<{
   const { colors } = useTheme();
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <Pressable style={s.overlay} onPress={onCancel}>
+      <Pressable style={s.overlay} onPress={onCancel} accessibilityRole="button" accessibilityLabel="Dismiss dialog">
         <Pressable style={[s.modalBox, { backgroundColor: colors.surface }]} onPress={() => {}}>
           <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary, marginBottom: 8 }}>
             {title}
@@ -39,12 +39,16 @@ const ConfirmModal: React.FC<{
           <View style={{ flexDirection: 'row', gap: 12 }}>
             <TouchableOpacity
               onPress={onCancel}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
               style={[s.modalBtn, { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 }]}
             >
               <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textSecondary }}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={onConfirm}
+              accessibilityRole="button"
+              accessibilityLabel={confirmLabel}
               style={[s.modalBtn, { backgroundColor: destructive ? colors.error : colors.primary }]}
             >
               <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: '#FFF' }}>{confirmLabel}</Text>
@@ -228,9 +232,9 @@ export default function ProfileRoute() {
 
       <ScrollView contentContainerStyle={s.container} showsVerticalScrollIndicator={false}>
         {/* Avatar */}
-        <TouchableOpacity onPress={pickAndUpload} style={s.avatarWrap} activeOpacity={0.8}>
+        <TouchableOpacity onPress={pickAndUpload} style={s.avatarWrap} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel="Change profile photo" accessibilityHint="Opens photo picker">
           {user?.profile_photo ? (
-            <Image source={{ uri: user.profile_photo }} style={[s.avatar, { borderColor: colors.primaryBorder }]} />
+            <Image source={{ uri: user.profile_photo }} style={[s.avatar, { borderColor: colors.primaryBorder }]} accessible={true} accessibilityRole="image" accessibilityLabel={`Profile photo of ${user?.first_name ?? 'user'} ${user?.last_name ?? ''}`.trim()} />
           ) : (
             <View style={[s.avatarPlaceholder, { backgroundColor: colors.primaryTint, borderColor: colors.primaryBorder }]}>
               <Ionicons name="person" size={44} color={colors.primary} />
@@ -255,6 +259,9 @@ export default function ProfileRoute() {
             </Text>
             <TouchableOpacity
               onPress={startEditing}
+              accessibilityRole="button"
+              accessibilityLabel="Edit profile"
+              accessibilityHint="Opens profile editing form"
               style={[s.editBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
             >
               <Ionicons name="pencil-outline" size={15} color={colors.primary} />
@@ -274,6 +281,7 @@ export default function ProfileRoute() {
                 <TextInput
                   value={firstName}
                   onChangeText={setFirstName}
+                  accessibilityLabel="First name"
                   style={[s.input, { color: colors.textPrimary, backgroundColor: colors.background, borderColor: colors.border }]}
                   placeholderTextColor={colors.textTertiary}
                 />
@@ -283,6 +291,7 @@ export default function ProfileRoute() {
                 <TextInput
                   value={lastName}
                   onChangeText={setLastName}
+                  accessibilityLabel="Last name"
                   style={[s.input, { color: colors.textPrimary, backgroundColor: colors.background, borderColor: colors.border }]}
                   placeholderTextColor={colors.textTertiary}
                 />
@@ -293,12 +302,15 @@ export default function ProfileRoute() {
               value={phone}
               onChangeText={setPhone}
               keyboardType="phone-pad"
+              accessibilityLabel="Phone number"
               style={[s.input, { color: colors.textPrimary, backgroundColor: colors.background, borderColor: colors.border }]}
               placeholderTextColor={colors.textTertiary}
             />
             <View style={[s.row, { marginTop: 16, gap: 10 }]}>
               <TouchableOpacity
                 onPress={() => setEditing(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Cancel editing"
                 style={[s.formBtn, { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 }]}
               >
                 <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textSecondary }}>Cancel</Text>
@@ -306,6 +318,9 @@ export default function ProfileRoute() {
               <TouchableOpacity
                 onPress={() => updateMutation.mutate()}
                 disabled={updateMutation.isPending}
+                accessibilityRole="button"
+                accessibilityLabel="Save profile changes"
+                accessibilityState={{ disabled: updateMutation.isPending }}
                 style={[s.formBtn, { backgroundColor: colors.primary }]}
               >
                 <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: '#FFF' }}>Save</Text>
@@ -403,19 +418,19 @@ export default function ProfileRoute() {
 
         {/* Account actions */}
         <View style={[s.actionsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <TouchableOpacity onPress={() => router.push('/account/privacy' as any)} style={s.actionRow}>
+          <TouchableOpacity onPress={() => router.push('/account/privacy' as any)} style={s.actionRow} accessibilityRole="button" accessibilityLabel="Privacy Policy and Terms" accessibilityHint="Opens privacy policy and terms of service">
             <Ionicons name="shield-checkmark-outline" size={20} color={colors.textPrimary} />
             <Text style={{ fontSize: FontSize.base, color: colors.textPrimary, marginLeft: 14, flex: 1 }}>Privacy Policy & Terms</Text>
             <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
           </TouchableOpacity>
           <View style={{ height: 1, backgroundColor: colors.border }} />
-          <TouchableOpacity onPress={handleLogout} style={s.actionRow}>
+          <TouchableOpacity onPress={handleLogout} style={s.actionRow} accessibilityRole="button" accessibilityLabel="Log out">
             <Ionicons name="log-out-outline" size={20} color={colors.textPrimary} />
             <Text style={{ fontSize: FontSize.base, color: colors.textPrimary, marginLeft: 14, flex: 1 }}>Log out</Text>
             <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
           </TouchableOpacity>
           <View style={{ height: 1, backgroundColor: colors.border }} />
-          <TouchableOpacity onPress={handleDeleteAccount} style={s.actionRow}>
+          <TouchableOpacity onPress={handleDeleteAccount} style={s.actionRow} accessibilityRole="button" accessibilityLabel="Delete account" accessibilityHint="Permanently deactivates your account">
             <Ionicons name="trash-outline" size={20} color={colors.error} />
             <Text style={{ fontSize: FontSize.base, color: colors.error, marginLeft: 14, flex: 1 }}>Delete account</Text>
             <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />

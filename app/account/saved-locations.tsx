@@ -7,10 +7,10 @@ export default function SavedLocationsRoute() {
   const router = useRouter();
   return (
     <View style={s.container}>
-      <TouchableOpacity style={s.back} onPress={() => router.back()}>
+      <TouchableOpacity style={s.back} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Go back">
         <Ionicons name="arrow-back" size={24} color={Colors.primary} />
       </TouchableOpacity>
-      <Text style={s.title}>Saved Places</Text>
+      <Text accessibilityRole="header" style={s.title}>Saved Places</Text>
       <Text style={s.sub}>Coming soon</Text>
     </View>
   );

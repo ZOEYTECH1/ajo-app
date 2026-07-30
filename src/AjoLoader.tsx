@@ -51,7 +51,7 @@ export const AjoLoader: React.FC<AjoLoaderProps> = ({ size = 64 }) => {
   });
 
   return (
-    <View style={{ width: size, height: size }}>
+    <View style={{ width: size, height: size }} accessible={true} accessibilityLabel="Loading" accessibilityLiveRegion="polite">
       {/* Ring — spins continuously */}
       <Animated.View
         style={{ position: 'absolute', width: size, height: size, backgroundColor: 'transparent', zIndex: 1, transform: [{ rotate: spin }] }}

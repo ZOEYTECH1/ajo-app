@@ -91,6 +91,8 @@ function InvoiceCard({
           onPress={onPay}
           style={[s.payBtn, { backgroundColor: colors.primary }]}
           activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel={`Pay ₦${totalFee.toLocaleString()} for ${invoice.month_label}`}
         >
           <Ionicons name="card-outline" size={18} color="#fff" />
           <Text style={{ color: '#fff', fontWeight: '800', fontSize: FontSize.sm, marginLeft: 8 }}>
@@ -160,11 +162,13 @@ export default function OrgBillingScreen() {
         <TouchableOpacity
           onPress={() => router.back()}
           hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
         >
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ marginLeft: 16, flex: 1 }}>
-          <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary }}>
+          <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">
             Organisation Billing
           </Text>
           {pendingCount > 0 && (
@@ -177,6 +181,8 @@ export default function OrgBillingScreen() {
           onPress={() => generate()}
           disabled={generating}
           style={[s.generateBtn, { backgroundColor: colors.primaryTint }]}
+          accessibilityRole="button"
+          accessibilityLabel="Generate this month's invoice"
         >
           {generating
             ? <ActivityIndicator size="small" color={colors.primary} />

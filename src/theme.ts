@@ -18,8 +18,9 @@ export const LightColors = {
   // Text
   textPrimary:      '#0D1117',
   textSecondary:    '#6B7280',
-  textTertiary:     '#9CA3AF',
+  textTertiary:     '#72777D',
   textDisabled:     '#C4C9D4',
+  textPlaceholder:  '#9CA3AF',
   textInverse:      '#FFFFFF',
   textLink:         '#0035F0',
 
@@ -39,16 +40,19 @@ export const LightColors = {
   success:          '#22C55E',
   successLight:     '#DCFCE7',
   successDark:      '#16A34A',
+  successText:      '#15803D',
 
   // Status — Error
   error:            '#EF4444',
   errorLight:       '#FEE2E2',
   errorDark:        '#DC2626',
+  errorText:        '#B91C1C',
 
   // Status — Warning
   warning:          '#F59E0B',
   warningLight:     '#FEF3C7',
   warningDark:      '#D97706',
+  warningText:      '#92400E',
 
   // Status — Info
   info:             '#3B82F6',
@@ -59,7 +63,7 @@ export const LightColors = {
   tabBar:           '#FFFFFF',
   tabBarBorder:     '#E5E7EB',
   tabActive:        '#0035F0',
-  tabInactive:      '#9CA3AF',
+  tabInactive:      '#72777D',
   headerBg:         '#FFFFFF',
   headerBorder:     '#E5E7EB',
 
@@ -88,8 +92,9 @@ export const DarkColors = {
   // Text
   textPrimary:      '#F0F2F5',
   textSecondary:    '#9CA3AF',
-  textTertiary:     '#6B7280',
+  textTertiary:     '#8E9399',
   textDisabled:     '#4B5563',
+  textPlaceholder:  '#6B7280',
   textInverse:      '#0D1117',
   textLink:         '#4D7EFF',
 
@@ -109,16 +114,19 @@ export const DarkColors = {
   success:          '#22C55E',
   successLight:     '#052E16',
   successDark:      '#4ADE80',
+  successText:      '#86EFAC',
 
   // Status — Error
   error:            '#EF4444',
   errorLight:       '#2D0A0A',
   errorDark:        '#F87171',
+  errorText:        '#FCA5A5',
 
   // Status — Warning
   warning:          '#F59E0B',
   warningLight:     '#2D1B00',
   warningDark:      '#FCD34D',
+  warningText:      '#FDE68A',
 
   // Status — Info
   info:             '#3B82F6',
@@ -129,7 +137,7 @@ export const DarkColors = {
   tabBar:           '#161B22',
   tabBarBorder:     '#30363D',
   tabActive:        '#4D7EFF',
-  tabInactive:      '#6B7280',
+  tabInactive:      '#8E9399',
   headerBg:         '#0D1117',
   headerBorder:     '#30363D',
 

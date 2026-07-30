@@ -26,6 +26,9 @@ const GroupCard: React.FC<{ group: Group; isAdmin: boolean; onPress: () => void 
     <TouchableOpacity
       activeOpacity={0.82}
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${group.name} group`}
+      accessibilityHint="Opens group details"
       style={[s.card, { backgroundColor: colors.surface, ...Shadow.card(colors.black) }]}
     >
       <View style={s.cardTop}>
@@ -67,6 +70,9 @@ const ThriftCard: React.FC<{ group: ThriftGroup; isCollector: boolean; onPress: 
     <TouchableOpacity
       activeOpacity={0.82}
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${group.name} contribution group`}
+      accessibilityHint="Opens contribution group details"
       style={[s.card, { backgroundColor: colors.surface, ...Shadow.card(colors.black) }]}
     >
       <View style={s.cardTop}>
@@ -112,6 +118,9 @@ const CategoryCard: React.FC<{ cat: InventoryCategory; onPress: () => void }> = 
     <TouchableOpacity
       activeOpacity={0.82}
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${cat.name} category`}
+      accessibilityHint="Opens inventory category"
       style={[s.card, { backgroundColor: colors.surface, ...Shadow.card(colors.black) }]}
     >
       <View style={s.cardTop}>
@@ -150,7 +159,7 @@ const CardSkeleton: React.FC = () => {
 const SectionTitle: React.FC<{ label: string }> = ({ label }) => {
   const { colors } = useTheme();
   return (
-    <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 }}>
+    <Text accessibilityRole="header" style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginBottom: 12 }}>
       {label}
     </Text>
   );
@@ -274,7 +283,7 @@ export default function HomeRoute() {
               {user?.first_name ?? 'there'} {user?.last_name ?? ''}
             </Text>
           </View>
-          <TouchableOpacity onPress={handleLogout} style={s.headerIcon} hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+          <TouchableOpacity onPress={handleLogout} style={s.headerIcon} hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }} accessibilityRole="button" accessibilityLabel="Log out">
             <Ionicons name="log-out-outline" size={22} color={colors.textSecondary} />
           </TouchableOpacity>
         </View>
@@ -286,6 +295,9 @@ export default function HomeRoute() {
               onPress={() => router.push(`/thrift/org/${org.id}` as any)}
               style={[s.card, { backgroundColor: colors.surface, ...Shadow.card(colors.black) }]}
               activeOpacity={0.82}
+              accessibilityRole="button"
+              accessibilityLabel={`${org.name} organisation`}
+              accessibilityHint="Opens organisation dashboard"
             >
               <View style={s.cardTop}>
                 <View style={[s.thriftBadge, { backgroundColor: colors.primaryTint }]}>
@@ -331,19 +343,19 @@ export default function HomeRoute() {
             {user?.first_name ?? 'there'} {user?.last_name ?? ''}
           </Text>
         </View>
-        <TouchableOpacity onPress={handleLogout} style={s.headerIcon} hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+        <TouchableOpacity onPress={handleLogout} style={s.headerIcon} hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }} accessibilityRole="button" accessibilityLabel="Log out">
           <Ionicons name="log-out-outline" size={22} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>
 
       {/* ── Tab Row ── */}
-      <View style={[s.tabRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+      <View accessibilityRole="tablist" style={[s.tabRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         {([
           { key: 'ajo', label: 'Ajo Groups' },
           { key: 'thrift', label: 'Contributions' },
           { key: 'inventory', label: 'Inventory' },
         ] as const).map(({ key, label }) => (
-          <TouchableOpacity key={key} onPress={() => setTab(key)} style={s.tabBtn} activeOpacity={0.8}>
+          <TouchableOpacity key={key} onPress={() => setTab(key)} style={s.tabBtn} activeOpacity={0.8} accessibilityRole="tab" accessibilityLabel={`${label} tab`} accessibilityState={{ selected: tab === key }}>
             <Text style={[s.tabLabel, { color: tab === key ? colors.primary : colors.textSecondary, fontWeight: tab === key ? '700' : '400' }]}>
               {label}
             </Text>
@@ -361,7 +373,7 @@ export default function HomeRoute() {
         {isError && (
           <View style={[s.errorBanner, { backgroundColor: colors.errorLight }]}>
             <Ionicons name="warning-outline" size={16} color={colors.error} />
-            <Text style={{ color: colors.error, fontSize: FontSize.sm, marginLeft: 8 }}>Could not load. Pull down to retry.</Text>
+            <Text accessibilityRole="alert" accessibilityLiveRegion="assertive" style={{ color: colors.error, fontSize: FontSize.sm, marginLeft: 8 }}>Could not load. Pull down to retry.</Text>
           </View>
         )}
 
@@ -401,6 +413,9 @@ export default function HomeRoute() {
                 onPress={() => requirePhoto(() => router.push('/group/join' as any))}
                 style={[s.joinCodeBtn, { backgroundColor: colors.surface, borderColor: colors.primaryBorder }]}
                 activeOpacity={0.82}
+                accessibilityRole="button"
+                accessibilityLabel="Join an Ajo Group"
+                accessibilityHint="Enter an invite code to join a group"
               >
                 <View style={[s.joinCodeIcon, { backgroundColor: colors.primaryTint }]}>
                   <Ionicons name="key-outline" size={20} color={colors.primary} />
@@ -422,6 +437,9 @@ export default function HomeRoute() {
                 onPress={() => router.push('/thrift/queue' as any)}
                 style={[s.billsBanner, { backgroundColor: colors.errorLight, borderColor: colors.error, marginBottom: 10 }]}
                 activeOpacity={0.82}
+                accessibilityRole="button"
+                accessibilityLabel={`${queueCount} item${queueCount !== 1 ? 's' : ''} need your attention`}
+                accessibilityHint="Opens approval queue"
               >
                 <View style={[s.billsIcon, { backgroundColor: '#fee2e2' }]}>
                   <Ionicons name="time-outline" size={20} color={colors.error} />
@@ -444,6 +462,9 @@ export default function HomeRoute() {
                 onPress={() => router.push('/thrift/billing' as any)}
                 style={[s.billsBanner, { backgroundColor: colors.surface, borderColor: colors.primaryBorder }]}
                 activeOpacity={0.82}
+                accessibilityRole="button"
+                accessibilityLabel="My Platform Bills"
+                accessibilityHint="View and pay monthly fee invoices"
               >
                 <View style={[s.billsIcon, { backgroundColor: colors.primaryTint }]}>
                   <Ionicons name="receipt-outline" size={20} color={colors.primary} />
@@ -487,6 +508,9 @@ export default function HomeRoute() {
                 onPress={() => requirePhoto(() => router.push('/thrift/join' as any))}
                 style={[s.joinCodeBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
                 activeOpacity={0.82}
+                accessibilityRole="button"
+                accessibilityLabel="Join a Contribution Group"
+                accessibilityHint="Enter the invite code from your collector"
               >
                 <View style={[s.joinCodeIcon, { backgroundColor: colors.successLight }]}>
                   <Ionicons name="key-outline" size={20} color={colors.success} />
@@ -507,6 +531,9 @@ export default function HomeRoute() {
               <TouchableOpacity
                 onPress={() => router.push('/inventory/locations' as any)}
                 activeOpacity={0.82}
+                accessibilityRole="button"
+                accessibilityLabel={`Current location: ${selectedBusinessName ?? 'Select a location'}`}
+                accessibilityHint="Switch business location"
                 style={{
                   flexDirection: 'row', alignItems: 'center',
                   backgroundColor: '#FFF3E0', borderRadius: Radius.lg,
@@ -569,6 +596,8 @@ export default function HomeRoute() {
                     key={route}
                     onPress={() => router.push(route as any)}
                     activeOpacity={0.8}
+                    accessibilityRole="button"
+                    accessibilityLabel={label}
                     style={{ backgroundColor: '#FFF3E0', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, alignItems: 'center', flexDirection: 'row', gap: 6 }}
                   >
                     <Ionicons name={icon as any} size={16} color="#E65100" />
@@ -608,6 +637,8 @@ export default function HomeRoute() {
       <TouchableOpacity
         onPress={handleFab}
         activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel={tab === 'ajo' ? 'Create Ajo group' : tab === 'thrift' ? 'Create contribution group' : 'Create inventory category'}
         style={[s.fab, { backgroundColor: tab === 'ajo' ? colors.primary : tab === 'thrift' ? colors.success : '#E65100', ...Shadow.strong(tab === 'ajo' ? colors.primary : tab === 'thrift' ? colors.success : '#E65100') }]}
       >
         <Ionicons name="add" size={28} color={colors.white} />

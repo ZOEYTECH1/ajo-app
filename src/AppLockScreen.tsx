@@ -139,7 +139,11 @@ export function AppLockScreen({ mode }: Props) {
       )}
 
       {/* PIN dots */}
-      <Animated.View style={[s.dotsRow, { transform: [{ translateX: shakeAnim }] }]}>
+      <Animated.View
+        style={[s.dotsRow, { transform: [{ translateX: shakeAnim }] }]}
+        accessibilityLabel={`${activePin.length} of 6 digits entered`}
+        accessibilityLiveRegion="polite"
+      >
         {Array.from({ length: 6 }).map((_, i) => {
           const filled = i < activePin.length;
           const bg = dotError
@@ -174,6 +178,8 @@ export function AppLockScreen({ mode }: Props) {
                 style={s.numKey}
                 onPress={handleBackspace}
                 activeOpacity={0.5}
+                accessibilityRole="button"
+                accessibilityLabel="Delete last digit"
               >
                 <Ionicons name="backspace-outline" size={26} color={colors.textPrimary} />
               </TouchableOpacity>
@@ -186,6 +192,8 @@ export function AppLockScreen({ mode }: Props) {
               style={[s.numKey, s.numBtn, { backgroundColor: colors.surface }]}
               onPress={() => handleDigit(key)}
               activeOpacity={0.5}
+              accessibilityRole="button"
+              accessibilityLabel={`Digit ${key}`}
             >
               <Text style={[s.numText, { color: colors.textPrimary }]}>{key}</Text>
             </TouchableOpacity>
@@ -194,7 +202,7 @@ export function AppLockScreen({ mode }: Props) {
       </View>
 
       {mode === 'lock' && (
-        <TouchableOpacity onPress={handleForgot} style={{ marginTop: 36 }}>
+        <TouchableOpacity onPress={handleForgot} style={{ marginTop: 36 }} accessibilityRole="button" accessibilityLabel="Forgot PIN, log out">
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary }}>
             Forgot PIN?{' '}
             <Text style={{ color: colors.primary, fontWeight: '700' }}>Log out</Text>

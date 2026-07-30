@@ -55,7 +55,7 @@ function InviteModal({ orgId, visible, onClose }: { orgId: number; visible: bool
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 24 }}>
         <View style={{ backgroundColor: colors.surface, borderRadius: Radius.lg, padding: 24 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary, marginBottom: 4 }}>Invite Collector</Text>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary, marginBottom: 4 }} accessibilityRole="header">Invite Collector</Text>
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginBottom: 20 }}>
             Enter the email address of the person you want to invite as a collector.
           </Text>
@@ -106,7 +106,7 @@ function ResolveReportModal({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 24 }}>
         <View style={{ backgroundColor: colors.surface, borderRadius: Radius.lg, padding: 24 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary, marginBottom: 4 }}>Review Report</Text>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary, marginBottom: 4 }} accessibilityRole="header">Review Report</Text>
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginBottom: 4 }}>Reason:</Text>
           <Text style={{ fontSize: FontSize.sm, color: colors.textPrimary, marginBottom: 16, lineHeight: 20 }}>{report.reason}</Text>
           <Input
@@ -119,19 +119,25 @@ function ResolveReportModal({
           />
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 20, flexWrap: 'wrap' }}>
             <TouchableOpacity onPress={() => resolveMutation.mutate('review')}
-              style={[s.actionBtn, { backgroundColor: '#3B82F6' }]}>
+              style={[s.actionBtn, { backgroundColor: '#3B82F6' }]}
+              accessibilityRole="button"
+              accessibilityLabel="Mark reviewed">
               <Text style={s.actionBtnLabel}>Mark Reviewed</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => resolveMutation.mutate('resolve')}
-              style={[s.actionBtn, { backgroundColor: colors.success }]}>
+              style={[s.actionBtn, { backgroundColor: colors.success }]}
+              accessibilityRole="button"
+              accessibilityLabel="Resolve report">
               <Text style={s.actionBtnLabel}>Resolve</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => resolveMutation.mutate('dismiss')}
-              style={[s.actionBtn, { backgroundColor: colors.textSecondary }]}>
+              style={[s.actionBtn, { backgroundColor: colors.textSecondary }]}
+              accessibilityRole="button"
+              accessibilityLabel="Dismiss report">
               <Text style={s.actionBtnLabel}>Dismiss</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={onClose} style={{ marginTop: 12, alignItems: 'center' }}>
+          <TouchableOpacity onPress={onClose} style={{ marginTop: 12, alignItems: 'center' }} accessibilityRole="button" accessibilityLabel="Cancel">
             <Text style={{ color: colors.textSecondary, fontSize: FontSize.sm }}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -179,7 +185,7 @@ function CollectorGroupsModal({
                 {collectorGroups.length} group{collectorGroups.length !== 1 ? 's' : ''}
               </Text>
             </View>
-            <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Close">
               <Ionicons name="close" size={22} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
@@ -200,6 +206,8 @@ function CollectorGroupsModal({
                   onPress={() => { onClose(); router.push(`/thrift/${g.id}` as any); }}
                   activeOpacity={0.8}
                   style={[s.card, { backgroundColor: colors.background, borderColor: colors.border, ...Shadow.soft(colors.black) }]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Open group: ${g.name}`}
                 >
                   <View style={[s.avatar, { backgroundColor: colors.successLight }]}>
                     <Ionicons name="wallet-outline" size={18} color={colors.success} />
@@ -314,11 +322,11 @@ export default function OrgDashboardRoute() {
 
       {/* Header */}
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginHorizontal: 12 }}>
-          <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.textPrimary }} numberOfLines={1}>
+          <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.textPrimary }} numberOfLines={1} accessibilityRole="header">
             {org?.name ?? 'Organisation'}
           </Text>
           {org && (
@@ -337,11 +345,13 @@ export default function OrgDashboardRoute() {
           onPress={() => router.push(`/thrift/org/${orgId}/billing` as any)}
           hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}
           style={{ marginLeft: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel="View billing"
         >
           <Ionicons name="receipt-outline" size={22} color={colors.textPrimary} />
         </TouchableOpacity>
         {data && (
-          <TouchableOpacity onPress={handleExport} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} style={{ marginLeft: 8 }}>
+          <TouchableOpacity onPress={handleExport} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} style={{ marginLeft: 8 }} accessibilityRole="button" accessibilityLabel="Export organisation report">
             <Ionicons name="share-outline" size={22} color={colors.textPrimary} />
           </TouchableOpacity>
         )}
@@ -350,7 +360,7 @@ export default function OrgDashboardRoute() {
       {/* Tabs */}
       <View style={[s.tabRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         {TABS.map((t) => (
-          <TouchableOpacity key={t.key} onPress={() => setTab(t.key)} style={s.tabBtn} activeOpacity={0.8}>
+          <TouchableOpacity key={t.key} onPress={() => setTab(t.key)} style={s.tabBtn} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel={t.label} accessibilityState={{ selected: tab === t.key }}>
             <Text style={[s.tabLabel, { color: tab === t.key ? colors.primary : colors.textSecondary, fontWeight: tab === t.key ? '700' : '400' }]}>
               {t.label}
             </Text>
@@ -372,7 +382,7 @@ export default function OrgDashboardRoute() {
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
           <Ionicons name="warning-outline" size={48} color={colors.error} />
           <Text style={{ color: colors.error, fontSize: FontSize.md, fontWeight: '700', marginTop: 12 }}>Could not load dashboard</Text>
-          <TouchableOpacity onPress={() => refetch()} style={{ marginTop: 16, paddingHorizontal: 24, paddingVertical: 10, backgroundColor: colors.primary, borderRadius: Radius.md }}>
+          <TouchableOpacity onPress={() => refetch()} style={{ marginTop: 16, paddingHorizontal: 24, paddingVertical: 10, backgroundColor: colors.primary, borderRadius: Radius.md }} accessibilityRole="button" accessibilityLabel="Retry">
             <Text style={{ color: colors.white, fontWeight: '700' }}>Retry</Text>
           </TouchableOpacity>
         </View>
@@ -453,10 +463,10 @@ export default function OrgDashboardRoute() {
                       </View>
                     </View>
                     <View style={{ gap: 6 }}>
-                      <TouchableOpacity onPress={() => confirmMemberAction(m, 'approve')} style={[s.miniBtn, { borderColor: colors.success }]}>
+                      <TouchableOpacity onPress={() => confirmMemberAction(m, 'approve')} style={[s.miniBtn, { borderColor: colors.success }]} accessibilityRole="button" accessibilityLabel={`Approve ${m.user.first_name} ${m.user.last_name}`}>
                         <Text style={{ fontSize: 10, fontWeight: '700', color: colors.success }}>Approve</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity onPress={() => confirmMemberAction(m, 'reject')} style={[s.miniBtn, { borderColor: colors.error }]}>
+                      <TouchableOpacity onPress={() => confirmMemberAction(m, 'reject')} style={[s.miniBtn, { borderColor: colors.error }]} accessibilityRole="button" accessibilityLabel={`Reject ${m.user.first_name} ${m.user.last_name}`}>
                         <Text style={{ fontSize: 10, fontWeight: '700', color: colors.error }}>Reject</Text>
                       </TouchableOpacity>
                     </View>
@@ -480,6 +490,8 @@ export default function OrgDashboardRoute() {
                   onPress={() => setCollectorGroups(m)}
                   activeOpacity={0.8}
                   style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border, flexDirection: 'column', alignItems: 'stretch' }]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${m.user.first_name} ${m.user.last_name}, view groups`}
                 >
                   {/* Identity + actions row */}
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -508,15 +520,15 @@ export default function OrgDashboardRoute() {
                     </View>
                     <View style={{ gap: 6, alignItems: 'flex-end' }}>
                       {m.status === 'active' ? (
-                        <TouchableOpacity onPress={() => confirmMemberAction(m, 'suspend')} style={[s.miniBtn, { borderColor: '#F59E0B' }]}>
+                        <TouchableOpacity onPress={() => confirmMemberAction(m, 'suspend')} style={[s.miniBtn, { borderColor: '#F59E0B' }]} accessibilityRole="button" accessibilityLabel={`Suspend ${m.user.first_name} ${m.user.last_name}`}>
                           <Text style={{ fontSize: 10, fontWeight: '700', color: '#F59E0B' }}>Suspend</Text>
                         </TouchableOpacity>
                       ) : (
-                        <TouchableOpacity onPress={() => confirmMemberAction(m, 'activate')} style={[s.miniBtn, { borderColor: colors.success }]}>
+                        <TouchableOpacity onPress={() => confirmMemberAction(m, 'activate')} style={[s.miniBtn, { borderColor: colors.success }]} accessibilityRole="button" accessibilityLabel={`Activate ${m.user.first_name} ${m.user.last_name}`}>
                           <Text style={{ fontSize: 10, fontWeight: '700', color: colors.success }}>Activate</Text>
                         </TouchableOpacity>
                       )}
-                      <TouchableOpacity onPress={() => confirmMemberAction(m, 'remove')} style={[s.miniBtn, { borderColor: colors.error }]}>
+                      <TouchableOpacity onPress={() => confirmMemberAction(m, 'remove')} style={[s.miniBtn, { borderColor: colors.error }]} accessibilityRole="button" accessibilityLabel={`Remove ${m.user.first_name} ${m.user.last_name}`}>
                         <Text style={{ fontSize: 10, fontWeight: '700', color: colors.error }}>Remove</Text>
                       </TouchableOpacity>
                     </View>
@@ -569,6 +581,8 @@ export default function OrgDashboardRoute() {
             {(data?.groups ?? []).map((g) => (
               <TouchableOpacity key={g.id} onPress={() => router.push(`/thrift/${g.id}` as any)} activeOpacity={0.85}
                 style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                accessibilityRole="button"
+                accessibilityLabel={`Open group: ${g.name}`}
               >
                 <View style={[s.avatar, { backgroundColor: colors.successLight }]}>
                   <Ionicons name="wallet-outline" size={20} color={colors.success} />
@@ -617,6 +631,8 @@ export default function OrgDashboardRoute() {
                   <TouchableOpacity
                     onPress={() => { setReport(r); setResolve(true); }}
                     style={[s.miniBtn, { borderColor: colors.primary, alignSelf: 'flex-end' }]}
+                    accessibilityRole="button"
+                    accessibilityLabel="Review report"
                   >
                     <Text style={{ fontSize: 11, fontWeight: '700', color: colors.primary }}>Review</Text>
                   </TouchableOpacity>

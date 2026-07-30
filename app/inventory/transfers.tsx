@@ -34,11 +34,11 @@ export default function TransfersScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 16 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Transfer History</Text>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Transfer History</Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
             Stock moves for {selectedBusinessName ?? 'this location'}
           </Text>
@@ -47,6 +47,7 @@ export default function TransfersScreen() {
           onPress={() => router.push('/inventory/transfer' as any)}
           style={{ backgroundColor: '#E3F2FD', borderRadius: Radius.md, padding: 8 }}
           hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}
+          accessibilityRole="button" accessibilityLabel="New transfer"
         >
           <Ionicons name="swap-horizontal-outline" size={20} color="#1565C0" />
         </TouchableOpacity>
@@ -74,6 +75,7 @@ export default function TransfersScreen() {
               <TouchableOpacity
                 onPress={() => router.push('/inventory/transfer' as any)}
                 style={[s.newBtn, { backgroundColor: '#1565C0', marginTop: 20 }]}
+                accessibilityRole="button" accessibilityLabel="New transfer"
               >
                 <Ionicons name="add" size={16} color="#fff" />
                 <Text style={{ color: '#fff', fontWeight: '700', fontSize: FontSize.sm, marginLeft: 6 }}>New Transfer</Text>

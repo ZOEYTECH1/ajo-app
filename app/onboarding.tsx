@@ -179,6 +179,8 @@ export default function OnboardingScreen() {
           <TouchableOpacity
             style={[s.iconBtn, { backgroundColor: colors.surface }]}
             onPress={() => goTo(index - 1)}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
           >
             <BackArrow color={colors.primary} />
           </TouchableOpacity>
@@ -190,6 +192,8 @@ export default function OnboardingScreen() {
           <TouchableOpacity
             style={[s.skipBtn, { backgroundColor: colors.primaryTint }]}
             onPress={handleSkip}
+            accessibilityRole="button"
+            accessibilityLabel="Skip onboarding"
           >
             <Text style={[s.skipText, { color: colors.primary }]}>Skip</Text>
           </TouchableOpacity>
@@ -222,7 +226,7 @@ export default function OnboardingScreen() {
                 {illustrations[item.id]}
               </Animated.View>
               <Animated.View style={{ opacity, transform: [{ translateY: textTranslateY }] }}>
-                <Text style={[s.title, { color: colors.textPrimary }]}>{item.title}</Text>
+                <Text accessibilityRole="header" style={[s.title, { color: colors.textPrimary }]}>{item.title}</Text>
                 <Text style={[s.subtitle, { color: colors.textSecondary }]}>{item.subtitle}</Text>
               </Animated.View>
             </View>
@@ -250,12 +254,15 @@ export default function OnboardingScreen() {
           style={[s.btn, { backgroundColor: isLast ? colors.success : colors.primary }]}
           onPress={handleNext}
           activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel={isLast ? 'Get started' : 'Continue'}
+          accessibilityHint={isLast ? 'Double tap to get started' : 'Double tap to go to the next slide'}
         >
           <Text style={s.btnText}>{isLast ? 'Get Started' : 'Continue'}</Text>
         </TouchableOpacity>
 
         {isLast && (
-          <TouchableOpacity onPress={handleSkip} style={{ marginTop: 16 }}>
+          <TouchableOpacity onPress={handleSkip} style={{ marginTop: 16 }} accessibilityRole="link" accessibilityLabel="Go to login">
             <Text style={[s.loginLink, { color: colors.textSecondary }]}>
               Already have an account?{' '}
               <Text style={{ color: colors.primary, fontWeight: '700' }}>Log in</Text>

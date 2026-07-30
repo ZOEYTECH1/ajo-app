@@ -80,11 +80,11 @@ export default function BusinessProfileScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 16 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Business Profile</Text>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Business Profile</Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>Appears on receipts and reports</Text>
         </View>
         {biz && (
@@ -105,6 +105,7 @@ export default function BusinessProfileScreen() {
           disabled={isPending || !biz}
           activeOpacity={0.85}
           style={[s.saveBtn, { backgroundColor: INV, opacity: (isPending || !biz) ? 0.6 : 1 }]}
+          accessibilityRole="button" accessibilityLabel="Save business profile"
         >
           {isPending
             ? <ActivityIndicator color="#fff" />
@@ -115,6 +116,7 @@ export default function BusinessProfileScreen() {
           <TouchableOpacity
             onPress={() => router.push('/inventory/locations')}
             style={[s.switchBtn, { borderColor: colors.border, backgroundColor: colors.surface }]}
+            accessibilityRole="button" accessibilityLabel="Switch location"
           >
             <Ionicons name="swap-horizontal-outline" size={18} color={colors.textSecondary} />
             <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginLeft: 8 }}>Switch location</Text>
@@ -143,6 +145,7 @@ function Field({ label, value, onChangeText, placeholder, colors, multiline, key
           minHeight: multiline ? 80 : undefined,
           textAlignVertical: multiline ? 'top' : undefined,
         }]}
+        accessibilityLabel={label.replace(' *', '')}
       />
     </View>
   );

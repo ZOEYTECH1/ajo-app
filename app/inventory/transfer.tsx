@@ -127,11 +127,11 @@ export default function TransferScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 16 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Transfer Stock</Text>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Transfer Stock</Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>Move goods between your locations</Text>
         </View>
       </View>
@@ -150,7 +150,7 @@ export default function TransferScreen() {
             </View>
           </View>
           <View style={[s.routeLine, { backgroundColor: colors.border }]} />
-          <TouchableOpacity style={s.routeStop} onPress={() => setDestModal(true)}>
+          <TouchableOpacity style={s.routeStop} onPress={() => setDestModal(true)} accessibilityRole="button" accessibilityLabel={destination ? `Destination: ${destination.name}` : 'Choose destination location'} accessibilityHint="Double tap to select a destination location">
             <View style={[s.routeDot, { backgroundColor: destination ? '#2E7D32' : colors.border }]} />
             <View style={{ flex: 1, marginLeft: 10 }}>
               <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, fontWeight: '600' }}>TO</Text>
@@ -171,6 +171,8 @@ export default function TransferScreen() {
           <TouchableOpacity
             onPress={() => setProductModal(true)}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#E3F2FD', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel="Add item to transfer"
           >
             <Ionicons name="add" size={16} color={INV} />
             <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: INV }}>Add item</Text>
@@ -203,8 +205,10 @@ export default function TransferScreen() {
                   keyboardType="number-pad"
                   autoFocus
                   style={[s.qtyInput, { borderColor: INV, color: colors.textPrimary, backgroundColor: colors.background }]}
+                  accessibilityLabel={`Quantity for ${li.product.name}`}
+                  accessibilityHint="Enter the number of units to transfer"
                 />
-                <TouchableOpacity onPress={commitQty} style={{ padding: 4 }}>
+                <TouchableOpacity onPress={commitQty} style={{ padding: 4 }} accessibilityRole="button" accessibilityLabel="Confirm quantity">
                   <Ionicons name="checkmark-circle" size={24} color={INV} />
                 </TouchableOpacity>
               </View>
@@ -212,12 +216,14 @@ export default function TransferScreen() {
               <TouchableOpacity
                 onPress={() => { setEditingQtyIdx(idx); setQtyDraft(String(li.quantity)); }}
                 style={[s.qtyBadge, { backgroundColor: '#E3F2FD' }]}
+                accessibilityRole="button"
+                accessibilityLabel={`Quantity: ${li.quantity} units. Double tap to edit`}
               >
                 <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: INV }}>{li.quantity}</Text>
                 <Text style={{ fontSize: 10, color: INV, marginLeft: 2 }}>units</Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity onPress={() => removeItem(idx)} style={{ marginLeft: 8, padding: 4 }}>
+            <TouchableOpacity onPress={() => removeItem(idx)} style={{ marginLeft: 8, padding: 4 }} accessibilityRole="button" accessibilityLabel={`Remove ${li.product.name} from transfer`} accessibilityHint="Double tap to remove this item">
               <Ionicons name="trash-outline" size={18} color={colors.textTertiary} />
             </TouchableOpacity>
           </View>
@@ -232,6 +238,8 @@ export default function TransferScreen() {
           placeholderTextColor={colors.textTertiary}
           autoCapitalize="characters"
           style={[s.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.textPrimary, fontFamily: 'monospace' }]}
+          accessibilityLabel="Transfer reference number"
+          accessibilityHint="Optional reference number for this transfer"
         />
 
         {/* Notes */}
@@ -243,6 +251,8 @@ export default function TransferScreen() {
           placeholderTextColor={colors.textTertiary}
           multiline
           style={[s.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.textPrimary, minHeight: 70, textAlignVertical: 'top' }]}
+          accessibilityLabel="Notes"
+          accessibilityHint="Optional notes about this transfer"
         />
 
         <TouchableOpacity
@@ -250,6 +260,10 @@ export default function TransferScreen() {
           disabled={isPending}
           style={[s.saveBtn, { backgroundColor: INV, opacity: isPending ? 0.6 : 1 }]}
           activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="Confirm transfer"
+          accessibilityHint="Sends the stock transfer to the destination location"
+          accessibilityState={{ disabled: isPending }}
         >
           {isPending
             ? <ActivityIndicator color="#fff" />
@@ -263,7 +277,7 @@ export default function TransferScreen() {
 
       {/* Destination picker modal */}
       <Modal visible={destModal} transparent animationType="slide" onRequestClose={() => setDestModal(false)}>
-        <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setDestModal(false)} />
+        <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setDestModal(false)} accessibilityRole="button" accessibilityLabel="Close destination picker" />
         <View style={[s.modalSheet, { backgroundColor: colors.surface }]}>
           <Text style={[s.modalTitle, { color: colors.textPrimary }]}>Destination Location</Text>
           {otherBusinesses.length === 0 ? (
@@ -280,6 +294,9 @@ export default function TransferScreen() {
                 onPress={() => { setDestination(biz); setDestModal(false); }}
                 style={[s.destRow, { borderBottomColor: colors.border,
                   backgroundColor: destination?.id === biz.id ? '#E3F2FD' : 'transparent' }]}
+                accessibilityRole="button"
+                accessibilityLabel={`${biz.name}${destination?.id === biz.id ? ', selected' : ''}`}
+                accessibilityState={{ selected: destination?.id === biz.id }}
               >
                 <Ionicons
                   name={biz.mode === 'warehouse' ? 'cube-outline' : 'storefront-outline'}
@@ -296,6 +313,8 @@ export default function TransferScreen() {
           <TouchableOpacity
             onPress={() => setDestModal(false)}
             style={[s.saveBtn, { backgroundColor: colors.background, marginTop: 16 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Cancel"
           >
             <Text style={{ color: colors.textPrimary, fontWeight: '700' }}>Cancel</Text>
           </TouchableOpacity>
@@ -323,6 +342,9 @@ export default function TransferScreen() {
                         activeOpacity={alreadyAdded || p.quantity === 0 ? 1 : 0.7}
                         style={[s.productRow, { borderBottomColor: colors.border,
                           opacity: alreadyAdded || p.quantity === 0 ? 0.4 : 1 }]}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${p.name}, ${p.quantity === 0 ? 'out of stock' : `${p.quantity} units`}${alreadyAdded ? ', already added' : ''}`}
+                        accessibilityState={{ disabled: alreadyAdded || p.quantity === 0 }}
                       >
                         <View style={{ flex: 1 }}>
                           <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textPrimary }}>{p.name}</Text>
@@ -341,6 +363,8 @@ export default function TransferScreen() {
             <TouchableOpacity
               onPress={() => setProductModal(false)}
               style={[s.saveBtn, { backgroundColor: colors.background, marginTop: 12 }]}
+              accessibilityRole="button"
+              accessibilityLabel="Done"
             >
               <Text style={{ color: colors.textPrimary, fontWeight: '700' }}>Done</Text>
             </TouchableOpacity>

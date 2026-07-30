@@ -37,12 +37,16 @@ const ConfirmModal: React.FC<{
             <TouchableOpacity
               onPress={onCancel}
               style={[s.modalBtn, { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 }]}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
             >
               <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textSecondary }}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={onConfirm}
               style={[s.modalBtn, { backgroundColor: confirmDestructive ? colors.error : colors.primary }]}
+              accessibilityRole="button"
+              accessibilityLabel={confirmLabel}
             >
               <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: '#FFF' }}>{confirmLabel}</Text>
             </TouchableOpacity>
@@ -122,6 +126,8 @@ const ProposalCard: React.FC<{
             onPress={() => onVote(proposal.id, false)}
             disabled={voting}
             style={[s.voteBtn, { backgroundColor: colors.successLight, flex: 1 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Vote to keep member"
           >
             <Ionicons name="thumbs-up" size={15} color={colors.successDark} />
             <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.successDark, marginLeft: 6 }}>Keep</Text>
@@ -130,6 +136,8 @@ const ProposalCard: React.FC<{
             onPress={() => onVote(proposal.id, true)}
             disabled={voting}
             style={[s.voteBtn, { backgroundColor: colors.errorLight, flex: 1 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Vote to remove member"
           >
             <Ionicons name="thumbs-down" size={15} color={colors.errorDark} />
             <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.errorDark, marginLeft: 6 }}>Remove</Text>
@@ -203,6 +211,8 @@ const MemberRow: React.FC<{
             <TouchableOpacity
               onPress={() => onApprove(membership)}
               style={[s.actionChip, { backgroundColor: colors.successLight }]}
+              accessibilityRole="button"
+              accessibilityLabel={`Approve ${membership.user.first_name} ${membership.user.last_name}`}
             >
               <Ionicons name="checkmark" size={14} color={colors.successDark} />
               <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.successDark, marginLeft: 3 }}>Approve</Text>
@@ -210,6 +220,8 @@ const MemberRow: React.FC<{
             <TouchableOpacity
               onPress={() => onReject(membership)}
               style={[s.actionChip, { backgroundColor: colors.errorLight }]}
+              accessibilityRole="button"
+              accessibilityLabel={`Reject ${membership.user.first_name} ${membership.user.last_name}`}
             >
               <Ionicons name="close" size={14} color={colors.errorDark} />
               <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.errorDark, marginLeft: 3 }}>Reject</Text>
@@ -220,6 +232,8 @@ const MemberRow: React.FC<{
           <TouchableOpacity
             onPress={() => onProposeRemoval(membership)}
             style={[s.actionChip, { backgroundColor: colors.warningLight }]}
+            accessibilityRole="button"
+            accessibilityLabel={`Propose removal of ${membership.user.first_name} ${membership.user.last_name}`}
           >
             <Ionicons name="alert-circle-outline" size={13} color={colors.warningDark} />
             <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.warningDark, marginLeft: 3 }}>
@@ -381,10 +395,10 @@ export default function MembersRoute() {
 
       {/* Header */}
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Members</Text>
+        <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Members</Text>
         <View style={{ width: 24 }} />
       </View>
 

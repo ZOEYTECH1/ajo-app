@@ -52,6 +52,8 @@ const InviteCard: React.FC<{ groupId: number; inviteCode: string; colors: any }>
         <TouchableOpacity
           onPress={handleCopy}
           style={[s.inviteBtn, { backgroundColor: copied ? colors.successLight : colors.surface }]}
+          accessibilityRole="button"
+          accessibilityLabel={copied ? 'Invite code copied' : 'Copy invite code'}
         >
           <Ionicons
             name={copied ? 'checkmark' : 'copy-outline'}
@@ -67,6 +69,8 @@ const InviteCard: React.FC<{ groupId: number; inviteCode: string; colors: any }>
           onPress={() => regenMutation.mutate()}
           disabled={regenMutation.isPending}
           style={[s.inviteBtn, { backgroundColor: colors.surface }]}
+          accessibilityRole="button"
+          accessibilityLabel="Regenerate invite code"
         >
           <Ionicons name="refresh-outline" size={16} color={colors.textSecondary} />
         </TouchableOpacity>
@@ -164,7 +168,7 @@ const CycleCard: React.FC<{ cycle: Cycle | undefined; group: Group | undefined; 
 const ActionBtn: React.FC<{ icon: string; label: string; onPress: () => void; colors: any }> = ({
   icon, label, onPress, colors,
 }) => (
-  <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={[s.actionBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+  <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={[s.actionBtn, { backgroundColor: colors.surface, borderColor: colors.border }]} accessibilityRole="button" accessibilityLabel={label}>
     <View style={[s.actionIcon, { backgroundColor: colors.primaryTint }]}>
       <Ionicons name={icon as any} size={20} color={colors.primary} />
     </View>
@@ -258,7 +262,7 @@ export default function GroupDetailRoute() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background, padding: 20 }}>
         <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
-        <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 52, marginBottom: 24 }}>
+        <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 52, marginBottom: 24 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.primary} />
         </TouchableOpacity>
         <Skeleton width="60%" height={24} style={{ marginBottom: 10 }} />
@@ -276,7 +280,7 @@ export default function GroupDetailRoute() {
         <Text style={{ fontSize: FontSize.md, color: colors.textPrimary, fontWeight: '700', marginTop: 16, textAlign: 'center' }}>
           Could not load group
         </Text>
-        <TouchableOpacity onPress={() => refetch()} style={{ marginTop: 16 }}>
+        <TouchableOpacity onPress={() => refetch()} style={{ marginTop: 16 }} accessibilityRole="button" accessibilityLabel="Try again">
           <Text style={{ color: colors.primary, fontWeight: '600' }}>Try again</Text>
         </TouchableOpacity>
       </View>
@@ -297,7 +301,7 @@ export default function GroupDetailRoute() {
       >
         {/* ── Header ── */}
         <View style={[s.groupHeader, { backgroundColor: colors.primary }]}>
-          <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 16 }}>
+          <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 16 }} accessibilityRole="button" accessibilityLabel="Go back">
             <Ionicons name="arrow-back" size={24} color="rgba(255,255,255,0.9)" />
           </TouchableOpacity>
           <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
@@ -355,6 +359,8 @@ export default function GroupDetailRoute() {
             <TouchableOpacity
               onPress={() => router.push(`/group/${groupId}/payments` as any)}
               style={[s.alertBanner, { backgroundColor: colors.warningLight, borderColor: colors.warning }]}
+              accessibilityRole="button"
+              accessibilityLabel={`${pendingPayments} payment${pendingPayments > 1 ? 's' : ''} awaiting review`}
             >
               <Ionicons name="alert-circle-outline" size={18} color={colors.warningDark} />
               <Text style={{ fontSize: FontSize.sm, color: colors.warningDark, flex: 1, marginLeft: 8, fontWeight: '600' }}>
@@ -387,7 +393,7 @@ export default function GroupDetailRoute() {
               Collection Schedule
             </Text>
             {isGroupAdmin && (
-              <TouchableOpacity onPress={() => router.push(`/group/${groupId}/collection-order` as any)}>
+              <TouchableOpacity onPress={() => router.push(`/group/${groupId}/collection-order` as any)} accessibilityRole="button" accessibilityLabel="Edit collection order">
                 <Text style={{ fontSize: FontSize.sm, color: colors.primary, fontWeight: '600' }}>Edit Order</Text>
               </TouchableOpacity>
             )}
@@ -548,7 +554,7 @@ export default function GroupDetailRoute() {
               <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary }}>
                 Recent Payments
               </Text>
-              <TouchableOpacity onPress={() => router.push(`/group/${groupId}/payments` as any)}>
+              <TouchableOpacity onPress={() => router.push(`/group/${groupId}/payments` as any)} accessibilityRole="button" accessibilityLabel="See all payments">
                 <Text style={{ fontSize: FontSize.sm, color: colors.primary, fontWeight: '600' }}>See all</Text>
               </TouchableOpacity>
             </View>
@@ -579,6 +585,8 @@ export default function GroupDetailRoute() {
               disabled={joinMutation.isPending}
               style={[s.joinBtn, { backgroundColor: colors.primary }]}
               activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="Request to Join"
             >
               <Ionicons name="person-add-outline" size={18} color={colors.white} />
               <Text style={{ color: colors.white, fontSize: FontSize.md, fontWeight: '700', marginLeft: 8 }}>

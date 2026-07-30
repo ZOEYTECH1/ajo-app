@@ -10,7 +10,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   const { colors } = useTheme();
   return (
     <View style={{ marginBottom: 24 }}>
-      <Text style={{ fontSize: FontSize.sm, fontWeight: '800', color: colors.textPrimary, marginBottom: 8 }}>{title}</Text>
+      <Text accessibilityRole="header" style={{ fontSize: FontSize.sm, fontWeight: '800', color: colors.textPrimary, marginBottom: 8 }}>{title}</Text>
       {children}
     </View>
   );
@@ -39,10 +39,10 @@ export default function PrivacyRoute() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginLeft: 16 }}>
+        <Text accessibilityRole="header" style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginLeft: 16 }}>
           Privacy & Terms
         </Text>
       </View>
@@ -53,7 +53,7 @@ export default function PrivacyRoute() {
         </Text>
 
         {/* Privacy Policy */}
-        <Text style={{ fontSize: FontSize.lg, fontWeight: '900', color: colors.textPrimary, marginBottom: 20 }}>
+        <Text accessibilityRole="header" style={{ fontSize: FontSize.lg, fontWeight: '900', color: colors.textPrimary, marginBottom: 20 }}>
           Privacy Policy
         </Text>
 
@@ -99,7 +99,7 @@ export default function PrivacyRoute() {
         <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 28 }} />
 
         {/* Terms of Service */}
-        <Text style={{ fontSize: FontSize.lg, fontWeight: '900', color: colors.textPrimary, marginBottom: 20 }}>
+        <Text accessibilityRole="header" style={{ fontSize: FontSize.lg, fontWeight: '900', color: colors.textPrimary, marginBottom: 20 }}>
           Terms of Service
         </Text>
 
@@ -132,7 +132,7 @@ export default function PrivacyRoute() {
           <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary, marginBottom: 6 }}>
             Questions or data requests?
           </Text>
-          <TouchableOpacity onPress={() => Linking.openURL(`mailto:${CONTACT_EMAIL}`)}>
+          <TouchableOpacity onPress={() => Linking.openURL(`mailto:${CONTACT_EMAIL}`)} accessibilityRole="link" accessibilityLabel={`Send email to ${CONTACT_EMAIL}`}>
             <Text style={{ fontSize: FontSize.sm, color: colors.primary }}>{CONTACT_EMAIL}</Text>
           </TouchableOpacity>
         </View>

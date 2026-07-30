@@ -99,7 +99,7 @@ function MarkPaymentModal({
       <View style={m.overlay}>
         <View style={[m.sheet, { backgroundColor: colors.surface }]}>
           <View style={m.handle} />
-          <Text style={[m.title, { color: colors.textPrimary }]}>Mark Payment</Text>
+          <Text style={[m.title, { color: colors.textPrimary }]} accessibilityRole="header">Mark Payment</Text>
           <Text style={[m.sub, { color: colors.textSecondary }]}>
             {member.user.first_name} {member.user.last_name} · usual ₦{Number(member.personal_amount).toLocaleString()}/period
           </Text>
@@ -111,6 +111,8 @@ function MarkPaymentModal({
             placeholder="YYYY-MM-DD"
             style={[m.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
             placeholderTextColor={colors.textTertiary}
+            accessibilityLabel="Period date"
+            accessibilityHint="Enter date in YYYY-MM-DD format"
           />
 
           <Text style={[m.lbl, { color: colors.textSecondary, marginTop: 14 }]}>Amount received (₦)</Text>
@@ -121,6 +123,7 @@ function MarkPaymentModal({
             keyboardType="decimal-pad"
             style={[m.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
             placeholderTextColor={colors.textTertiary}
+            accessibilityLabel="Amount received"
           />
 
           <Text style={[m.lbl, { color: colors.textSecondary, marginTop: 14 }]}>Notes (optional)</Text>
@@ -131,6 +134,7 @@ function MarkPaymentModal({
             multiline
             style={[m.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border, height: 70 }]}
             placeholderTextColor={colors.textTertiary}
+            accessibilityLabel="Notes"
           />
 
           {!!err && <Text style={{ color: colors.error, fontSize: FontSize.xs, marginTop: 8 }}>{err}</Text>}
@@ -139,10 +143,12 @@ function MarkPaymentModal({
             onPress={handleMark}
             disabled={mutation.isPending}
             style={[m.btn, { backgroundColor: colors.success, marginTop: 20 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Mark as Paid"
           >
             <Text style={m.btnText}>{mutation.isPending ? 'Marking…' : 'Mark as Paid'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]}>
+          <TouchableOpacity onPress={onClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]} accessibilityRole="button" accessibilityLabel="Cancel">
             <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm }}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -179,7 +185,7 @@ function FlagAmountModal({
       <View style={m.overlay}>
         <View style={[m.sheet, { backgroundColor: colors.surface }]}>
           <View style={m.handle} />
-          <Text style={[m.title, { color: colors.textPrimary }]}>Flag Amount</Text>
+          <Text style={[m.title, { color: colors.textPrimary }]} accessibilityRole="header">Flag Amount</Text>
           <Text style={[m.sub, { color: colors.textSecondary }]}>
             Tell {member.user.first_name} why their amount of ₦{Number(member.personal_amount).toLocaleString()} is incorrect.
           </Text>
@@ -191,15 +197,18 @@ function FlagAmountModal({
             multiline
             style={[m.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border, height: 80 }]}
             placeholderTextColor={colors.textTertiary}
+            accessibilityLabel="Reason for flagging"
           />
           <TouchableOpacity
             onPress={() => mutation.mutate()}
             disabled={mutation.isPending}
             style={[m.btn, { backgroundColor: WARNING, marginTop: 20 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Flag and notify payer"
           >
             <Text style={m.btnText}>{mutation.isPending ? 'Flagging…' : 'Flag & Notify Payer'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]}>
+          <TouchableOpacity onPress={onClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]} accessibilityRole="button" accessibilityLabel="Cancel">
             <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm }}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -240,7 +249,7 @@ function CorrectAmountModal({
       <View style={m.overlay}>
         <View style={[m.sheet, { backgroundColor: colors.surface }]}>
           <View style={m.handle} />
-          <Text style={[m.title, { color: colors.textPrimary }]}>Correct Your Amount</Text>
+          <Text style={[m.title, { color: colors.textPrimary }]} accessibilityRole="header">Correct Your Amount</Text>
           <Text style={[m.sub, { color: colors.textSecondary }]}>
             Current: ₦{Number(member.personal_amount).toLocaleString()}/period
             {member.flag_reason ? `\nCollector's note: ${member.flag_reason}` : ''}
@@ -253,6 +262,7 @@ function CorrectAmountModal({
             placeholder="e.g. 1000"
             style={[m.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
             placeholderTextColor={colors.textTertiary}
+            accessibilityLabel="New contribution amount"
           />
           {!!err && <Text style={{ color: colors.error, fontSize: FontSize.xs, marginTop: 6 }}>{err}</Text>}
           <TouchableOpacity
@@ -264,10 +274,12 @@ function CorrectAmountModal({
             }}
             disabled={mutation.isPending}
             style={[m.btn, { backgroundColor: colors.primary, marginTop: 20 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Submit correction"
           >
             <Text style={m.btnText}>{mutation.isPending ? 'Submitting…' : 'Submit Correction'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]}>
+          <TouchableOpacity onPress={onClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]} accessibilityRole="button" accessibilityLabel="Cancel">
             <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm }}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -377,7 +389,7 @@ function DisputePaymentModal({
       <View style={m.overlay}>
         <View style={[m.sheet, { backgroundColor: colors.surface }]}>
           <View style={m.handle} />
-          <Text style={[m.title, { color: colors.textPrimary }]}>Dispute Payment</Text>
+          <Text style={[m.title, { color: colors.textPrimary }]} accessibilityRole="header">Dispute Payment</Text>
           <Text style={[m.sub, { color: colors.textSecondary }]}>
             ₦{Number(payment.amount).toLocaleString()} recorded for {payment.period_date}. Tell us why this is incorrect.
           </Text>
@@ -390,6 +402,7 @@ function DisputePaymentModal({
             multiline
             style={[m.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border, height: 90 }]}
             placeholderTextColor={colors.textTertiary}
+            accessibilityLabel="Dispute reason"
           />
 
           {/* Voice note */}
@@ -404,6 +417,8 @@ function DisputePaymentModal({
               onPress={startRecording}
               style={[m.voiceBtn, { backgroundColor: colors.primaryTint, borderColor: colors.primaryBorder }]}
               activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="Start recording voice note"
             >
               <Ionicons name="mic-outline" size={20} color={colors.primary} />
               <Text style={{ color: colors.primary, fontWeight: '700', fontSize: FontSize.sm, marginLeft: 8 }}>Start Recording</Text>
@@ -416,7 +431,7 @@ function DisputePaymentModal({
                 <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444', marginRight: 8 }} />
                 <Text style={{ color: '#EF4444', fontWeight: '700', fontSize: FontSize.sm }}>Recording  {fmt(recSeconds)}</Text>
               </View>
-              <TouchableOpacity onPress={stopRecording} style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TouchableOpacity onPress={stopRecording} style={{ flexDirection: 'row', alignItems: 'center' }} accessibilityRole="button" accessibilityLabel="Stop recording">
                 <Ionicons name="stop-circle-outline" size={20} color="#EF4444" />
                 <Text style={{ color: '#EF4444', fontWeight: '700', fontSize: FontSize.sm, marginLeft: 4 }}>Stop</Text>
               </TouchableOpacity>
@@ -425,13 +440,13 @@ function DisputePaymentModal({
 
           {!recording && !!audioUri && (
             <View style={[m.voiceBtn, { backgroundColor: colors.successLight, borderColor: colors.success, justifyContent: 'space-between' }]}>
-              <TouchableOpacity onPress={playAudio} style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TouchableOpacity onPress={playAudio} style={{ flexDirection: 'row', alignItems: 'center' }} accessibilityRole="button" accessibilityLabel={isPlaying ? 'Pause voice note' : 'Play voice note'}>
                 <Ionicons name={isPlaying ? 'pause-circle-outline' : 'play-circle-outline'} size={22} color={colors.success} />
                 <Text style={{ color: colors.success, fontWeight: '700', fontSize: FontSize.sm, marginLeft: 6 }}>
                   {isPlaying ? 'Playing…' : `Play  (${fmt(recSeconds)})`}
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={deleteAudio}>
+              <TouchableOpacity onPress={deleteAudio} accessibilityRole="button" accessibilityLabel="Delete voice note">
                 <Ionicons name="trash-outline" size={20} color={colors.error} />
               </TouchableOpacity>
             </View>
@@ -446,10 +461,12 @@ function DisputePaymentModal({
             }}
             disabled={mutation.isPending || !!recording}
             style={[m.btn, { backgroundColor: WARNING, marginTop: 20, opacity: (mutation.isPending || !!recording) ? 0.6 : 1 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Submit dispute"
           >
             <Text style={m.btnText}>{mutation.isPending ? 'Submitting…' : 'Submit Dispute'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]}>
+          <TouchableOpacity onPress={handleClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]} accessibilityRole="button" accessibilityLabel="Cancel">
             <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm }}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -484,7 +501,7 @@ function ReportCollectorModal({
       <View style={m.overlay}>
         <View style={[m.sheet, { backgroundColor: colors.surface }]}>
           <View style={m.handle} />
-          <Text style={[m.title, { color: colors.textPrimary }]}>Report Collector</Text>
+          <Text style={[m.title, { color: colors.textPrimary }]} accessibilityRole="header">Report Collector</Text>
           <Text style={[m.sub, { color: colors.textSecondary }]}>
             Describe your concern. This will be reviewed by our team.
           </Text>
@@ -496,6 +513,8 @@ function ReportCollectorModal({
             multiline
             style={[m.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border, height: 100 }]}
             placeholderTextColor={colors.textTertiary}
+            accessibilityLabel="Report reason"
+            accessibilityHint="Minimum 10 characters"
           />
           {!!err && <Text style={{ color: colors.error, fontSize: FontSize.xs, marginTop: 6 }}>{err}</Text>}
           <TouchableOpacity
@@ -505,10 +524,12 @@ function ReportCollectorModal({
             }}
             disabled={mutation.isPending}
             style={[m.btn, { backgroundColor: colors.error, marginTop: 20 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Submit report"
           >
             <Text style={m.btnText}>{mutation.isPending ? 'Submitting…' : 'Submit Report'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]}>
+          <TouchableOpacity onPress={onClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]} accessibilityRole="button" accessibilityLabel="Cancel">
             <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm }}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -544,7 +565,7 @@ function EndCycleModal({
           <View style={[m.iconWrap, { backgroundColor: colors.errorLight }]}>
             <Ionicons name="stop-circle-outline" size={32} color={colors.error} />
           </View>
-          <Text style={[m.title, { color: colors.textPrimary, marginTop: 12 }]}>End Current Cycle?</Text>
+          <Text style={[m.title, { color: colors.textPrimary, marginTop: 12 }]} accessibilityRole="header">End Current Cycle?</Text>
           <Text style={[m.sub, { color: colors.textSecondary }]}>
             This will mark the active cycle as completed. You can restart a new cycle afterwards.
           </Text>
@@ -552,10 +573,12 @@ function EndCycleModal({
             onPress={() => mutation.mutate()}
             disabled={mutation.isPending}
             style={[m.btn, { backgroundColor: colors.error, marginTop: 20 }]}
+            accessibilityRole="button"
+            accessibilityLabel="End cycle"
           >
             <Text style={m.btnText}>{mutation.isPending ? 'Ending…' : 'End Cycle'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]}>
+          <TouchableOpacity onPress={onClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]} accessibilityRole="button" accessibilityLabel="Cancel">
             <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm }}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -599,7 +622,7 @@ function RestartCycleModal({
       <View style={m.overlay}>
         <View style={[m.sheet, { backgroundColor: colors.surface }]}>
           <View style={m.handle} />
-          <Text style={[m.title, { color: colors.textPrimary }]}>Restart Cycle</Text>
+          <Text style={[m.title, { color: colors.textPrimary }]} accessibilityRole="header">Restart Cycle</Text>
           <Text style={[m.sub, { color: colors.textSecondary }]}>
             Start a new contribution cycle. Leave dates blank to use today.
           </Text>
@@ -611,6 +634,8 @@ function RestartCycleModal({
             placeholder="YYYY-MM-DD (leave blank for today)"
             style={[m.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
             placeholderTextColor={colors.textTertiary}
+            accessibilityLabel="Start date"
+            accessibilityHint="Enter date in YYYY-MM-DD format, leave blank for today"
           />
 
           {isFixed && (
@@ -622,6 +647,8 @@ function RestartCycleModal({
                 placeholder="YYYY-MM-DD"
                 style={[m.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
                 placeholderTextColor={colors.textTertiary}
+                accessibilityLabel="End date"
+                accessibilityHint="Enter date in YYYY-MM-DD format"
               />
             </>
           )}
@@ -632,10 +659,12 @@ function RestartCycleModal({
             onPress={() => mutation.mutate()}
             disabled={mutation.isPending}
             style={[m.btn, { backgroundColor: colors.success, marginTop: 20 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Restart cycle"
           >
             <Text style={m.btnText}>{mutation.isPending ? 'Restarting…' : 'Restart Cycle'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]}>
+          <TouchableOpacity onPress={onClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]} accessibilityRole="button" accessibilityLabel="Cancel">
             <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm }}>Cancel</Text>
           </TouchableOpacity>
         </View>
@@ -766,7 +795,7 @@ export default function ThriftGroupDetail() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-          <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}>
+          <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
             <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
           <View style={{ width: 24 }} />
@@ -804,23 +833,24 @@ export default function ThriftGroupDetail() {
 
       {/* Header */}
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text
           style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.textPrimary, flex: 1, marginHorizontal: 12 }}
           numberOfLines={1}
+          accessibilityRole="header"
         >
           {group.name}
         </Text>
         {isOrgAdmin ? (
           <View style={{ width: 22 }} />
         ) : isCollector ? (
-          <TouchableOpacity onPress={shareInvite} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}>
+          <TouchableOpacity onPress={shareInvite} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Share invite code">
             <Ionicons name="share-outline" size={22} color={colors.primary} />
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity onPress={() => setKebabOpen(true)} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}>
+          <TouchableOpacity onPress={() => setKebabOpen(true)} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="More options">
             <Ionicons name="ellipsis-vertical" size={22} color={colors.textPrimary} />
           </TouchableOpacity>
         )}
@@ -833,6 +863,8 @@ export default function ThriftGroupDetail() {
             <TouchableOpacity
               style={s.kebabItem}
               onPress={() => { setKebabOpen(false); setReportOpen(true); }}
+              accessibilityRole="button"
+              accessibilityLabel="Report collector"
             >
               <Ionicons name="flag-outline" size={18} color={colors.error} />
               <Text style={{ fontSize: FontSize.sm, color: colors.error, marginLeft: 10, fontWeight: '600' }}>
@@ -920,6 +952,8 @@ export default function ThriftGroupDetail() {
                 <TouchableOpacity
                   onPress={() => setEndCycleOpen(true)}
                   style={[s.cycleBtn, { backgroundColor: colors.errorLight }]}
+                  accessibilityRole="button"
+                  accessibilityLabel="End cycle"
                 >
                   <Ionicons name="stop-circle-outline" size={15} color={colors.error} />
                   <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.error, marginLeft: 5 }}>End Cycle</Text>
@@ -928,6 +962,8 @@ export default function ThriftGroupDetail() {
                 <TouchableOpacity
                   onPress={() => setRestartOpen(true)}
                   style={[s.cycleBtn, { backgroundColor: colors.successLight }]}
+                  accessibilityRole="button"
+                  accessibilityLabel={cycle ? 'Restart cycle' : 'Start cycle'}
                 >
                   <Ionicons name="play-circle-outline" size={15} color={colors.success} />
                   <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.success, marginLeft: 5 }}>
@@ -993,6 +1029,8 @@ export default function ThriftGroupDetail() {
                             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                             style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 5, paddingVertical: 2, borderRadius: 99,
                               backgroundColor: mem.user.is_kyc_verified ? colors.successLight : colors.border }}
+                            accessibilityRole="button"
+                            accessibilityLabel={mem.user.is_kyc_verified ? `Remove KYC verification for ${mem.user.first_name} ${mem.user.last_name}` : `Mark ${mem.user.first_name} ${mem.user.last_name} as KYC verified`}
                           >
                             <Ionicons
                               name={mem.user.is_kyc_verified ? 'shield-checkmark' : 'shield-outline'}
@@ -1084,6 +1122,8 @@ export default function ThriftGroupDetail() {
                           <TouchableOpacity
                             onPress={toggleExpand}
                             style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 10, paddingVertical: 6, borderRadius: Radius.md, backgroundColor: colors.background }}
+                            accessibilityRole="button"
+                            accessibilityLabel={isExpanded ? 'Show fewer payments' : `View all ${memberPayments.length} payments`}
                           >
                             <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.primary }}>
                               {isExpanded ? 'Show less' : `View all ${memberPayments.length} payments`}
@@ -1105,6 +1145,9 @@ export default function ThriftGroupDetail() {
               <TouchableOpacity
                 style={[s.tab, activeTab === 'pending' && { borderBottomColor: colors.primary, borderBottomWidth: 2 }]}
                 onPress={() => setActiveTab('pending')}
+                accessibilityRole="button"
+                accessibilityLabel={`Pending (${pendingMembers.length})`}
+                accessibilityState={{ selected: activeTab === 'pending' }}
               >
                 <Text style={[s.tabText, { color: activeTab === 'pending' ? colors.primary : colors.textSecondary }]}>
                   Pending ({pendingMembers.length})
@@ -1113,6 +1156,9 @@ export default function ThriftGroupDetail() {
               <TouchableOpacity
                 style={[s.tab, activeTab === 'payments' && { borderBottomColor: colors.primary, borderBottomWidth: 2 }]}
                 onPress={() => setActiveTab('payments')}
+                accessibilityRole="button"
+                accessibilityLabel="Payments"
+                accessibilityState={{ selected: activeTab === 'payments' }}
               >
                 <Text style={[s.tabText, { color: activeTab === 'payments' ? colors.primary : colors.textSecondary }]}>
                   Payments
@@ -1168,6 +1214,8 @@ export default function ThriftGroupDetail() {
                           onPress={() => reviewMutation.mutate({ memberId: mem.id, action: 'approve' })}
                           disabled={reviewMutation.isPending}
                           style={[s.actionBtn, { backgroundColor: colors.successLight, flex: 1 }]}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Approve ${mem.user.first_name} ${mem.user.last_name}`}
                         >
                           <Ionicons name="checkmark" size={15} color={colors.success} />
                           <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.success, marginLeft: 4 }}>Approve</Text>
@@ -1177,6 +1225,8 @@ export default function ThriftGroupDetail() {
                           <TouchableOpacity
                             onPress={() => setFlagTarget(mem)}
                             style={[s.actionBtn, { backgroundColor: WARNING_LIGHT, flex: 1 }]}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Flag amount for ${mem.user.first_name} ${mem.user.last_name}`}
                           >
                             <Ionicons name="flag-outline" size={15} color={WARNING} />
                             <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: WARNING, marginLeft: 4 }}>Flag Amount</Text>
@@ -1187,6 +1237,8 @@ export default function ThriftGroupDetail() {
                           onPress={() => reviewMutation.mutate({ memberId: mem.id, action: 'reject' })}
                           disabled={reviewMutation.isPending}
                           style={[s.actionBtn, { backgroundColor: colors.errorLight, flex: 1 }]}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Reject ${mem.user.first_name} ${mem.user.last_name}`}
                         >
                           <Ionicons name="close" size={15} color={colors.error} />
                           <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.error, marginLeft: 4 }}>Reject</Text>
@@ -1232,6 +1284,8 @@ export default function ThriftGroupDetail() {
                           <TouchableOpacity
                             onPress={() => setMarkTarget(mem)}
                             style={[s.markBtn, { backgroundColor: colors.success }]}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Mark ${mem.user.first_name} ${mem.user.last_name} as paid`}
                           >
                             <Ionicons name="checkmark" size={14} color="#fff" />
                             <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: '#fff', marginLeft: 3 }}>Mark Paid</Text>
@@ -1262,6 +1316,8 @@ export default function ThriftGroupDetail() {
                                   onPress={() => unmarkMutation.mutate(p.id)}
                                   disabled={unmarkMutation.isPending}
                                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                  accessibilityRole="button"
+                                  accessibilityLabel="Delete payment record"
                                 >
                                   <Ionicons name="trash-outline" size={14} color={colors.error} />
                                 </TouchableOpacity>
@@ -1316,6 +1372,8 @@ export default function ThriftGroupDetail() {
                     <TouchableOpacity
                       onPress={() => setCorrectOpen(true)}
                       style={[s.actionBtn, { backgroundColor: colors.primary, marginTop: 10, justifyContent: 'center' }]}
+                      accessibilityRole="button"
+                      accessibilityLabel="Correct my amount"
                     >
                       <Ionicons name="create-outline" size={16} color="#fff" />
                       <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: '#fff', marginLeft: 6 }}>Correct My Amount</Text>
@@ -1395,6 +1453,8 @@ export default function ThriftGroupDetail() {
                           onPress={() => confirmMutation.mutate(p.id)}
                           disabled={confirmMutation.isPending}
                           style={[s.actionBtn, { backgroundColor: colors.successLight, flex: 1, justifyContent: 'center' }]}
+                          accessibilityRole="button"
+                          accessibilityLabel="Confirm payment"
                         >
                           <Ionicons name="checkmark-done" size={14} color={colors.success} />
                           <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.success, marginLeft: 4 }}>
@@ -1405,6 +1465,8 @@ export default function ThriftGroupDetail() {
                           <TouchableOpacity
                             onPress={() => setDisputeTarget(p)}
                             style={[s.actionBtn, { backgroundColor: WARNING_LIGHT, flex: 1, justifyContent: 'center' }]}
+                            accessibilityRole="button"
+                            accessibilityLabel="Dispute payment"
                           >
                             <Ionicons name="alert-circle-outline" size={14} color={WARNING} />
                             <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: WARNING, marginLeft: 4 }}>

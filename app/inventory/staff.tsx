@@ -92,11 +92,11 @@ export default function StaffScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 16 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Team Members</Text>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Team Members</Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
             Manage who has access to this location
           </Text>
@@ -106,6 +106,7 @@ export default function StaffScreen() {
             onPress={() => setInviteModal(true)}
             style={{ backgroundColor: '#FFF3E0', borderRadius: Radius.md, padding: 8 }}
             hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}
+            accessibilityRole="button" accessibilityLabel="Invite team member"
           >
             <Ionicons name="person-add-outline" size={20} color={INV} />
           </TouchableOpacity>
@@ -146,6 +147,9 @@ export default function StaffScreen() {
                     onPress={() => handleRemove(member)}
                     hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}
                     style={{ padding: 6 }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Remove ${member.user_name}`}
+                    accessibilityHint="Double tap to remove this team member"
                   >
                     <Ionicons name="person-remove-outline" size={20} color={colors.textTertiary} />
                   </TouchableOpacity>
@@ -193,6 +197,7 @@ export default function StaffScreen() {
             autoCapitalize="none"
             autoFocus
             style={[s.modalInput, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }]}
+            accessibilityLabel="Staff member email address"
           />
 
           <Text style={[s.modalLabel, { color: colors.textSecondary, marginTop: 16 }]}>Role</Text>
@@ -211,6 +216,9 @@ export default function StaffScreen() {
                   backgroundColor: active ? '#FFF3E0' : colors.background,
                   opacity: disabled ? 0.4 : 1,
                 }]}
+                accessibilityRole="button"
+                accessibilityLabel={`Role: ${r.label}`}
+                accessibilityState={{ selected: active, disabled }}
               >
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: active ? INV : colors.textPrimary }}>
@@ -229,6 +237,7 @@ export default function StaffScreen() {
             onPress={handleInvite}
             disabled={inviting}
             style={[s.saveBtn, { backgroundColor: INV, opacity: inviting ? 0.6 : 1, marginTop: 20 }]}
+            accessibilityRole="button" accessibilityLabel="Send invite"
           >
             {inviting
               ? <ActivityIndicator color="#fff" />

@@ -63,10 +63,10 @@ export default function CollectionOrderRoute() {
 
       {/* Header */}
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>
+        <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">
           Collection Order
         </Text>
         <View style={{ width: 24 }} />
@@ -115,6 +115,8 @@ export default function CollectionOrderRoute() {
                     disabled={idx === 0}
                     style={[s.arrowBtn, { opacity: idx === 0 ? 0.25 : 1 }]}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Move ${slot.full_name} up`}
                   >
                     <Ionicons name="chevron-up" size={20} color={colors.primary} />
                   </TouchableOpacity>
@@ -123,6 +125,8 @@ export default function CollectionOrderRoute() {
                     disabled={idx === order.length - 1}
                     style={[s.arrowBtn, { opacity: idx === order.length - 1 ? 0.25 : 1 }]}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Move ${slot.full_name} down`}
                   >
                     <Ionicons name="chevron-down" size={20} color={colors.primary} />
                   </TouchableOpacity>

@@ -148,7 +148,7 @@ export default function CategoryDetailScreen() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={{ fontSize: 20, marginLeft: 14 }}>{emoji}</Text>
@@ -160,6 +160,7 @@ export default function CategoryDetailScreen() {
           disabled={deleting}
           hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}
           style={{ paddingHorizontal: 4 }}
+          accessibilityRole="button" accessibilityLabel="Category options"
         >
           {deleting
             ? <ActivityIndicator size="small" color={colors.textSecondary} />
@@ -182,11 +183,13 @@ export default function CategoryDetailScreen() {
               placeholder="e.g. Beverages"
               placeholderTextColor={colors.textTertiary}
               autoFocus
+              accessibilityLabel="Category name"
             />
             <TouchableOpacity
               onPress={() => saveCatEdit()}
               disabled={savingCat || !editName.trim()}
               style={[s.modalSaveBtn, { backgroundColor: '#E65100', opacity: (savingCat || !editName.trim()) ? 0.5 : 1 }]}
+              accessibilityRole="button" accessibilityLabel="Save category name"
             >
               {savingCat
                 ? <ActivityIndicator color="#fff" />
@@ -230,7 +233,7 @@ export default function CategoryDetailScreen() {
                       )}
                     </View>
                   </View>
-                  <TouchableOpacity onPress={() => removeField(f.name)} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }}>
+                  <TouchableOpacity onPress={() => removeField(f.name)} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }} accessibilityRole="button" accessibilityLabel={`Remove field: ${f.name.replace(/_/g, ' ')}`}>
                     <Ionicons name="trash-outline" size={18} color={colors.error} />
                   </TouchableOpacity>
                 </View>
@@ -342,9 +345,10 @@ export default function CategoryDetailScreen() {
               style={{ flex: 1, marginLeft: 8, fontSize: FontSize.sm, color: colors.textPrimary }}
               returnKeyType="search"
               clearButtonMode="while-editing"
+              accessibilityLabel="Search products"
             />
             {search.length > 0 && (
-              <TouchableOpacity onPress={() => setSearch('')} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }}>
+              <TouchableOpacity onPress={() => setSearch('')} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }} accessibilityRole="button" accessibilityLabel="Clear search">
                 <Ionicons name="close-circle" size={16} color={colors.textTertiary} />
               </TouchableOpacity>
             )}
@@ -358,6 +362,7 @@ export default function CategoryDetailScreen() {
                   key={f}
                   onPress={() => setStockFilter(f)}
                   style={[s.chip, { backgroundColor: active ? '#E65100' : colors.background, borderColor: active ? '#E65100' : colors.border }]}
+                  accessibilityRole="button" accessibilityLabel={`Filter: ${label}`} accessibilityState={{ selected: active }}
                 >
                   <Text style={{ fontSize: 11, fontWeight: '600', color: active ? '#fff' : colors.textSecondary }}>{label}</Text>
                 </TouchableOpacity>
@@ -421,6 +426,8 @@ export default function CategoryDetailScreen() {
                     { borderBottomColor: colors.border, borderBottomWidth: isLast ? 0 : 1 },
                     idx % 2 === 1 && { backgroundColor: colors.background },
                   ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${p.name}, ${p.quantity} in stock`}
                 >
                   <View style={{ flex: 1, paddingRight: 6 }}>
                     <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }} numberOfLines={1}>
@@ -456,6 +463,7 @@ export default function CategoryDetailScreen() {
         onPress={() => router.push(`/inventory/${catId}/add-product` as any)}
         style={[s.fab, { backgroundColor: '#E65100' }]}
         activeOpacity={0.85}
+        accessibilityRole="button" accessibilityLabel="Add new product"
       >
         <Ionicons name="add" size={28} color="#fff" />
       </TouchableOpacity>

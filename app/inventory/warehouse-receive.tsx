@@ -79,11 +79,11 @@ export default function WarehouseReceiveScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 16 }}>
-          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>Receive Goods</Text>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Receive Goods</Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>Record incoming stock into the warehouse</Text>
         </View>
       </View>
@@ -94,6 +94,9 @@ export default function WarehouseReceiveScreen() {
         <TouchableOpacity
           onPress={() => setProductPickerModal(true)}
           style={[s.selectorRow, { backgroundColor: colors.surface, borderColor: selectedProduct ? INV : colors.border }]}
+          accessibilityRole="button"
+          accessibilityLabel={selectedProduct ? `Selected product: ${selectedProduct.name}` : 'Choose product'}
+          accessibilityHint="Double tap to open the product picker"
         >
           <Ionicons name="cube-outline" size={18} color={selectedProduct ? INV : colors.textTertiary} />
           <Text style={{ flex: 1, marginLeft: 10, fontSize: FontSize.sm, color: selectedProduct ? colors.textPrimary : colors.textTertiary }}>
@@ -117,11 +120,13 @@ export default function WarehouseReceiveScreen() {
             placeholder="e.g. 50"
             placeholderTextColor={colors.textTertiary}
             style={{ flex: 1, fontSize: FontSize.md, color: colors.textPrimary }}
+            accessibilityLabel="Quantity received"
+            accessibilityHint="Enter the number of units received"
           />
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary }}>units</Text>
         </View>
         {selectedProduct && !!quantity && (
-          <Text style={{ fontSize: FontSize.xs, color: '#2E7D32', marginTop: 4 }}>
+          <Text style={{ fontSize: FontSize.xs, color: '#15803D', marginTop: 4 }}>
             New stock will be: {selectedProduct.quantity + (parseInt(quantity, 10) || 0)} units
           </Text>
         )}
@@ -134,6 +139,8 @@ export default function WarehouseReceiveScreen() {
           placeholder="e.g. Dangote Ltd, Nestle Nigeria"
           placeholderTextColor={colors.textTertiary}
           style={[s.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.textPrimary }]}
+          accessibilityLabel="Supplier name"
+          accessibilityHint="Optional name of the supplier"
         />
 
         {/* Reference */}
@@ -145,6 +152,8 @@ export default function WarehouseReceiveScreen() {
           placeholderTextColor={colors.textTertiary}
           autoCapitalize="characters"
           style={[s.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.textPrimary, fontFamily: 'monospace' }]}
+          accessibilityLabel="GRN or PO reference number"
+          accessibilityHint="Optional goods received note or purchase order reference"
         />
 
         {/* Note */}
@@ -156,6 +165,8 @@ export default function WarehouseReceiveScreen() {
           placeholderTextColor={colors.textTertiary}
           multiline
           style={[s.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.textPrimary, minHeight: 70, textAlignVertical: 'top' }]}
+          accessibilityLabel="Notes"
+          accessibilityHint="Optional notes about this receipt"
         />
 
         <TouchableOpacity
@@ -163,6 +174,10 @@ export default function WarehouseReceiveScreen() {
           disabled={isPending}
           style={[s.saveBtn, { backgroundColor: INV, opacity: isPending ? 0.6 : 1 }]}
           activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="Confirm receipt"
+          accessibilityHint="Records the goods as received and adds to stock"
+          accessibilityState={{ disabled: isPending }}
         >
           {isPending
             ? <ActivityIndicator color="#fff" />
@@ -191,6 +206,8 @@ export default function WarehouseReceiveScreen() {
                       key={p.id}
                       onPress={() => { setSelectedProduct(p); setProductPickerModal(false); }}
                       style={[s.productRow, { borderBottomColor: colors.border }]}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${p.name}, ${p.quantity} in stock`}
                     >
                       <View style={{ flex: 1 }}>
                         <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textPrimary }}>{p.name}</Text>
@@ -212,6 +229,8 @@ export default function WarehouseReceiveScreen() {
             <TouchableOpacity
               onPress={() => setProductPickerModal(false)}
               style={[s.saveBtn, { backgroundColor: colors.background, marginTop: 12 }]}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel"
             >
               <Text style={{ color: colors.textPrimary, fontWeight: '700' }}>Cancel</Text>
             </TouchableOpacity>

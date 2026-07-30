@@ -133,10 +133,10 @@ export default function AddProductScreen() {
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.background }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       {/* Header */}
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginLeft: 14, flex: 1 }}>
+        <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginLeft: 14, flex: 1 }} accessibilityRole="header">
           Add a Product
         </Text>
       </View>
@@ -152,9 +152,9 @@ export default function AddProductScreen() {
 
         {/* Product image */}
         <Text style={[s.label, { color: colors.textSecondary }]}>Product Photo (optional)</Text>
-        <TouchableOpacity onPress={pickImage} activeOpacity={0.8} style={[s.imagePicker, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <TouchableOpacity onPress={pickImage} activeOpacity={0.8} style={[s.imagePicker, { backgroundColor: colors.surface, borderColor: colors.border }]} accessibilityRole="button" accessibilityLabel="Add product photo">
           {imageUri ? (
-            <Image source={{ uri: imageUri }} style={s.productImage} />
+            <Image source={{ uri: imageUri }} style={s.productImage} accessible={true} accessibilityRole="image" accessibilityLabel="Product photo" />
           ) : (
             <View style={{ alignItems: 'center' }}>
               <Ionicons name="camera-outline" size={28} color={colors.textTertiary} />
@@ -172,6 +172,7 @@ export default function AddProductScreen() {
           placeholderTextColor={colors.textTertiary}
           style={[s.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.textPrimary }]}
           autoFocus
+          accessibilityLabel="Product name"
         />
 
         {/* Price */}
@@ -185,6 +186,8 @@ export default function AddProductScreen() {
             placeholder="0.00"
             placeholderTextColor={colors.textTertiary}
             style={{ flex: 1, fontSize: FontSize.md, color: colors.textPrimary }}
+            accessibilityLabel="Selling price"
+            accessibilityHint="Enter price in Naira"
           />
         </View>
 
@@ -198,6 +201,7 @@ export default function AddProductScreen() {
             placeholder="0"
             placeholderTextColor={colors.textTertiary}
             style={{ flex: 1, fontSize: FontSize.md, color: colors.textPrimary }}
+            accessibilityLabel="Discount percentage"
           />
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary }}>%</Text>
         </View>
@@ -220,6 +224,7 @@ export default function AddProductScreen() {
             placeholder="0"
             placeholderTextColor={colors.textTertiary}
             style={{ flex: 1, fontSize: FontSize.md, color: colors.textPrimary }}
+            accessibilityLabel="Quantity"
           />
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary }}>pieces / units</Text>
         </View>
@@ -238,13 +243,14 @@ export default function AddProductScreen() {
             placeholderTextColor={colors.textTertiary}
             autoCapitalize="none"
             style={{ flex: 1, fontSize: FontSize.sm, color: colors.textPrimary }}
+            accessibilityLabel="Barcode"
           />
           {barcode ? (
-            <TouchableOpacity onPress={() => setBarcode('')} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }}>
+            <TouchableOpacity onPress={() => setBarcode('')} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }} accessibilityRole="button" accessibilityLabel="Clear barcode">
               <Ionicons name="close-circle" size={18} color={colors.textTertiary} />
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity onPress={openScanner} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }}>
+            <TouchableOpacity onPress={openScanner} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }} accessibilityRole="button" accessibilityLabel="Scan barcode">
               <Ionicons name="camera-outline" size={20} color={INV} />
             </TouchableOpacity>
           )}
@@ -261,7 +267,7 @@ export default function AddProductScreen() {
                 onBarcodeScanned={handleScan}
               >
                 <View style={s.scanOverlay}>
-                  <TouchableOpacity onPress={() => setScannerVisible(false)} style={s.scanCloseBtn}>
+                  <TouchableOpacity onPress={() => setScannerVisible(false)} style={s.scanCloseBtn} accessibilityRole="button" accessibilityLabel="Close scanner">
                     <Ionicons name="close" size={28} color="#fff" />
                   </TouchableOpacity>
                   <View style={s.scanFrame} />
@@ -280,6 +286,7 @@ export default function AddProductScreen() {
         <TouchableOpacity
           onPress={() => setShowExpiryPicker(true)}
           style={[s.inputRow, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          accessibilityRole="button" accessibilityLabel={expiryDate ? `Expiry date: ${new Date(expiryDate + 'T00:00:00').toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}` : 'Set expiry date'}
         >
           <Ionicons name="calendar-outline" size={18} color={expiryDate ? INV : colors.textTertiary} style={{ marginRight: 8 }} />
           <Text style={{ flex: 1, fontSize: FontSize.sm, color: expiryDate ? colors.textPrimary : colors.textTertiary }}>

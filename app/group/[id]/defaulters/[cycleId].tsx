@@ -114,10 +114,10 @@ export default function DefaultersScreen() {
 
       {/* Header */}
       <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} numberOfLines={1}>
+        <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} numberOfLines={1} accessibilityRole="header">
           {title}
         </Text>
         <View style={{ width: 24 }} />
@@ -138,7 +138,7 @@ export default function DefaultersScreen() {
             <Text style={{ color: colors.error, fontSize: FontSize.sm, marginLeft: 8, flex: 1 }}>
               Could not load defaulters. Pull down to retry.
             </Text>
-            <TouchableOpacity onPress={() => refetch()}>
+            <TouchableOpacity onPress={() => refetch()} accessibilityRole="button" accessibilityLabel="Retry">
               <Text style={{ color: colors.error, fontWeight: '700', fontSize: FontSize.sm }}>Retry</Text>
             </TouchableOpacity>
           </View>

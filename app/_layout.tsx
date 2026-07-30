@@ -129,6 +129,9 @@ function BottomTabBar() {
             onPress={() => router.replace(tab.route as any)}
             style={ts.tab}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={tab.label}
+            accessibilityState={{ selected: active }}
           >
             <View style={{ position: 'relative' }}>
               <Ionicons

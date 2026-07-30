@@ -41,6 +41,7 @@ export default function SubmitPaymentRoute() {
       const data = err.response?.data;
       const msg =
         data?.amount_entered?.[0] ??
+        data?.receipt_image?.[0] ??
         data?.non_field_errors?.[0] ??
         data?.detail ??
         'Something went wrong. Please try again.';

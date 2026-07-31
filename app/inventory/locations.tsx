@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView,
   StyleSheet, Alert, ActivityIndicator, Modal, TextInput,
@@ -8,10 +8,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/hooks/useTheme';
 import { FontSize, Radius, Shadow } from '../../src/theme';
-import { getBusinesses, createBusiness, type InventoryBusinessFull } from '../../src/services/inventoryService';
+import {
+  getBusinesses, createBusiness, createBranch,
+  type InventoryBusinessFull, type BusinessMode,
+} from '../../src/services/inventoryService';
 import { useInventoryStore } from '../../src/store/useAppStore';
 
 const INV = '#E65100';
+
+type CreationMode = 'retail' | 'warehouse' | 'branch';
 
 export default function LocationsScreen() {
   const { colors } = useTheme();
@@ -19,26 +24,54 @@ export default function LocationsScreen() {
   const qc = useQueryClient();
   const { selectedBusinessId, setSelectedBusiness } = useInventoryStore();
 
-  const [addModal, setAddModal]   = useState(false);
-  const [newName, setNewName]     = useState('');
-  const [newMode, setNewMode]     = useState<'retail' | 'warehouse'>('retail');
+  const [addModal, setAddModal]             = useState(false);
+  const [newName, setNewName]               = useState('');
+  const [creationMode, setCreationMode]     = useState<CreationMode>('retail');
+  const [parentPickerOpen, setParentPickerOpen] = useState(false);
+  const [selectedParentId, setSelectedParentId] = useState<number | null>(null);
 
   const { data: businesses, isLoading } = useQuery({
     queryKey: ['inventory-businesses'],
     queryFn: getBusinesses,
   });
 
+  // Businesses the user owns (eligible as parent for a new branch)
+  const ownedParents = useMemo(
+    () => (businesses ?? []).filter(
+      (b) => b.my_role === 'owner' && b.mode !== 'branch'
+    ),
+    [businesses],
+  );
+
+  const selectedParent = useMemo(
+    () => ownedParents.find((b) => b.id === selectedParentId) ?? null,
+    [ownedParents, selectedParentId],
+  );
+
   const { mutate: doCreate, isPending: creating } = useMutation({
-    mutationFn: () => createBusiness({ name: newName.trim(), mode: newMode }),
+    mutationFn: () => {
+      if (creationMode === 'branch') {
+        if (!selectedParentId) throw new Error('Select a parent business first.');
+        return createBranch({ name: newName.trim(), parent_business_id: selectedParentId });
+      }
+      return createBusiness({ name: newName.trim(), mode: creationMode });
+    },
     onSuccess: (biz) => {
       qc.invalidateQueries({ queryKey: ['inventory-businesses'] });
       qc.invalidateQueries({ queryKey: ['inventory-categories'] });
       setSelectedBusiness(biz.id, biz.mode, biz.my_role, biz.name);
-      setAddModal(false);
-      setNewName('');
+      closeModal();
     },
-    onError: () => Alert.alert('Error', 'Could not create business location. Try again.'),
+    onError: (e: any) => Alert.alert('Error', e?.response?.data?.detail || 'Could not create location. Try again.'),
   });
+
+  const closeModal = () => {
+    setAddModal(false);
+    setNewName('');
+    setCreationMode('retail');
+    setSelectedParentId(null);
+    setParentPickerOpen(false);
+  };
 
   const selectBusiness = (biz: InventoryBusinessFull) => {
     setSelectedBusiness(biz.id, biz.mode, biz.my_role, biz.name);
@@ -47,15 +80,108 @@ export default function LocationsScreen() {
     router.back();
   };
 
-  const modeBadge = (mode: 'retail' | 'warehouse') =>
-    mode === 'warehouse'
-      ? { label: 'Warehouse', bg: '#E3F2FD', color: '#1565C0', icon: 'cube-outline' as const }
-      : { label: 'Retail',    bg: '#E8F5E9', color: '#2E7D32', icon: 'storefront-outline' as const };
+  // Group businesses: parent → its branches
+  const grouped = useMemo(() => {
+    const list = businesses ?? [];
+    const parents = list.filter((b) => !b.parent_business);
+    return parents.map((p) => ({
+      parent: p,
+      branches: list.filter((b) => b.parent_business === p.id),
+    }));
+  }, [businesses]);
+
+  const modeBadge = (mode: BusinessMode) => {
+    if (mode === 'warehouse') return { label: 'Warehouse', bg: '#E3F2FD', color: '#1565C0', icon: 'cube-outline' as const };
+    if (mode === 'branch')    return { label: 'Branch',    bg: '#F3E5F5', color: '#6A1B9A', icon: 'git-branch-outline' as const };
+    return                           { label: 'Retail',    bg: '#E8F5E9', color: '#2E7D32', icon: 'storefront-outline' as const };
+  };
 
   const roleBadge = (role: string) =>
-    role === 'owner'   ? { label: 'Owner',   bg: '#FFF3E0', color: INV }
-    : role === 'manager' ? { label: 'Manager', bg: '#F3E5F5', color: '#6A1B9A' }
-    :                      { label: 'Staff',   bg: '#ECEFF1', color: '#455A64' };
+    role === 'owner'        ? { label: 'Owner',        bg: '#FFF3E0', color: INV }
+    : role === 'manager'    ? { label: 'Manager',      bg: '#F3E5F5', color: '#6A1B9A' }
+    : role === 'branch_admin' ? { label: 'Branch Admin', bg: '#E8EAF6', color: '#283593' }
+    :                           { label: 'Staff',        bg: '#ECEFF1', color: '#455A64' };
+
+  const renderCard = (biz: InventoryBusinessFull, indented = false) => {
+    const mode = modeBadge(biz.mode);
+    const role = roleBadge(biz.my_role);
+    const isSelected = biz.id === selectedBusinessId;
+
+    return (
+      <TouchableOpacity
+        key={biz.id}
+        onPress={() => selectBusiness(biz)}
+        activeOpacity={0.82}
+        style={[
+          s.card,
+          indented && s.cardIndented,
+          {
+            backgroundColor: colors.surface,
+            borderColor: isSelected ? INV : colors.border,
+            borderWidth: isSelected ? 2 : 1,
+            ...Shadow.card(colors.black),
+          },
+        ]}
+        accessibilityRole="button"
+        accessibilityLabel={`Switch to ${biz.name}`}
+        accessibilityState={{ selected: isSelected }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          <View style={[s.modeIcon, { backgroundColor: mode.bg }]}>
+            <Ionicons name={mode.icon} size={22} color={mode.color} />
+          </View>
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary }} numberOfLines={1}>
+              {biz.name}
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
+              <View style={[s.badge, { backgroundColor: mode.bg }]}>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: mode.color }}>{mode.label}</Text>
+              </View>
+              <View style={[s.badge, { backgroundColor: role.bg }]}>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: role.color }}>{role.label}</Text>
+              </View>
+              {biz.branch_count > 0 && (
+                <View style={[s.badge, { backgroundColor: '#FFF3E0' }]}>
+                  <Text style={{ fontSize: 11, fontWeight: '700', color: INV }}>
+                    {biz.branch_count} {biz.branch_count === 1 ? 'branch' : 'branches'}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+          {isSelected && <Ionicons name="checkmark-circle" size={22} color={INV} style={{ marginLeft: 8 }} />}
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  const modeOptions: { key: CreationMode; label: string; desc: string; icon: string; bg: string; color: string }[] = [
+    {
+      key: 'retail',
+      label: 'Retail Store',
+      desc: 'Sells to customers, tracks revenue and daily P&L.',
+      icon: 'storefront-outline',
+      bg: '#E8F5E9',
+      color: '#2E7D32',
+    },
+    {
+      key: 'warehouse',
+      label: 'Warehouse',
+      desc: 'Tracks bulk stock, receives goods, dispatches to branches.',
+      icon: 'cube-outline',
+      bg: '#E3F2FD',
+      color: '#1565C0',
+    },
+    {
+      key: 'branch',
+      label: 'Branch Shop',
+      desc: 'A branch of an existing business — inherits products, independent inventory.',
+      icon: 'git-branch-outline',
+      bg: '#F3E5F5',
+      color: '#6A1B9A',
+    },
+  ];
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -85,51 +211,17 @@ export default function LocationsScreen() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
-          {(businesses ?? []).map((biz) => {
-            const mode = modeBadge(biz.mode);
-            const role = roleBadge(biz.my_role);
-            const isSelected = biz.id === selectedBusinessId;
-
-            return (
-              <TouchableOpacity
-                key={biz.id}
-                onPress={() => selectBusiness(biz)}
-                activeOpacity={0.82}
-                style={[
-                  s.card,
-                  {
-                    backgroundColor: colors.surface,
-                    borderColor: isSelected ? INV : colors.border,
-                    borderWidth: isSelected ? 2 : 1,
-                    ...Shadow.card(colors.black),
-                  },
-                ]}
-                accessibilityRole="button"
-                accessibilityLabel={`Switch to ${biz.name}`}
-                accessibilityState={{ selected: isSelected }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                  <View style={[s.modeIcon, { backgroundColor: mode.bg }]}>
-                    <Ionicons name={mode.icon} size={22} color={mode.color} />
-                  </View>
-                  <View style={{ flex: 1, marginLeft: 12 }}>
-                    <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary }} numberOfLines={1}>
-                      {biz.name}
-                    </Text>
-                    <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
-                      <View style={[s.badge, { backgroundColor: mode.bg }]}>
-                        <Text style={{ fontSize: 11, fontWeight: '700', color: mode.color }}>{mode.label}</Text>
-                      </View>
-                      <View style={[s.badge, { backgroundColor: role.bg }]}>
-                        <Text style={{ fontSize: 11, fontWeight: '700', color: role.color }}>{role.label}</Text>
-                      </View>
-                    </View>
-                  </View>
-                  {isSelected && <Ionicons name="checkmark-circle" size={22} color={INV} style={{ marginLeft: 8 }} />}
+          {grouped.map(({ parent, branches }) => (
+            <View key={parent.id}>
+              {renderCard(parent, false)}
+              {branches.map((branch) => (
+                <View key={branch.id} style={s.branchRow}>
+                  <View style={s.branchLine} />
+                  {renderCard(branch, true)}
                 </View>
-              </TouchableOpacity>
-            );
-          })}
+              ))}
+            </View>
+          ))}
 
           {(businesses ?? []).length === 0 && (
             <View style={{ alignItems: 'center', paddingVertical: 60 }}>
@@ -146,8 +238,8 @@ export default function LocationsScreen() {
       )}
 
       {/* Add location modal */}
-      <Modal visible={addModal} transparent animationType="slide" onRequestClose={() => setAddModal(false)}>
-        <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setAddModal(false)} />
+      <Modal visible={addModal} transparent animationType="slide" onRequestClose={closeModal}>
+        <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={closeModal} />
         <View style={[s.modalSheet, { backgroundColor: colors.surface }]}>
           <Text style={[s.modalTitle, { color: colors.textPrimary }]}>Add a Location</Text>
 
@@ -156,51 +248,102 @@ export default function LocationsScreen() {
             value={newName}
             onChangeText={setNewName}
             style={[s.modalInput, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
-            placeholder="e.g. Surulere Branch, Main Warehouse"
+            placeholder={creationMode === 'branch' ? 'e.g. Ikeja Branch' : 'e.g. Main Store, Surulere Warehouse'}
             placeholderTextColor={colors.textTertiary}
             autoFocus
             accessibilityLabel="Location name"
           />
 
           <Text style={[s.modalLabel, { color: colors.textSecondary, marginTop: 16 }]}>Type</Text>
-          <View style={{ flexDirection: 'row', gap: 10, marginBottom: 4 }}>
-            {(['retail', 'warehouse'] as const).map((m) => {
-              const b = modeBadge(m);
-              const active = newMode === m;
+          <View style={{ gap: 8, marginBottom: 4 }}>
+            {modeOptions.map((opt) => {
+              const active = creationMode === opt.key;
+              const disabled = opt.key === 'branch' && ownedParents.length === 0;
               return (
                 <TouchableOpacity
-                  key={m}
-                  onPress={() => setNewMode(m)}
+                  key={opt.key}
+                  onPress={() => {
+                    if (disabled) {
+                      Alert.alert('No businesses yet', 'Create a retail store or warehouse first before adding a branch.');
+                      return;
+                    }
+                    setCreationMode(opt.key);
+                    if (opt.key !== 'branch') setSelectedParentId(null);
+                  }}
                   style={[s.modeBtn, {
-                    backgroundColor: active ? b.bg : colors.background,
-                    borderColor: active ? b.color : colors.border,
-                    flex: 1,
+                    backgroundColor: active ? opt.bg : colors.background,
+                    borderColor: active ? opt.color : colors.border,
+                    opacity: disabled ? 0.4 : 1,
                   }]}
                   accessibilityRole="button"
-                  accessibilityLabel={b.label}
+                  accessibilityLabel={opt.label}
                   accessibilityState={{ selected: active }}
                 >
-                  <Ionicons name={b.icon} size={18} color={active ? b.color : colors.textSecondary} />
-                  <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: active ? b.color : colors.textSecondary, marginLeft: 6 }}>
-                    {b.label}
-                  </Text>
+                  <Ionicons name={opt.icon as any} size={18} color={active ? opt.color : colors.textSecondary} />
+                  <View style={{ flex: 1, marginLeft: 10 }}>
+                    <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: active ? opt.color : colors.textPrimary }}>
+                      {opt.label}
+                    </Text>
+                    <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }} numberOfLines={2}>
+                      {opt.desc}
+                    </Text>
+                  </View>
+                  {active && <Ionicons name="checkmark-circle" size={20} color={opt.color} style={{ marginLeft: 8 }} />}
                 </TouchableOpacity>
               );
             })}
           </View>
-          <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginBottom: 20 }}>
-            {newMode === 'warehouse'
-              ? 'Warehouse: tracks bulk stock, receive goods, dispatch to retail branches.'
-              : 'Retail: sells to customers, records revenue and daily P&L.'}
-          </Text>
+
+          {/* Parent business picker (only when branch mode selected) */}
+          {creationMode === 'branch' && (
+            <View style={{ marginTop: 12, marginBottom: 4 }}>
+              <Text style={[s.modalLabel, { color: colors.textSecondary }]}>Parent Business</Text>
+              <TouchableOpacity
+                onPress={() => setParentPickerOpen(!parentPickerOpen)}
+                style={[s.parentPickerBtn, {
+                  backgroundColor: colors.background,
+                  borderColor: selectedParent ? INV : colors.border,
+                }]}
+                accessibilityRole="button"
+                accessibilityLabel="Select parent business"
+              >
+                <Text style={{ fontSize: FontSize.sm, color: selectedParent ? colors.textPrimary : colors.textTertiary, flex: 1 }}>
+                  {selectedParent?.name ?? 'Select a business…'}
+                </Text>
+                <Ionicons name={parentPickerOpen ? 'chevron-up' : 'chevron-down'} size={18} color={colors.textSecondary} />
+              </TouchableOpacity>
+
+              {parentPickerOpen && (
+                <View style={[s.parentDropdown, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                  {ownedParents.map((p) => (
+                    <TouchableOpacity
+                      key={p.id}
+                      onPress={() => { setSelectedParentId(p.id); setParentPickerOpen(false); }}
+                      style={[s.parentOption, { borderBottomColor: colors.border }]}
+                    >
+                      <Ionicons
+                        name={p.mode === 'warehouse' ? 'cube-outline' : 'storefront-outline'}
+                        size={16}
+                        color={INV}
+                        style={{ marginRight: 8 }}
+                      />
+                      <Text style={{ fontSize: FontSize.sm, color: colors.textPrimary, flex: 1 }}>{p.name}</Text>
+                      {selectedParentId === p.id && <Ionicons name="checkmark" size={16} color={INV} />}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
+          )}
 
           <TouchableOpacity
             onPress={() => {
               if (!newName.trim()) return Alert.alert('Required', 'Enter a name for this location.');
+              if (creationMode === 'branch' && !selectedParentId) return Alert.alert('Required', 'Select a parent business.');
               doCreate();
             }}
             disabled={creating}
-            style={[s.saveBtn, { backgroundColor: INV, opacity: creating ? 0.6 : 1 }]}
+            style={[s.saveBtn, { backgroundColor: INV, opacity: creating ? 0.6 : 1, marginTop: 20 }]}
             accessibilityRole="button" accessibilityLabel="Create location"
           >
             {creating
@@ -223,6 +366,24 @@ const s = StyleSheet.create({
     borderRadius: Radius.lg, padding: 16, marginBottom: 12,
     flexDirection: 'row', alignItems: 'center',
   },
+  cardIndented: {
+    marginLeft: 0,
+  },
+  branchRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 0,
+  },
+  branchLine: {
+    width: 2,
+    backgroundColor: '#E65100',
+    opacity: 0.25,
+    marginLeft: 20,
+    marginRight: 10,
+    borderRadius: 1,
+    alignSelf: 'stretch',
+    marginBottom: 12,
+  },
   modeIcon: {
     width: 44, height: 44, borderRadius: 22,
     alignItems: 'center', justifyContent: 'center',
@@ -242,8 +403,22 @@ const s = StyleSheet.create({
     paddingHorizontal: 14, paddingVertical: 12, fontSize: FontSize.md,
   },
   modeBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1.5, borderRadius: Radius.md, paddingVertical: 12,
+    flexDirection: 'row', alignItems: 'center',
+    borderWidth: 1.5, borderRadius: Radius.md, padding: 12,
+  },
+  parentPickerBtn: {
+    flexDirection: 'row', alignItems: 'center',
+    borderWidth: 1, borderRadius: Radius.md,
+    paddingHorizontal: 14, paddingVertical: 12,
+  },
+  parentDropdown: {
+    borderWidth: 1, borderRadius: Radius.md,
+    marginTop: 4, overflow: 'hidden',
+  },
+  parentOption: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: 14, paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   saveBtn: {
     paddingVertical: 16, borderRadius: Radius.lg, alignItems: 'center',

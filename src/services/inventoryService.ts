@@ -128,10 +128,16 @@ export interface InventoryBusiness {
   updated_at: string;
 }
 
+export type BusinessMode = 'retail' | 'warehouse' | 'branch';
+export type MemberRole = 'owner' | 'manager' | 'branch_admin' | 'staff';
+
 export interface InventoryBusinessFull extends InventoryBusiness {
-  mode: 'retail' | 'warehouse';
+  mode: BusinessMode;
+  parent_business: number | null;
+  parent_business_name: string | null;
+  branch_count: number;
   is_active: boolean;
-  my_role: 'owner' | 'manager' | 'staff';
+  my_role: MemberRole;
 }
 
 /** Legacy single-business endpoint (backwards-compat, solo users only). */
@@ -148,15 +154,55 @@ export const getBusinesses = (): Promise<InventoryBusinessFull[]> =>
 export const createBusiness = (data: { name: string; mode: 'retail' | 'warehouse' }): Promise<InventoryBusinessFull> =>
   api.post('/api/inventory/businesses/', data).then(r => r.data);
 
+export const createBranch = (data: { name: string; parent_business_id: number }): Promise<InventoryBusinessFull> =>
+  api.post('/api/inventory/businesses/', { ...data, mode: 'branch' }).then(r => r.data);
+
 export const updateBusiness = (
   bizId: number,
   data: Partial<{ name: string; business_type: string; address: string; phone: string }>,
 ): Promise<InventoryBusinessFull> =>
   api.patch(`/api/inventory/businesses/${bizId}/`, data).then(r => r.data);
 
-// ─── Business members / staff ─────────────────────────────────────────────────
+// ─── Branch product requests ──────────────────────────────────────────────────
 
-export type MemberRole = 'owner' | 'manager' | 'staff';
+export interface BranchProductRequest {
+  id: number;
+  branch: number;
+  branch_name: string;
+  category: number;
+  category_name: string;
+  product_name: string;
+  note: string;
+  status: 'pending' | 'approved' | 'rejected';
+  requested_by: number | null;
+  requested_by_name: string | null;
+  reviewed_by: number | null;
+  reviewed_by_name: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+}
+
+export const getBranchProductRequests = (
+  bizId: number,
+  statusFilter?: 'pending' | 'approved' | 'rejected',
+): Promise<BranchProductRequest[]> =>
+  api.get(`/api/inventory/businesses/${bizId}/product-requests/`, {
+    params: statusFilter ? { status: statusFilter } : undefined,
+  }).then(r => r.data);
+
+export const createBranchProductRequest = (
+  branchId: number,
+  data: { category: number; product_name: string; note?: string },
+): Promise<BranchProductRequest> =>
+  api.post(`/api/inventory/businesses/${branchId}/product-requests/`, data).then(r => r.data);
+
+export const reviewBranchProductRequest = (
+  reqId: number,
+  newStatus: 'approved' | 'rejected',
+): Promise<BranchProductRequest> =>
+  api.patch(`/api/inventory/product-requests/${reqId}/`, { status: newStatus }).then(r => r.data);
+
+// ─── Business members / staff ─────────────────────────────────────────────────
 
 export interface InventoryMember {
   id: number;

@@ -165,27 +165,27 @@ const SectionTitle: React.FC<{ label: string }> = ({ label }) => {
   );
 };
 
-// ─── Discover Card ───────────────────────────────────────────────────────────
+// ─── Discover Card ────────────────────────────────────────────────────────────
 
 const MODULE_META: Record<ModuleKey, { icon: string; title: string; teaser: string; accent: string; bg: string }> = {
   ajo: {
     icon: 'people-circle-outline',
-    title: 'Try Ajo Groups',
-    teaser: 'Manage peer savings circles with friends and market traders — and settle disputes with proof.',
+    title: 'Ajo Groups',
+    teaser: 'Manage peer savings circles with friends, colleagues, and market traders.',
     accent: '#0035F0',
     bg: '#E6ECFF',
   },
   thrift: {
     icon: 'wallet-outline',
-    title: 'Try Contributions',
-    teaser: 'Run or join a formal thrift/cooperative group with full rotation and approval tracking.',
+    title: 'Contributions',
+    teaser: 'Run or join a formal thrift/cooperative group with rotation and full audit trail.',
     accent: '#16A34A',
     bg: '#DCFCE7',
   },
   inventory: {
     icon: 'cube-outline',
-    title: 'Try Inventory',
-    teaser: 'Track your shop\'s stock, record sales, and see daily analytics — all in Ajo.',
+    title: 'Inventory',
+    teaser: 'Track your shop\'s stock, record sales, and see daily business analytics.',
     accent: '#E65100',
     bg: '#FFF3E0',
   },
@@ -199,12 +199,12 @@ const DiscoverCard: React.FC<{ module: ModuleKey; onActivate: () => void }> = ({
       onPress={onActivate}
       activeOpacity={0.85}
       accessibilityRole="button"
-      accessibilityLabel={meta.title}
-      accessibilityHint={`Activate the ${module} module`}
+      accessibilityLabel={`Add ${meta.title}`}
+      accessibilityHint={`Activates the ${meta.title} tab`}
       style={{
         flexDirection: 'row', alignItems: 'center',
         backgroundColor: meta.bg, borderRadius: Radius.lg,
-        padding: 16, marginTop: 8,
+        padding: 16, marginBottom: 10,
         borderWidth: 1, borderColor: meta.accent + '33',
       }}
     >
@@ -215,16 +215,11 @@ const DiscoverCard: React.FC<{ module: ModuleKey; onActivate: () => void }> = ({
         <Text style={{ fontSize: FontSize.sm, fontWeight: '800', color: meta.accent }}>{meta.title}</Text>
         <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 3, lineHeight: 18 }}>{meta.teaser}</Text>
       </View>
-      <Ionicons name="add-circle-outline" size={22} color={meta.accent} style={{ marginLeft: 10 }} />
+      <View style={{ backgroundColor: meta.accent, borderRadius: Radius.full, paddingHorizontal: 12, paddingVertical: 6, marginLeft: 10 }}>
+        <Text style={{ fontSize: FontSize.xs, fontWeight: '800', color: '#fff' }}>Add</Text>
+      </View>
     </TouchableOpacity>
   );
-};
-
-// What to suggest on each tab (ordered by relevance to that tab's user)
-const DISCOVER_MAP: Record<ModuleKey, ModuleKey[]> = {
-  ajo:       ['inventory', 'thrift'],
-  thrift:    ['ajo', 'inventory'],
-  inventory: ['ajo', 'thrift'],
 };
 
 // ─── Home Screen ──────────────────────────────────────────────────────────────
@@ -234,7 +229,8 @@ export default function HomeRoute() {
   const { selectedModules, primaryModule, addModule } = useModuleStore();
   const router = useRouter();
 
-  // Determine which tabs to show and which is the default
+  // Determine which tabs to show and which is the default.
+  // Only activated modules appear as tabs; others surface as discovery cards below.
   const ALL_TAB_DEFS = [
     { key: 'ajo' as const,       label: 'Ajo Groups' },
     { key: 'thrift' as const,    label: 'Contributions' },
@@ -707,16 +703,17 @@ export default function HomeRoute() {
           </>
         )}
 
-        {/* ── Module discovery — suggest unactivated modules ── */}
+        {/* ── Discovery — show all modules the user hasn't activated yet ── */}
         {selectedModules && (() => {
-          const suggestions = DISCOVER_MAP[tab].filter(m => !selectedModules.includes(m)).slice(0, 1);
-          if (suggestions.length === 0) return null;
+          const ALL_MODULES: ModuleKey[] = ['ajo', 'thrift', 'inventory'];
+          const toDiscover = ALL_MODULES.filter(m => !selectedModules.includes(m));
+          if (toDiscover.length === 0) return null;
           return (
-            <View style={{ marginTop: 28 }}>
-              <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.textTertiary, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>
-                Also in Ajo
+            <View style={{ marginTop: 28, marginBottom: 8 }}>
+              <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.textTertiary, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 12 }}>
+                Also in Ajo — tap to add
               </Text>
-              {suggestions.map(mod => (
+              {toDiscover.map(mod => (
                 <DiscoverCard
                   key={mod}
                   module={mod}
@@ -729,6 +726,7 @@ export default function HomeRoute() {
             </View>
           );
         })()}
+
       </ScrollView>
 
       {/* ── FAB ── */}

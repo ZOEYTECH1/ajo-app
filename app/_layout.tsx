@@ -60,7 +60,7 @@ function AuthGuard() {
   const segments = useSegments();
   const router = useRouter();
   const { user, accessToken, _hasHydrated } = useAuthStore();
-  const { selectedModules, _moduleHydrated } = useModuleStore();
+  const { selectedModules, _moduleHydrated, setSelectedModules } = useModuleStore();
 
   useEffect(() => {
     if (!_hasHydrated || !_moduleHydrated) return;
@@ -77,7 +77,8 @@ function AuthGuard() {
       if (!hasPhone && !isCompleteProfile) {
         router.replace('/complete-profile');
       } else if (hasPhone && !hasPickedModules && !isPickModules) {
-        router.replace('/pick-modules');
+        // Existing user who pre-dates module selection — give them full access
+        setSelectedModules(['ajo', 'thrift', 'inventory'], 'ajo');
       } else if (hasPhone && hasPickedModules && (isPublicRoute || isCompleteProfile || isPickModules)) {
         router.replace('/home');
       }

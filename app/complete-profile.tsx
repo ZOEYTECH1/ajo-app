@@ -61,7 +61,7 @@ export default function CompleteProfileRoute() {
       const fresh = await authService.getMe();
       updateUser(fresh);
       feedback('success');
-      router.replace('/home');
+      router.replace('/pick-modules');
     } catch (err: any) {
       feedback('error');
       const data = err.response?.data;

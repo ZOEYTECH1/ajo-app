@@ -178,6 +178,11 @@ export const groupService = {
     return res.data;
   },
 
+  leaveGroup: async (groupId: number): Promise<{ detail: string }> => {
+    const res = await api.post(`/api/groups/${groupId}/leave/`);
+    return res.data;
+  },
+
   removeMember: async (groupId: number, membershipId: number): Promise<void> => {
     await api.delete(`/api/groups/${groupId}/members/${membershipId}/`);
   },

@@ -252,10 +252,15 @@ export default function GroupDetailRoute() {
     return true;
   });
 
-  // Current collector = member whose slot matches the active cycle number
+  // Effective slot wraps around after a full round: cycle 1→slot 1, cycle N+1→slot 1 again
   const activeCycleNumber = activeCycle?.cycle_number ?? null;
-  const currentCollector: CollectionSlot | undefined = activeCycleNumber
-    ? collectionOrder?.find((s) => s.collection_slot === activeCycleNumber)
+  const totalMembers = collectionOrder?.length ?? 1;
+  const effectiveSlot = activeCycleNumber != null
+    ? ((activeCycleNumber - 1) % totalMembers) + 1
+    : null;
+
+  const currentCollector: CollectionSlot | undefined = effectiveSlot != null
+    ? collectionOrder?.find((s) => s.collection_slot === effectiveSlot)
     : collectionOrder?.[0];
 
   if (groupLoading) {
@@ -404,7 +409,7 @@ export default function GroupDetailRoute() {
               <Ionicons name="trophy-outline" size={18} color={colors.primary} />
               <View style={{ flex: 1, marginLeft: 10 }}>
                 <Text style={{ fontSize: FontSize.xs, color: colors.primary, fontWeight: '600' }}>
-                  {activeCycleNumber ? `Cycle ${activeCycleNumber} collector` : 'First to collect'}
+                  {activeCycleNumber ? `Cycle ${activeCycleNumber} collector` : 'Next to collect'}
                 </Text>
                 <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.primary }}>
                   {currentCollector.full_name}
@@ -416,7 +421,7 @@ export default function GroupDetailRoute() {
           {collectionOrder && collectionOrder.length > 0 && (
             <View style={[s.section, { backgroundColor: colors.surface, ...Shadow.card(colors.black), marginBottom: 20 }]}>
               {collectionOrder.map((slot, idx) => {
-                const isCurrentCollector = slot.collection_slot === activeCycleNumber;
+                const isCurrentCollector = effectiveSlot != null && slot.collection_slot === effectiveSlot;
                 return (
                   <View
                     key={slot.id}
@@ -471,6 +476,14 @@ export default function GroupDetailRoute() {
               colors={colors}
               onPress={() => router.push(`/group/${groupId}/collection-history` as any)}
             />
+            {activeCycle && (
+              <ActionBtn
+                icon="alert-circle-outline"
+                label="Defaulters"
+                colors={colors}
+                onPress={() => router.push(`/group/${groupId}/defaulters/${activeCycle.id}` as any)}
+              />
+            )}
             {isGroupAdmin && (
               <ActionBtn
                 icon="refresh-circle-outline"

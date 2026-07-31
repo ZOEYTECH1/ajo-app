@@ -333,6 +333,16 @@ export default function MembersRoute() {
     onError: () => feedback('error'),
   });
 
+  const leaveMutation = useMutation({
+    mutationFn: () => groupService.leaveGroup(groupId),
+    onSuccess: () => {
+      feedback('success');
+      queryClient.invalidateQueries({ queryKey: ['groups'] });
+      router.replace('/home' as any);
+    },
+    onError: () => feedback('error'),
+  });
+
   const closeModal = () => setConfirmModal((prev) => ({ ...prev, visible: false }));
 
   const handleApprove = (m: Membership) => {
@@ -376,7 +386,10 @@ export default function MembersRoute() {
   const approved = members?.filter((m) => m.status === 'approved') ?? [];
   const rejected = members?.filter((m) => m.status === 'rejected') ?? [];
 
-  const isBusy = reviewMutation.isPending || proposeMutation.isPending;
+  const myMembership = members?.find((m) => m.user.id === user?.id && m.status === 'approved');
+  const canLeave = !!myMembership && !isGroupAdmin;
+
+  const isBusy = reviewMutation.isPending || proposeMutation.isPending || leaveMutation.isPending;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -482,6 +495,31 @@ export default function MembersRoute() {
             )}
           </>
         )}
+
+        {/* Leave group — non-admin approved members only */}
+        {canLeave && (
+          <TouchableOpacity
+            onPress={() =>
+              setConfirmModal({
+                visible: true,
+                title: 'Leave group',
+                message: 'Are you sure you want to leave this group? You will need to request to join again.',
+                confirmLabel: 'Leave',
+                destructive: true,
+                onConfirm: () => { closeModal(); leaveMutation.mutate(); },
+              })
+            }
+            style={[s.leaveBtn, { borderColor: colors.error }]}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Leave group"
+          >
+            <Ionicons name="exit-outline" size={16} color={colors.error} />
+            <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.error, marginLeft: 8 }}>
+              Leave Group
+            </Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </View>
   );
@@ -569,6 +607,15 @@ const s = StyleSheet.create({
     padding: 10,
     borderRadius: Radius.md,
     justifyContent: 'center',
+  },
+  leaveBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: Radius.full,
+    borderWidth: 1.5,
+    marginTop: 8,
   },
   modalOverlay: {
     flex: 1,

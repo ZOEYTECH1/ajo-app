@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../src/hooks/useTheme';
-import { useAuthStore } from '../src/store/useAppStore';
+import { useAuthStore, useModuleStore, type ModuleKey } from '../src/store/useAppStore';
 import { groupService, type Group } from '../src/services/groupService';
 import { thriftService, type ThriftGroup } from '../src/services/thriftService';
 import { getCategories, getBusinesses, type InventoryCategory } from '../src/services/inventoryService';
@@ -165,12 +165,91 @@ const SectionTitle: React.FC<{ label: string }> = ({ label }) => {
   );
 };
 
+// ─── Discover Card ───────────────────────────────────────────────────────────
+
+const MODULE_META: Record<ModuleKey, { icon: string; title: string; teaser: string; accent: string; bg: string }> = {
+  ajo: {
+    icon: 'people-circle-outline',
+    title: 'Try Ajo Groups',
+    teaser: 'Manage peer savings circles with friends and market traders — and settle disputes with proof.',
+    accent: '#0035F0',
+    bg: '#E6ECFF',
+  },
+  thrift: {
+    icon: 'wallet-outline',
+    title: 'Try Contributions',
+    teaser: 'Run or join a formal thrift/cooperative group with full rotation and approval tracking.',
+    accent: '#16A34A',
+    bg: '#DCFCE7',
+  },
+  inventory: {
+    icon: 'cube-outline',
+    title: 'Try Inventory',
+    teaser: 'Track your shop\'s stock, record sales, and see daily analytics — all in Ajo.',
+    accent: '#E65100',
+    bg: '#FFF3E0',
+  },
+};
+
+const DiscoverCard: React.FC<{ module: ModuleKey; onActivate: () => void }> = ({ module, onActivate }) => {
+  const { colors } = useTheme();
+  const meta = MODULE_META[module];
+  return (
+    <TouchableOpacity
+      onPress={onActivate}
+      activeOpacity={0.85}
+      accessibilityRole="button"
+      accessibilityLabel={meta.title}
+      accessibilityHint={`Activate the ${module} module`}
+      style={{
+        flexDirection: 'row', alignItems: 'center',
+        backgroundColor: meta.bg, borderRadius: Radius.lg,
+        padding: 16, marginTop: 8,
+        borderWidth: 1, borderColor: meta.accent + '33',
+      }}
+    >
+      <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: meta.accent + '22', alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
+        <Ionicons name={meta.icon as any} size={22} color={meta.accent} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontSize: FontSize.sm, fontWeight: '800', color: meta.accent }}>{meta.title}</Text>
+        <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 3, lineHeight: 18 }}>{meta.teaser}</Text>
+      </View>
+      <Ionicons name="add-circle-outline" size={22} color={meta.accent} style={{ marginLeft: 10 }} />
+    </TouchableOpacity>
+  );
+};
+
+// What to suggest on each tab (ordered by relevance to that tab's user)
+const DISCOVER_MAP: Record<ModuleKey, ModuleKey[]> = {
+  ajo:       ['inventory', 'thrift'],
+  thrift:    ['ajo', 'inventory'],
+  inventory: ['ajo', 'thrift'],
+};
+
 // ─── Home Screen ──────────────────────────────────────────────────────────────
 export default function HomeRoute() {
   const { colors, isDark } = useTheme();
   const { user, logout } = useAuthStore();
+  const { selectedModules, primaryModule, addModule } = useModuleStore();
   const router = useRouter();
-  const [tab, setTab] = useState<'ajo' | 'thrift' | 'inventory'>('thrift');
+
+  // Determine which tabs to show and which is the default
+  const ALL_TAB_DEFS = [
+    { key: 'ajo' as const,       label: 'Ajo Groups' },
+    { key: 'thrift' as const,    label: 'Contributions' },
+    { key: 'inventory' as const, label: 'Inventory' },
+  ];
+  const visibleTabs = selectedModules && selectedModules.length > 0
+    ? ALL_TAB_DEFS.filter(t => selectedModules.includes(t.key))
+    : ALL_TAB_DEFS;
+  const initialTab = (
+    primaryModule && visibleTabs.some(t => t.key === primaryModule)
+      ? primaryModule
+      : visibleTabs[0]?.key ?? 'thrift'
+  ) as 'ajo' | 'thrift' | 'inventory';
+
+  const [tab, setTab] = useState<'ajo' | 'thrift' | 'inventory'>(initialTab);
 
   const { data: groups, isLoading: ajoLoading, isError: ajoError, refetch: refetchAjo, isRefetching: ajoRefetching } = useQuery({
     queryKey: ['groups'],
@@ -350,11 +429,7 @@ export default function HomeRoute() {
 
       {/* ── Tab Row ── */}
       <View accessibilityRole="tablist" style={[s.tabRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        {([
-          { key: 'ajo', label: 'Ajo Groups' },
-          { key: 'thrift', label: 'Contributions' },
-          { key: 'inventory', label: 'Inventory' },
-        ] as const).map(({ key, label }) => (
+        {visibleTabs.map(({ key, label }) => (
           <TouchableOpacity key={key} onPress={() => setTab(key)} style={s.tabBtn} activeOpacity={0.8} accessibilityRole="tab" accessibilityLabel={`${label} tab`} accessibilityState={{ selected: tab === key }}>
             <Text style={[s.tabLabel, { color: tab === key ? colors.primary : colors.textSecondary, fontWeight: tab === key ? '700' : '400' }]}>
               {label}
@@ -631,6 +706,29 @@ export default function HomeRoute() {
             )}
           </>
         )}
+
+        {/* ── Module discovery — suggest unactivated modules ── */}
+        {selectedModules && (() => {
+          const suggestions = DISCOVER_MAP[tab].filter(m => !selectedModules.includes(m)).slice(0, 1);
+          if (suggestions.length === 0) return null;
+          return (
+            <View style={{ marginTop: 28 }}>
+              <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.textTertiary, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 }}>
+                Also in Ajo
+              </Text>
+              {suggestions.map(mod => (
+                <DiscoverCard
+                  key={mod}
+                  module={mod}
+                  onActivate={() => {
+                    addModule(mod);
+                    setTab(mod);
+                  }}
+                />
+              ))}
+            </View>
+          );
+        })()}
       </ScrollView>
 
       {/* ── FAB ── */}

@@ -9,7 +9,7 @@ import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-quer
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../src/hooks/useTheme';
-import { useAuthStore } from '../src/store/useAppStore';
+import { useAuthStore, useModuleStore } from '../src/store/useAppStore';
 import { usePinStore } from '../src/store/usePinStore';
 import { AppLockScreen } from '../src/AppLockScreen';
 import { notificationService } from '../src/services/notificationService';
@@ -60,26 +60,31 @@ function AuthGuard() {
   const segments = useSegments();
   const router = useRouter();
   const { user, accessToken, _hasHydrated } = useAuthStore();
+  const { selectedModules, _moduleHydrated } = useModuleStore();
 
   useEffect(() => {
-    if (!_hasHydrated) return;
+    if (!_hasHydrated || !_moduleHydrated) return;
 
     const currentRoute = segments[0] as string | undefined;
     const isPublicRoute = !currentRoute || PUBLIC_ROUTES.has(currentRoute);
     const isCompleteProfile = currentRoute === 'complete-profile';
+    const isPickModules = currentRoute === 'pick-modules';
     const isAuthenticated = !!user && !!accessToken;
     const hasPhone = !!user?.phone_number;
+    const hasPickedModules = selectedModules !== null;
 
     if (isAuthenticated) {
       if (!hasPhone && !isCompleteProfile) {
         router.replace('/complete-profile');
-      } else if (hasPhone && (isPublicRoute || isCompleteProfile)) {
+      } else if (hasPhone && !hasPickedModules && !isPickModules) {
+        router.replace('/pick-modules');
+      } else if (hasPhone && hasPickedModules && (isPublicRoute || isCompleteProfile || isPickModules)) {
         router.replace('/home');
       }
-    } else if (!isPublicRoute && !isCompleteProfile) {
+    } else if (!isPublicRoute && !isCompleteProfile && !isPickModules) {
       router.replace('/login');
     }
-  }, [user, accessToken, _hasHydrated, segments]);
+  }, [user, accessToken, _hasHydrated, _moduleHydrated, selectedModules, segments]);
 
   return null;
 }
@@ -101,7 +106,7 @@ function BottomTabBar() {
   });
   const unreadCount = notifData?.unreadCount ?? 0;
 
-  if (!current || PUBLIC_ROUTES.has(current)) return null;
+  if (!current || PUBLIC_ROUTES.has(current) || current === 'pick-modules') return null;
 
   const tabs = [
     { route: '/home',          icon: 'home',          label: 'Home'    },

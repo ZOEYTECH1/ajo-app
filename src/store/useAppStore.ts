@@ -39,6 +39,52 @@ interface AuthState {
   setHasHydrated: (value: boolean) => void;
 }
 
+// ─── Module store (persisted — remembers which modules the user uses) ────────
+
+export type ModuleKey = 'ajo' | 'thrift' | 'inventory';
+
+interface ModuleState {
+  selectedModules: ModuleKey[] | null; // null = user hasn't picked yet
+  primaryModule: ModuleKey | null;     // the first module the user tapped = default tab
+  _moduleHydrated: boolean;
+  setSelectedModules: (modules: ModuleKey[], primary: ModuleKey) => void;
+  addModule: (module: ModuleKey) => void;
+  setModuleHydrated: (val: boolean) => void;
+}
+
+export const useModuleStore = create<ModuleState>()(
+  persist(
+    (set, get) => ({
+      selectedModules: null,
+      primaryModule: null,
+      _moduleHydrated: false,
+      setSelectedModules: (modules, primary) =>
+        set({ selectedModules: modules, primaryModule: primary }),
+      addModule: (module) => {
+        const current = get().selectedModules ?? [];
+        if (!current.includes(module)) {
+          set({
+            selectedModules: [...current, module],
+            primaryModule: get().primaryModule ?? module,
+          });
+        }
+      },
+      setModuleHydrated: (val) => set({ _moduleHydrated: val }),
+    }),
+    {
+      name: 'ajo-modules',
+      storage: createJSONStorage(() => secureStorage),
+      partialize: (state) => ({
+        selectedModules: state.selectedModules,
+        primaryModule: state.primaryModule,
+      }),
+      onRehydrateStorage: () => (state) => {
+        state?.setModuleHydrated(true);
+      },
+    },
+  ),
+);
+
 // ─── Inventory store (persisted — remembers last selected location) ──────────
 
 interface InventoryState {

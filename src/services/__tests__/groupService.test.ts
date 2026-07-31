@@ -248,14 +248,14 @@ describe('groupService.regenerateInviteCode', () => {
 // ─── Subscription ─────────────────────────────────────────────────────────────
 
 describe('groupService.initiateSubscription', () => {
-  it('calls POST /api/groups/<id>/subscription/initiate/ with months', async () => {
+  it('calls POST /api/groups/<id>/subscription/initiate/ with cycles', async () => {
     mockPost.mockResolvedValueOnce({ data: { link: 'https://pay.me', subscription: {} } });
 
     await groupService.initiateSubscription(6, 3);
 
     expect(mockPost).toHaveBeenCalledWith(
       '/api/groups/6/subscription/initiate/',
-      { months: 3 },
+      { cycles: 3 },
     );
   });
 });

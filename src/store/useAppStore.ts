@@ -89,10 +89,10 @@ export const useModuleStore = create<ModuleState>()(
 
 interface InventoryState {
   selectedBusinessId:   number | null;
-  selectedBusinessMode: 'retail' | 'warehouse' | null;
+  selectedBusinessMode: 'retail' | 'warehouse' | 'branch' | null;
   selectedBusinessRole: string | null;
   selectedBusinessName: string | null;
-  setSelectedBusiness: (id: number, mode: 'retail' | 'warehouse', role: string, name: string) => void;
+  setSelectedBusiness: (id: number, mode: 'retail' | 'warehouse' | 'branch', role: string, name: string) => void;
   clearSelectedBusiness: () => void;
 }
 

@@ -298,19 +298,28 @@ export default function HomeRoute() {
     }
   }, [businesses]);
 
-  // Auto-detect which modules the user actually has data in (runs once when selectedModules is null).
+  // Keep module tabs in sync with server data.
+  // Runs after every data load — adds a tab as soon as the user gains data in a module.
+  // Never removes tabs (removing mid-session would be jarring).
   React.useEffect(() => {
-    if (selectedModules !== null) return;
     if (ajoLoading || thriftLoading || bizLoading) return;
 
-    const detected: ModuleKey[] = [];
-    if ((groups ?? []).length > 0) detected.push('ajo');
-    if ((thriftGroups ?? []).length > 0) detected.push('thrift');
-    if ((businesses ?? []).length > 0) detected.push('inventory');
+    const current = selectedModules ?? [];
+    const toAdd: ModuleKey[] = [];
+    if ((groups ?? []).length > 0 && !current.includes('ajo')) toAdd.push('ajo');
+    if ((thriftGroups ?? []).length > 0 && !current.includes('thrift')) toAdd.push('thrift');
+    if ((businesses ?? []).length > 0 && !current.includes('inventory')) toAdd.push('inventory');
 
-    const primary = detected.length > 0 ? detected[0] : 'thrift';
-    setSelectedModules(detected, primary);
-  }, [selectedModules, ajoLoading, thriftLoading, bizLoading, groups, thriftGroups, businesses]);
+    if (toAdd.length === 0) {
+      // No new modules — if this is first detection, mark complete so spinner stops
+      if (selectedModules === null) setSelectedModules([], 'thrift');
+      return;
+    }
+
+    const updated = [...current, ...toAdd];
+    const primary = selectedModules !== null && primaryModule ? primaryModule : updated[0];
+    setSelectedModules(updated, primary);
+  }, [ajoLoading, thriftLoading, bizLoading, groups, thriftGroups, businesses, selectedModules]);
 
   const handleLogout = () => { resetModules(); logout(); router.replace('/login'); };
 

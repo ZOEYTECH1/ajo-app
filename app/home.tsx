@@ -813,15 +813,20 @@ export default function HomeRoute() {
       </ScrollView>
 
       {/* ── FAB ── */}
-      {visibleTabs.length > 0 && <TouchableOpacity
-        onPress={handleFab}
-        activeOpacity={0.85}
-        accessibilityRole="button"
-        accessibilityLabel={tab === 'ajo' ? 'Create Ajo group' : tab === 'thrift' ? 'Create contribution group' : 'Create inventory category'}
-        style={[s.fab, { backgroundColor: tab === 'ajo' ? colors.primary : tab === 'thrift' ? colors.success : '#E65100', ...Shadow.strong(tab === 'ajo' ? colors.primary : tab === 'thrift' ? colors.success : '#E65100') }]}
-      >
-        <Ionicons name="add" size={28} color={colors.white} />
-      </TouchableOpacity>}
+      {visibleTabs.length > 0 && (
+        <TouchableOpacity
+          onPress={handleFab}
+          activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel={tab === 'ajo' ? 'Create Ajo group' : tab === 'thrift' ? 'Create contribution group' : 'Create inventory category'}
+          style={[s.fab, { backgroundColor: tab === 'ajo' ? colors.primary : tab === 'thrift' ? colors.success : '#E65100', ...Shadow.strong(tab === 'ajo' ? colors.primary : tab === 'thrift' ? colors.success : '#E65100') }]}
+        >
+          <Ionicons name="add" size={22} color={colors.white} />
+          <Text style={{ color: colors.white, fontSize: FontSize.sm, fontWeight: '700', marginLeft: 6 }}>
+            {tab === 'ajo' ? 'New Group' : tab === 'thrift' ? 'New Group' : 'New Category'}
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -856,7 +861,7 @@ const s = StyleSheet.create({
   metaItem: { flexDirection: 'row', alignItems: 'center' },
   thriftBadge: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   sectionDivider: { height: 1, marginVertical: 24 },
-  fab: { position: 'absolute', bottom: 92, right: 24, width: 58, height: 58, borderRadius: 29, alignItems: 'center', justifyContent: 'center' },
+  fab: { position: 'absolute', bottom: 92, right: 24, borderRadius: 28, paddingHorizontal: 20, paddingVertical: 15, flexDirection: 'row', alignItems: 'center' },
   joinCodeBtn: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: Radius.lg, borderWidth: 1, marginTop: 8 },
   joinCodeIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   errorBanner: { flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: Radius.md, marginBottom: 16 },

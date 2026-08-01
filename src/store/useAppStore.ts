@@ -49,6 +49,7 @@ interface ModuleState {
   _moduleHydrated: boolean;
   setSelectedModules: (modules: ModuleKey[], primary: ModuleKey) => void;
   addModule: (module: ModuleKey) => void;
+  resetModules: () => void;
   setModuleHydrated: (val: boolean) => void;
 }
 
@@ -69,6 +70,7 @@ export const useModuleStore = create<ModuleState>()(
           });
         }
       },
+      resetModules: () => set({ selectedModules: null, primaryModule: null }),
       setModuleHydrated: (val) => set({ _moduleHydrated: val }),
     }),
     {

@@ -226,7 +226,7 @@ const DiscoverCard: React.FC<{ module: ModuleKey; onActivate: () => void }> = ({
 export default function HomeRoute() {
   const { colors, isDark } = useTheme();
   const { user, logout } = useAuthStore();
-  const { selectedModules, primaryModule, addModule, setSelectedModules } = useModuleStore();
+  const { selectedModules, primaryModule, addModule, setSelectedModules, resetModules } = useModuleStore();
   const router = useRouter();
 
   // Determine which tabs to show and which is the default.
@@ -312,7 +312,7 @@ export default function HomeRoute() {
     setSelectedModules(detected, detected[0]);
   }, [selectedModules, ajoLoading, thriftLoading, bizLoading, groups, thriftGroups, businesses]);
 
-  const handleLogout = () => { logout(); router.replace('/login'); };
+  const handleLogout = () => { resetModules(); logout(); router.replace('/login'); };
 
   const requirePhoto = (action: () => void) => {
     if (!user?.profile_photo) {

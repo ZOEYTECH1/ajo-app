@@ -13,6 +13,7 @@ import {
   getCategories, getProducts, deleteCategory, updateCategory,
   type CustomFieldDef,
 } from '../../src/services/inventoryService';
+import ErrorBanner from '../../src/components/ErrorBanner';
 import { getCategoryEmoji, formatStock, stockColor } from '../../src/utils/inventoryHelpers';
 import { useInventoryStore } from '../../src/store/useAppStore';
 
@@ -44,7 +45,7 @@ export default function CategoryDetailScreen() {
   const cat = categories?.find(c => c.id === catIdNum);
   const emoji = cat ? getCategoryEmoji(cat.name) : '📦';
 
-  const { data: products, isLoading } = useQuery({
+  const { data: products, isLoading, isError, error, refetch: refetchProducts } = useQuery({
     queryKey: ['inventory-products', catIdNum],
     queryFn: () => getProducts(catIdNum),
     enabled: !!catIdNum,
@@ -377,6 +378,7 @@ export default function CategoryDetailScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#E65100" />}
       >
+        {isError && <ErrorBanner error={error} onRetry={refetchProducts} />}
         {isLoading ? (
           <View style={{ alignItems: 'center', paddingVertical: 40 }}>
             <ActivityIndicator size="large" color="#E65100" />

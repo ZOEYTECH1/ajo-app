@@ -10,6 +10,7 @@ import { useTheme } from '../../src/hooks/useTheme';
 import { FontSize, Radius, Shadow } from '../../src/theme';
 import { useInventoryStore } from '../../src/store/useAppStore';
 import { getSales, type InventorySale } from '../../src/services/inventoryService';
+import ErrorBanner from '../../src/components/ErrorBanner';
 import { exportCsv, exportPdf } from '../../src/utils/exportUtils';
 
 const INV = '#E65100';
@@ -36,7 +37,7 @@ export default function SalesHistoryScreen() {
   const router = useRouter();
   const businessName = useInventoryStore(s => s.selectedBusinessName) ?? 'My Store';
 
-  const { data: sales, isLoading, isRefetching, refetch } = useQuery({
+  const { data: sales, isLoading, isError, error, isRefetching, refetch } = useQuery({
     queryKey: ['inventory-sales'],
     queryFn: getSales,
   });
@@ -144,6 +145,7 @@ export default function SalesHistoryScreen() {
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={INV} />}
           showsVerticalScrollIndicator={false}
         >
+          {isError && <ErrorBanner error={error} onRetry={refetch} />}
           {(sales ?? []).length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 48 }}>
               <Ionicons name="cart-outline" size={56} color={colors.textTertiary} />

@@ -54,6 +54,14 @@ const drainQueue = (error: unknown, token: string | null) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    // Attach a human-readable message for timeout and no-network failures
+    // so screens can show it without inspecting low-level error internals.
+    if (error.code === 'ECONNABORTED') {
+      error.userMessage = 'Request timed out. Check your connection and try again.';
+    } else if (!error.response) {
+      error.userMessage = 'Could not reach the server. Check your internet connection.';
+    }
+
     const original = error.config;
 
     // Only attempt refresh for 401 on non-refresh endpoints and only once

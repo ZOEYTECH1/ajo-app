@@ -16,6 +16,7 @@ import {
   PRESET_EXPENSE_CATEGORIES,
   type InventoryExpense, type UserExpenseCategory,
 } from '../../src/services/inventoryService';
+import ErrorBanner from '../../src/components/ErrorBanner';
 
 const INV = '#E65100';
 const MAX_CAT_CHARS = 20;
@@ -244,7 +245,7 @@ export default function ExpensesScreen() {
   const router = useRouter();
   const qc = useQueryClient();
 
-  const { data: expenses, isLoading, isRefetching, refetch } = useQuery({
+  const { data: expenses, isLoading, isError, error, isRefetching, refetch } = useQuery({
     queryKey: ['inventory-expenses'],
     queryFn: getExpenses,
   });
@@ -490,6 +491,7 @@ export default function ExpensesScreen() {
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={INV} />}
           showsVerticalScrollIndicator={false}
         >
+          {isError && <ErrorBanner error={error} onRetry={refetch} />}
           {/* ── Total banner ── */}
           <View style={[s.totalBanner, { backgroundColor: '#FFF3E0' }]}>
             <View>

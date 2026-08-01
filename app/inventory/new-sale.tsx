@@ -15,6 +15,7 @@ import {
   type InventoryProduct, type InventoryCustomer, type CreateSaleItemPayload,
   type InventorySale,
 } from '../../src/services/inventoryService';
+import { errorMessage } from '../../src/components/ErrorBanner';
 
 const INV = '#E65100';
 
@@ -57,7 +58,7 @@ export default function NewSaleScreen() {
 
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
 
-  const { data: categories } = useQuery({ queryKey: ['inventory-categories', selectedBusinessId], queryFn: () => getCategories(selectedBusinessId) });
+  const { data: categories, isError: catsError, error: catsErr } = useQuery({ queryKey: ['inventory-categories', selectedBusinessId], queryFn: () => getCategories(selectedBusinessId) });
   const { data: customers } = useQuery({ queryKey: ['inventory-customers'], queryFn: getCustomers });
 
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -323,6 +324,11 @@ export default function NewSaleScreen() {
             {!selectedCatId ? (
               <>
                 <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginBottom: 12 }}>Pick a category:</Text>
+                {catsError && (
+                  <Text style={{ fontSize: FontSize.sm, color: '#C62828', marginBottom: 8 }}>
+                    {errorMessage(catsErr)} Close and reopen to retry.
+                  </Text>
+                )}
                 <ScrollView style={{ maxHeight: 340 }}>
                   {(categories ?? []).map((cat) => (
                     <TouchableOpacity key={cat.id} onPress={() => setSelectedCatId(cat.id)}

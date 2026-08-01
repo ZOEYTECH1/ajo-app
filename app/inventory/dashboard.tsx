@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/hooks/useTheme';
 import { FontSize, Radius, Shadow } from '../../src/theme';
 import { getDashboard } from '../../src/services/inventoryService';
+import ErrorBanner from '../../src/components/ErrorBanner';
 
 const INV = '#E65100';
 
@@ -23,7 +24,7 @@ export default function InventoryDashboardScreen() {
   const router = useRouter();
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
 
-  const { data, isLoading, isRefetching, refetch } = useQuery({
+  const { data, isLoading, isError, error, isRefetching, refetch } = useQuery({
     queryKey: ['inventory-dashboard', date],
     queryFn: () => getDashboard(date),
   });
@@ -79,6 +80,7 @@ export default function InventoryDashboardScreen() {
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={INV} />}
           showsVerticalScrollIndicator={false}
         >
+          {isError && <ErrorBanner error={error} onRetry={refetch} />}
           {/* P&L */}
           <Text style={[s.sectionLabel, { color: colors.textPrimary }]}>Profit & Loss</Text>
           <View style={s.row}>

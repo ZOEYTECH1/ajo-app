@@ -13,6 +13,7 @@ import {
   getCustomers, createCustomer, updateCustomer, deleteCustomer, adjustCredit,
   type InventoryCustomer,
 } from '../../src/services/inventoryService';
+import ErrorBanner from '../../src/components/ErrorBanner';
 
 const INV = '#E65100';
 
@@ -21,7 +22,7 @@ export default function CustomersScreen() {
   const router = useRouter();
   const qc = useQueryClient();
 
-  const { data: customers, isLoading, isRefetching, refetch } = useQuery({
+  const { data: customers, isLoading, isError, error, isRefetching, refetch } = useQuery({
     queryKey: ['inventory-customers'],
     queryFn: getCustomers,
   });
@@ -165,6 +166,7 @@ export default function CustomersScreen() {
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={INV} />}
           showsVerticalScrollIndicator={false}
         >
+          {isError && <ErrorBanner error={error} onRetry={refetch} />}
           {filtered.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 48 }}>
               <Ionicons name="people-outline" size={56} color={colors.textTertiary} />

@@ -16,6 +16,7 @@ import {
   reviewBranchProductRequest,
   type BranchProductRequest,
 } from '../../src/services/inventoryService';
+import ErrorBanner from '../../src/components/ErrorBanner';
 import { useInventoryStore } from '../../src/store/useAppStore';
 
 const INV = '#E65100';
@@ -59,7 +60,7 @@ export default function ProductRequestsScreen() {
     enabled: canRequest && !!bizId,
   });
 
-  const { data: requests, isLoading, isRefetching, refetch } = useQuery({
+  const { data: requests, isLoading, isError, error, isRefetching, refetch } = useQuery({
     queryKey: ['product-requests', bizId, filter],
     queryFn: () => getBranchProductRequests(bizId, filter === 'all' ? undefined : filter),
     enabled: !!bizId,
@@ -180,6 +181,7 @@ export default function ProductRequestsScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={INV} />}
       >
+        {isError && <ErrorBanner error={error} onRetry={refetch} />}
         {isLoading ? (
           <ActivityIndicator size="large" color={INV} style={{ marginTop: 40 }} />
         ) : (requests ?? []).length === 0 ? (

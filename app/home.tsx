@@ -308,8 +308,8 @@ export default function HomeRoute() {
     if ((thriftGroups ?? []).length > 0) detected.push('thrift');
     if ((businesses ?? []).length > 0) detected.push('inventory');
 
-    if (detected.length === 0) detected.push('thrift'); // new user default
-    setSelectedModules(detected, detected[0]);
+    const primary = detected.length > 0 ? detected[0] : 'thrift';
+    setSelectedModules(detected, primary);
   }, [selectedModules, ajoLoading, thriftLoading, bizLoading, groups, thriftGroups, businesses]);
 
   const handleLogout = () => { resetModules(); logout(); router.replace('/login'); };
@@ -458,16 +458,18 @@ export default function HomeRoute() {
       </View>
 
       {/* ── Tab Row ── */}
-      <View accessibilityRole="tablist" style={[s.tabRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        {visibleTabs.map(({ key, label }) => (
-          <TouchableOpacity key={key} onPress={() => setTab(key)} style={s.tabBtn} activeOpacity={0.8} accessibilityRole="tab" accessibilityLabel={`${label} tab`} accessibilityState={{ selected: tab === key }}>
-            <Text style={[s.tabLabel, { color: tab === key ? colors.primary : colors.textSecondary, fontWeight: tab === key ? '700' : '400' }]}>
-              {label}
-            </Text>
-            {tab === key && <View style={[s.tabUnderline, { backgroundColor: colors.primary }]} />}
-          </TouchableOpacity>
-        ))}
-      </View>
+      {visibleTabs.length > 0 && (
+        <View accessibilityRole="tablist" style={[s.tabRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+          {visibleTabs.map(({ key, label }) => (
+            <TouchableOpacity key={key} onPress={() => setTab(key)} style={s.tabBtn} activeOpacity={0.8} accessibilityRole="tab" accessibilityLabel={`${label} tab`} accessibilityState={{ selected: tab === key }}>
+              <Text style={[s.tabLabel, { color: tab === key ? colors.primary : colors.textSecondary, fontWeight: tab === key ? '700' : '400' }]}>
+                {label}
+              </Text>
+              {tab === key && <View style={[s.tabUnderline, { backgroundColor: colors.primary }]} />}
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
 
       {/* ── Body ── */}
       <ScrollView
@@ -475,14 +477,28 @@ export default function HomeRoute() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} tintColor={colors.primary} colors={[colors.primary]} />}
       >
-        {isError && (
-          <View style={[s.errorBanner, { backgroundColor: colors.errorLight }]}>
-            <Ionicons name="warning-outline" size={16} color={colors.error} />
-            <Text accessibilityRole="alert" accessibilityLiveRegion="assertive" style={{ color: colors.error, fontSize: FontSize.sm, marginLeft: 8 }}>Could not load. Pull down to retry.</Text>
+        {visibleTabs.length === 0 ? (
+          <View style={{ alignItems: 'center', paddingVertical: 40, paddingHorizontal: 8 }}>
+            <Ionicons name="apps-outline" size={64} color={colors.primaryTint} />
+            <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginTop: 16, textAlign: 'center' }}>
+              Welcome to Ajo
+            </Text>
+            <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 6, textAlign: 'center', lineHeight: 20 }}>
+              Choose a feature below to get started.
+            </Text>
           </View>
+        ) : (
+          <>
+            {isError && (
+              <View style={[s.errorBanner, { backgroundColor: colors.errorLight }]}>
+                <Ionicons name="warning-outline" size={16} color={colors.error} />
+                <Text accessibilityRole="alert" accessibilityLiveRegion="assertive" style={{ color: colors.error, fontSize: FontSize.sm, marginLeft: 8 }}>Could not load. Pull down to retry.</Text>
+              </View>
+            )}
+          </>
         )}
 
-        {isLoading ? (
+        {visibleTabs.length > 0 && (isLoading ? (
           <><CardSkeleton /><CardSkeleton /></>
         ) : tab === 'ajo' ? (
           /* ── Ajo content ── */
@@ -768,7 +784,7 @@ export default function HomeRoute() {
               </View>
             ) : null}
           </>
-        )}
+        ))}
 
         {/* ── Discovery — show all modules the user hasn't activated yet ── */}
         {selectedModules && (() => {
@@ -797,7 +813,7 @@ export default function HomeRoute() {
       </ScrollView>
 
       {/* ── FAB ── */}
-      <TouchableOpacity
+      {visibleTabs.length > 0 && <TouchableOpacity
         onPress={handleFab}
         activeOpacity={0.85}
         accessibilityRole="button"
@@ -805,7 +821,7 @@ export default function HomeRoute() {
         style={[s.fab, { backgroundColor: tab === 'ajo' ? colors.primary : tab === 'thrift' ? colors.success : '#E65100', ...Shadow.strong(tab === 'ajo' ? colors.primary : tab === 'thrift' ? colors.success : '#E65100') }]}
       >
         <Ionicons name="add" size={28} color={colors.white} />
-      </TouchableOpacity>
+      </TouchableOpacity>}
     </View>
   );
 }

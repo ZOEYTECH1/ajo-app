@@ -631,16 +631,24 @@ export default function HomeRoute() {
             {/* Quick-action bar — role & mode aware */}
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
               {(() => {
-                const isWarehouse = selectedBusinessMode === 'warehouse';
-                const isStaff     = selectedBusinessRole === 'staff';
+                const isWarehouse  = selectedBusinessMode === 'warehouse';
+                const isBranch     = selectedBusinessMode === 'branch';
+                const isStaff      = selectedBusinessRole === 'staff';
                 const isOwnerOrMgr = selectedBusinessRole === 'owner' || selectedBusinessRole === 'manager';
+                const isBranchAdmin = selectedBusinessRole === 'branch_admin';
+                const currentBiz   = (businesses ?? []).find(b => b.id === selectedBusinessId);
+                const hasBranches  = (currentBiz?.branch_count ?? 0) > 0;
 
                 const actions: { icon: string; label: string; route: string }[] = [
                   { icon: 'bar-chart-outline',  label: 'Dashboard',      route: '/inventory/dashboard' },
-                  ...(!isWarehouse ? [
+                  ...(!isWarehouse && !isBranch ? [
                     { icon: 'cart-outline',      label: 'Record Sale',    route: '/inventory/new-sale' },
                     { icon: 'time-outline',      label: 'Sales',          route: '/inventory/sales' },
                     { icon: 'people-outline',    label: 'Customers',      route: '/inventory/customers' },
+                  ] : []),
+                  ...(isBranch ? [
+                    { icon: 'cart-outline',      label: 'Record Sale',    route: '/inventory/new-sale' },
+                    { icon: 'time-outline',      label: 'Sales',          route: '/inventory/sales' },
                   ] : []),
                   ...(isWarehouse ? [
                     { icon: 'arrow-down-circle-outline', label: 'Receive Goods',  route: '/inventory/warehouse-receive' },
@@ -651,11 +659,17 @@ export default function HomeRoute() {
                     { icon: 'podium-outline',    label: 'Best Sellers',   route: '/inventory/best-sellers' },
                     { icon: 'trending-up-outline', label: 'Analytics',    route: '/inventory/analytics' },
                   ] : []),
-                  ...(isOwnerOrMgr ? [
+                  ...(isOwnerOrMgr && !isBranch ? [
                     { icon: 'swap-horizontal-outline', label: 'Transfer',         route: '/inventory/transfer' },
                     { icon: 'git-compare-outline',     label: 'Transfer History', route: '/inventory/transfers' },
                     { icon: 'people-outline',          label: 'Staff',            route: '/inventory/staff' },
                     { icon: 'business-outline',        label: 'My Business',      route: '/inventory/business' },
+                  ] : []),
+                  ...(isOwnerOrMgr && hasBranches ? [
+                    { icon: 'git-pull-request-outline', label: 'Branch Requests', route: '/inventory/product-requests' },
+                  ] : []),
+                  ...((isBranch && (isBranchAdmin || isOwnerOrMgr)) ? [
+                    { icon: 'git-pull-request-outline', label: 'Requests',        route: '/inventory/product-requests' },
                   ] : []),
                   ...((businesses ?? []).length > 1 ? [
                     { icon: 'location-outline',  label: 'Locations',      route: '/inventory/locations' },

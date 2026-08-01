@@ -77,8 +77,8 @@ function AuthGuard() {
       if (!hasPhone && !isCompleteProfile) {
         router.replace('/complete-profile');
       } else if (hasPhone && !hasPickedModules && !isPickModules) {
-        // Existing user who pre-dates module selection — give them full access
-        setSelectedModules(['ajo', 'thrift', 'inventory'], 'ajo');
+        // No module preference yet — send to home; home.tsx auto-detects from server data
+        if (isPublicRoute || isCompleteProfile) router.replace('/home');
       } else if (hasPhone && hasPickedModules && (isPublicRoute || isCompleteProfile || isPickModules)) {
         router.replace('/home');
       }

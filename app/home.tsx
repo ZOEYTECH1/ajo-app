@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  RefreshControl, StatusBar, StyleSheet, Alert,
+  RefreshControl, StatusBar, StyleSheet, Alert, ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -226,7 +226,7 @@ const DiscoverCard: React.FC<{ module: ModuleKey; onActivate: () => void }> = ({
 export default function HomeRoute() {
   const { colors, isDark } = useTheme();
   const { user, logout } = useAuthStore();
-  const { selectedModules, primaryModule, addModule } = useModuleStore();
+  const { selectedModules, primaryModule, addModule, setSelectedModules } = useModuleStore();
   const router = useRouter();
 
   // Determine which tabs to show and which is the default.
@@ -277,10 +277,10 @@ export default function HomeRoute() {
     setSelectedBusiness,
   } = useInventoryStore();
 
-  const { data: businesses, refetch: refetchBusinesses } = useQuery({
+  const { data: businesses, isLoading: bizLoading, refetch: refetchBusinesses } = useQuery({
     queryKey: ['inventory-businesses'],
     queryFn: getBusinesses,
-    enabled: tab === 'inventory',
+    enabled: !!user,
   });
 
   const { data: categories, isLoading: invLoading, isError: invError, refetch: refetchInv, isRefetching: invRefetching } = useQuery({
@@ -297,6 +297,20 @@ export default function HomeRoute() {
       setSelectedBusiness(b.id, b.mode, b.my_role, b.name);
     }
   }, [businesses]);
+
+  // Auto-detect which modules the user actually has data in (runs once when selectedModules is null).
+  React.useEffect(() => {
+    if (selectedModules !== null) return;
+    if (ajoLoading || thriftLoading || bizLoading) return;
+
+    const detected: ModuleKey[] = [];
+    if ((groups ?? []).length > 0) detected.push('ajo');
+    if ((thriftGroups ?? []).length > 0) detected.push('thrift');
+    if ((businesses ?? []).length > 0) detected.push('inventory');
+
+    if (detected.length === 0) detected.push('thrift'); // new user default
+    setSelectedModules(detected, detected[0]);
+  }, [selectedModules, ajoLoading, thriftLoading, bizLoading, groups, thriftGroups, businesses]);
 
   const handleLogout = () => { logout(); router.replace('/login'); };
 
@@ -345,6 +359,26 @@ export default function HomeRoute() {
       router.push('/inventory/create-category' as any);
     }
   };
+
+  // ── Detecting modules — show spinner until server data reveals which tabs to show ──
+  if (selectedModules === null) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
+        <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+          <View>
+            <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginBottom: 2 }}>Welcome back</Text>
+            <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>
+              {user?.first_name ?? 'there'} {user?.last_name ?? ''}
+            </Text>
+          </View>
+        </View>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      </View>
+    );
+  }
 
   // ── Org admin home ─────────────────────────────────────────────────────────
   if (isOrgAdmin) {

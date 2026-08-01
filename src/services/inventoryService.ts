@@ -137,7 +137,25 @@ export interface InventoryBusinessFull extends InventoryBusiness {
   parent_business_name: string | null;
   branch_count: number;
   is_active: boolean;
+  trial_start: string | null;
+  trial_end: string | null;
+  subscription_expires: string | null;
+  is_on_trial: boolean;
+  is_subscription_active: boolean;
   my_role: MemberRole;
+}
+
+export interface InventorySubscription {
+  id: number;
+  business: number;
+  months: number;
+  amount: string;
+  tx_ref: string;
+  flw_transaction_id: string;
+  status: 'pending' | 'successful' | 'failed';
+  extends_until: string | null;
+  created_at: string;
+  verified_at: string | null;
 }
 
 /** Legacy single-business endpoint (backwards-compat, solo users only). */
@@ -406,6 +424,22 @@ export const getDashboard = (date?: string): Promise<InventoryDashboard> => {
     params: { ...(date ? { date } : {}), ...(bizParams ?? {}) },
   }).then(r => r.data);
 };
+
+// ─── Subscription / billing ───────────────────────────────────────────────────
+
+export const initiateInventorySubscription = (
+  bizId: number,
+  months: number,
+): Promise<{ message: string; link: string; subscription: InventorySubscription }> =>
+  api.post(`/api/inventory/businesses/${bizId}/subscription/initiate/`, { months }).then(r => r.data);
+
+export const verifyInventorySubscription = (
+  bizId: number,
+  transactionId: string,
+): Promise<{ message: string; subscription: InventorySubscription }> =>
+  api.get(`/api/inventory/businesses/${bizId}/subscription/verify/`, {
+    params: { transaction_id: transactionId },
+  }).then(r => r.data);
 
 // ─── Best Sellers ─────────────────────────────────────────────────────────────
 

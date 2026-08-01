@@ -102,10 +102,26 @@ export default function LocationsScreen() {
     : role === 'branch_admin' ? { label: 'Branch Admin', bg: '#E8EAF6', color: '#283593' }
     :                           { label: 'Staff',        bg: '#ECEFF1', color: '#455A64' };
 
+  const subBadge = (biz: InventoryBusinessFull) => {
+    if (biz.mode === 'branch') return null; // branches are always free
+    if (biz.is_on_trial) {
+      const daysLeft = biz.trial_end
+        ? Math.max(0, Math.ceil((new Date(biz.trial_end).getTime() - Date.now()) / 86400000))
+        : 0;
+      return { label: `Trial — ${daysLeft}d left`, bg: '#E8F5E9', color: '#2E7D32' };
+    }
+    if (biz.is_subscription_active) {
+      return { label: 'Active', bg: '#E8F5E9', color: '#2E7D32' };
+    }
+    return { label: 'Expired', bg: '#FFEBEE', color: '#C62828' };
+  };
+
   const renderCard = (biz: InventoryBusinessFull, indented = false) => {
     const mode = modeBadge(biz.mode);
     const role = roleBadge(biz.my_role);
+    const sub  = subBadge(biz);
     const isSelected = biz.id === selectedBusinessId;
+    const isExpired = biz.mode !== 'branch' && !biz.is_subscription_active;
 
     return (
       <TouchableOpacity
@@ -117,7 +133,7 @@ export default function LocationsScreen() {
           indented && s.cardIndented,
           {
             backgroundColor: colors.surface,
-            borderColor: isSelected ? INV : colors.border,
+            borderColor: isSelected ? INV : isExpired ? '#FFCDD2' : colors.border,
             borderWidth: isSelected ? 2 : 1,
             ...Shadow.card(colors.black),
           },
@@ -148,7 +164,23 @@ export default function LocationsScreen() {
                   </Text>
                 </View>
               )}
+              {sub && (
+                <View style={[s.badge, { backgroundColor: sub.bg }]}>
+                  <Text style={{ fontSize: 11, fontWeight: '700', color: sub.color }}>{sub.label}</Text>
+                </View>
+              )}
             </View>
+            {isExpired && biz.my_role === 'owner' && (
+              <TouchableOpacity
+                onPress={(e) => { e.stopPropagation(); router.push(`/inventory/subscription?bizId=${biz.id}`); }}
+                style={[s.renewBtn]}
+                accessibilityRole="button"
+                accessibilityLabel={`Renew subscription for ${biz.name}`}
+              >
+                <Ionicons name="refresh-outline" size={13} color="#fff" />
+                <Text style={{ fontSize: 11, fontWeight: '800', color: '#fff', marginLeft: 4 }}>Renew Subscription</Text>
+              </TouchableOpacity>
+            )}
           </View>
           {isSelected && <Ionicons name="checkmark-circle" size={22} color={INV} style={{ marginLeft: 8 }} />}
         </View>
@@ -422,5 +454,11 @@ const s = StyleSheet.create({
   },
   saveBtn: {
     paddingVertical: 16, borderRadius: Radius.lg, alignItems: 'center',
+  },
+  renewBtn: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#C62828', borderRadius: 8,
+    paddingHorizontal: 10, paddingVertical: 5,
+    alignSelf: 'flex-start', marginTop: 8,
   },
 });

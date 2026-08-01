@@ -703,17 +703,36 @@ export default function HomeRoute() {
                   />
                 ))}
               </>
-            ) : (
-              !invLoading && !invError && (
-                <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-                  <Ionicons name="cube-outline" size={64} color="#FFF3E0" />
-                  <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginTop: 16, textAlign: 'center' }}>No inventory yet</Text>
-                  <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 6, textAlign: 'center', lineHeight: 20 }}>
-                    Create a category to start tracking your products and stock movements.
-                  </Text>
-                </View>
-              )
-            )}
+            ) : !invLoading && !invError && businesses !== undefined && (businesses ?? []).length === 0 ? (
+              /* No business set up yet */
+              <View style={{ alignItems: 'center', paddingVertical: 48 }}>
+                <Ionicons name="storefront-outline" size={64} color="#FFE0B2" />
+                <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginTop: 16, textAlign: 'center' }}>
+                  Set up your inventory
+                </Text>
+                <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 6, textAlign: 'center', lineHeight: 20, paddingHorizontal: 8 }}>
+                  Register your business to start tracking products, sales, and expenses.
+                </Text>
+                <TouchableOpacity
+                  onPress={() => router.push('/inventory/locations' as any)}
+                  activeOpacity={0.82}
+                  accessibilityRole="button"
+                  accessibilityLabel="Create your first business"
+                  style={{ marginTop: 20, backgroundColor: '#E65100', borderRadius: Radius.lg, paddingHorizontal: 28, paddingVertical: 13 }}
+                >
+                  <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: '#fff' }}>Create your first business</Text>
+                </TouchableOpacity>
+              </View>
+            ) : !invLoading && !invError && selectedBusinessId ? (
+              /* Business exists but no categories */
+              <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+                <Ionicons name="cube-outline" size={64} color="#FFE0B2" />
+                <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginTop: 16, textAlign: 'center' }}>No categories yet</Text>
+                <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 6, textAlign: 'center', lineHeight: 20 }}>
+                  Tap the + button below to add your first product category.
+                </Text>
+              </View>
+            ) : null}
           </>
         )}
 

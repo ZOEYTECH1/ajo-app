@@ -35,6 +35,7 @@ export default function ProductDetailScreen() {
   const [editModal, setEditModal]             = useState(false);
   const [editName, setEditName]               = useState('');
   const [editPrice, setEditPrice]             = useState('');
+  const [editCostPrice, setEditCostPrice]     = useState('');
   const [editBarcode, setEditBarcode]         = useState('');
   const [editThreshold, setEditThreshold]     = useState('5');
   const [editExpiryDate, setEditExpiryDate]   = useState<string | null>(null);
@@ -109,6 +110,7 @@ export default function ProductDetailScreen() {
     mutationFn: () => updateProduct(prodIdNum, {
       name: editName.trim(),
       price: editPrice.trim(),
+      cost_price: editCostPrice.trim() || null,
       barcode: editBarcode.trim(),
       low_stock_threshold: Math.max(0, parseInt(editThreshold, 10) || 5),
       expiry_date: editExpiryDate || null,
@@ -162,6 +164,7 @@ export default function ProductDetailScreen() {
   const openEdit = () => {
     setEditName(product?.name ?? '');
     setEditPrice(product?.price ?? '');
+    setEditCostPrice(product?.cost_price ?? '');
     setEditBarcode(product?.barcode ?? '');
     setEditThreshold(String(product?.low_stock_threshold ?? 5));
     setEditExpiryDate(product?.expiry_date ?? null);
@@ -235,6 +238,17 @@ export default function ProductDetailScreen() {
               keyboardType="decimal-pad"
               accessibilityLabel="Selling price in naira"
               accessibilityHint="Enter the price in naira"
+            />
+            <Text style={[s.modalLabel, { color: colors.textSecondary, marginTop: 14 }]}>Cost / purchase price (₦) — optional</Text>
+            <TextInput
+              value={editCostPrice}
+              onChangeText={setEditCostPrice}
+              style={[s.modalInput, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
+              placeholder="What you paid per unit"
+              placeholderTextColor={colors.textTertiary}
+              keyboardType="decimal-pad"
+              accessibilityLabel="Cost price in naira"
+              accessibilityHint="Optional. Used to calculate your profit margin"
             />
             <Text style={[s.modalLabel, { color: colors.textSecondary, marginTop: 14 }]}>Barcode (optional)</Text>
             <TextInput

@@ -103,7 +103,7 @@ function BottomTabBar() {
     queryKey: ['notifications'],
     queryFn: notificationService.getNotifications,
     enabled: !!user && !!current && !PUBLIC_ROUTES.has(current),
-    refetchInterval: 60000,
+    refetchInterval: 30000,
   });
   const unreadCount = notifData?.unreadCount ?? 0;
 

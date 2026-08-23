@@ -76,6 +76,33 @@ export default function ProfileRoute() {
     confirmLabel: string; destructive: boolean; onConfirm: () => void;
   }>({ visible: false, title: '', message: '', confirmLabel: '', destructive: false, onConfirm: () => {} });
 
+  // Change password modal state
+  const [showChangePw, setShowChangePw] = useState(false);
+  const [currentPw, setCurrentPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [pwError, setPwError] = useState('');
+  const [pwSuccess, setPwSuccess] = useState(false);
+
+  const changePwMutation = useMutation({
+    mutationFn: () => userService.changePassword(currentPw, newPw),
+    onSuccess: () => {
+      setCurrentPw(''); setNewPw(''); setConfirmPw(''); setPwError('');
+      setPwSuccess(true);
+    },
+    onError: (err: any) => {
+      setPwError(err.response?.data?.detail ?? 'Failed to change password. Please try again.');
+    },
+  });
+
+  function handleChangePw() {
+    setPwError('');
+    if (!currentPw || !newPw || !confirmPw) { setPwError('All fields are required.'); return; }
+    if (newPw !== confirmPw) { setPwError('New passwords do not match.'); return; }
+    if (newPw.length < 8) { setPwError('New password must be at least 8 characters.'); return; }
+    changePwMutation.mutate();
+  }
+
   // Org admin detection
   const { data: myOrgs } = useQuery({
     queryKey: ['my-orgs'],
@@ -94,22 +121,23 @@ export default function ProfileRoute() {
   });
 
   // Ajo payment history — only relevant for non-org-admin
-  const { data: history, isLoading: historyLoading } = useQuery({
+  const { data: history = [], isLoading: historyLoading } = useQuery({
     queryKey: ['payment-history'],
     queryFn: groupService.getPaymentHistory,
     enabled: !!user && !isOrgAdmin,
+    initialData: [],
   });
 
-  const totalApproved = (history ?? [])
+  const totalApproved = history
     .filter((p) => p.status === 'approved')
     .reduce((sum, p) => sum + parseFloat(p.amount_entered), 0);
 
-  const totalPending = (history ?? [])
+  const totalPending = history
     .filter((p) => p.status === 'pending')
     .reduce((sum, p) => sum + parseFloat(p.amount_entered), 0);
 
-  const approvedCount = (history ?? []).filter((p) => p.status === 'approved').length;
-  const pendingCount  = (history ?? []).filter((p) => p.status === 'pending').length;
+  const approvedCount = history.filter((p) => p.status === 'approved').length;
+  const pendingCount  = history.filter((p) => p.status === 'pending').length;
 
   // Org stats
   const activeCollectors  = (orgDashboard?.collectors ?? []).filter((c) => c.status === 'active').length;
@@ -424,6 +452,12 @@ export default function ProfileRoute() {
             <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
           </TouchableOpacity>
           <View style={{ height: 1, backgroundColor: colors.border }} />
+          <TouchableOpacity onPress={() => setShowChangePw(true)} style={s.actionRow} accessibilityRole="button" accessibilityLabel="Change password">
+            <Ionicons name="lock-closed-outline" size={20} color={colors.textPrimary} />
+            <Text style={{ fontSize: FontSize.base, color: colors.textPrimary, marginLeft: 14, flex: 1 }}>Change password</Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+          </TouchableOpacity>
+          <View style={{ height: 1, backgroundColor: colors.border }} />
           <TouchableOpacity onPress={handleLogout} style={s.actionRow} accessibilityRole="button" accessibilityLabel="Log out">
             <Ionicons name="log-out-outline" size={20} color={colors.textPrimary} />
             <Text style={{ fontSize: FontSize.base, color: colors.textPrimary, marginLeft: 14, flex: 1 }}>Log out</Text>
@@ -436,6 +470,69 @@ export default function ProfileRoute() {
             <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
           </TouchableOpacity>
         </View>
+
+        {/* Change password modal */}
+        <Modal visible={showChangePw} animationType="slide" transparent onRequestClose={() => setShowChangePw(false)}>
+          <Pressable style={s.overlay} onPress={() => setShowChangePw(false)}>
+            <Pressable style={[s.modalBox, { backgroundColor: colors.surface }]} onPress={(e) => e.stopPropagation()}>
+              <Text style={{ fontSize: FontSize.lg, fontWeight: '700', color: colors.textPrimary, marginBottom: 16 }}>Change Password</Text>
+              {!!pwError && (
+                <View style={{ backgroundColor: colors.errorLight, borderRadius: 8, padding: 10, marginBottom: 12 }}>
+                  <Text style={{ color: colors.error, fontSize: FontSize.sm }}>{pwError}</Text>
+                </View>
+              )}
+              {pwSuccess ? (
+                <View style={{ alignItems: 'center', paddingVertical: 12 }}>
+                  <Ionicons name="checkmark-circle" size={48} color={colors.success} />
+                  <Text style={{ color: colors.success, marginTop: 8, fontWeight: '600' }}>Password changed!</Text>
+                  <TouchableOpacity onPress={() => { setShowChangePw(false); setPwSuccess(false); }} style={{ marginTop: 16 }}>
+                    <Text style={{ color: colors.primary, fontWeight: '600' }}>Done</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <>
+                  <TextInput
+                    value={currentPw}
+                    onChangeText={setCurrentPw}
+                    placeholder="Current password"
+                    placeholderTextColor={colors.textTertiary}
+                    secureTextEntry
+                    style={[s.input, { color: colors.textPrimary, backgroundColor: colors.background, borderColor: colors.border, marginBottom: 10 }]}
+                    accessibilityLabel="Current password"
+                  />
+                  <TextInput
+                    value={newPw}
+                    onChangeText={setNewPw}
+                    placeholder="New password (min 8 chars)"
+                    placeholderTextColor={colors.textTertiary}
+                    secureTextEntry
+                    style={[s.input, { color: colors.textPrimary, backgroundColor: colors.background, borderColor: colors.border, marginBottom: 10 }]}
+                    accessibilityLabel="New password"
+                  />
+                  <TextInput
+                    value={confirmPw}
+                    onChangeText={setConfirmPw}
+                    placeholder="Confirm new password"
+                    placeholderTextColor={colors.textTertiary}
+                    secureTextEntry
+                    style={[s.input, { color: colors.textPrimary, backgroundColor: colors.background, borderColor: colors.border, marginBottom: 16 }]}
+                    accessibilityLabel="Confirm new password"
+                  />
+                  <View style={[s.row, { gap: 10 }]}>
+                    <TouchableOpacity onPress={() => setShowChangePw(false)} style={[s.modalBtn, { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 }]}>
+                      <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm }}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleChangePw} disabled={changePwMutation.isPending} style={[s.modalBtn, { backgroundColor: colors.primary }]}>
+                      <Text style={{ color: '#FFF', fontWeight: '700', fontSize: FontSize.sm }}>
+                        {changePwMutation.isPending ? 'Saving…' : 'Save'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )}
+            </Pressable>
+          </Pressable>
+        </Modal>
       </ScrollView>
     </View>
   );

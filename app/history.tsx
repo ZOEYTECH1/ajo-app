@@ -333,9 +333,10 @@ export default function HistoryRoute() {
     queryKey: ['payment-history'],
     queryFn:  groupService.getPaymentHistory,
     enabled:  !isOrgAdmin,
+    initialData: [],
   });
 
-  const { data: thriftHistory, isLoading: thriftLoading, refetch: refetchThrift, isFetching: thriftFetching } = useQuery({
+  const { data: thriftHistory, isLoading: thriftLoading, isError: thriftError, refetch: refetchThrift, isFetching: thriftFetching } = useQuery({
     queryKey: ['thrift-payment-history'],
     queryFn:  thriftService.getMyPaymentHistory,
     enabled:  !isOrgAdmin,

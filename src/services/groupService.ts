@@ -212,7 +212,7 @@ export const groupService = {
 
   getPaymentHistory: async (): Promise<Payment[]> => {
     const res = await api.get('/api/payments/history/');
-    return res.data;
+    return res.data.results ?? [];
   },
 
   submitPayment: async ({ group_id, amount_entered, receipt_image }: SubmitPaymentPayload): Promise<Payment> => {

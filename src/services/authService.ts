@@ -31,6 +31,19 @@ export const authService = {
     return res.data;
   },
 
+  // Verifies a forgot-password OTP and returns JWT tokens (no existing auth needed)
+  forgotPasswordVerify: async (email: string, code: string): Promise<{ access: string; refresh: string; user: AjoUser }> => {
+    const res = await api.post('/api/auth/forgot-password/verify/', { email, code });
+    return res.data;
+  },
+
+  // Sets a new password using a short-lived token from forgotPasswordVerify
+  resetPassword: async (newPassword: string, accessToken: string): Promise<void> => {
+    await api.post('/api/auth/reset-password/', { new_password: newPassword }, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  },
+
   verifyPhone: async (email: string, code: string): Promise<{ message: string }> => {
     const res = await api.post('/api/auth/verify-phone/', { email, code });
     return res.data;

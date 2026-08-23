@@ -14,7 +14,7 @@ export const notificationService = {
   getNotifications: async (): Promise<{ data: AppNotification[]; unreadCount: number }> => {
     const res = await api.get('/api/notifications/');
     const unreadCount = parseInt(res.headers['x-unread-count'] ?? '0', 10);
-    return { data: res.data, unreadCount };
+    return { data: res.data.results ?? [], unreadCount };
   },
 
   getUnreadCount: async (): Promise<number> => {

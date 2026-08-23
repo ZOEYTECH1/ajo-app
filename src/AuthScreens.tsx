@@ -748,14 +748,21 @@ interface ForgotPasswordProps {
   onSuccess: () => void;
 }
 
+type ForgotStep = 'email' | 'otp' | 'password' | 'done';
+
 export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) => {
   const { colors, isDark } = useTheme();
-  const [email, setEmail]   = useState('');
-  const [sent, setSent]     = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError]   = useState('');
+  const [step, setStep]         = useState<ForgotStep>('email');
+  const [email, setEmail]       = useState('');
+  const [code, setCode]         = useState('');
+  const [newPw, setNewPw]       = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState('');
+  const accessTokenRef           = useRef('');
 
-  const handleSubmit = async () => {
+  // Step 1 — send OTP to email
+  const handleSendCode = async () => {
     if (!email.trim()) {
       setError('Please enter your email address.');
       feedback('error');
@@ -765,12 +772,70 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) 
     setError('');
     try {
       await authService.resendOtp(email.trim().toLowerCase(), 'email');
-    } catch {
-      // Intentionally swallow — don't reveal whether the email exists
+      setStep('otp');
+    } catch (e: any) {
+      const msg = e?.response?.data?.email?.[0] ?? e?.response?.data?.detail ?? 'Failed to send code. Check your email and try again.';
+      setError(msg);
+      feedback('error');
     } finally {
       setLoading(false);
-      setSent(true);
     }
+  };
+
+  // Step 2 — verify OTP, receive short-lived tokens
+  const handleVerifyCode = async () => {
+    if (code.length !== 6) {
+      setError('Please enter the 6-digit code.');
+      feedback('error');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const result = await authService.forgotPasswordVerify(email.trim().toLowerCase(), code.trim());
+      accessTokenRef.current = result.access;
+      setStep('password');
+    } catch (e: any) {
+      const msg = e?.response?.data?.code?.[0] ?? e?.response?.data?.detail ?? 'Invalid or expired code.';
+      setError(msg);
+      feedback('error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 3 — set new password
+  const handleResetPassword = async () => {
+    if (newPw.length < 8) {
+      setError('Password must be at least 8 characters.');
+      feedback('error');
+      return;
+    }
+    if (newPw !== confirmPw) {
+      setError('Passwords do not match.');
+      feedback('error');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      await authService.resetPassword(newPw, accessTokenRef.current);
+      feedback('success');
+      setStep('done');
+    } catch (e: any) {
+      const msg = e?.response?.data?.detail ?? 'Failed to reset password. Please try again.';
+      setError(msg);
+      feedback('error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const subtitleMap: Record<ForgotStep, string> = {
+    email:    "Enter your registered email and we'll send you a verification code.",
+    otp:      `Enter the 6-digit code sent to ${email}.`,
+    password: 'Choose a new password for your account.',
+    done:     'Your password has been reset successfully.',
   };
 
   return (
@@ -784,22 +849,16 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) 
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <AuthHeader
-          title="Reset Password"
-          subtitle={
-            sent
-              ? 'If that email is registered, a code has been sent. Contact support with the code to reset your password.'
-              : "Enter your registered email and we'll send you a verification code."
-          }
-        />
+        <AuthHeader title="Reset Password" subtitle={subtitleMap[step]} />
 
-        {!sent ? (
+        {!!error && step !== 'done' && (
+          <View style={[layout.errorBanner, { backgroundColor: colors.errorLight, borderLeftColor: colors.error }]} accessibilityRole="alert" accessibilityLiveRegion="assertive">
+            <Text style={{ color: colors.error, fontSize: FontSize.sm, fontWeight: '500' }}>{error}</Text>
+          </View>
+        )}
+
+        {step === 'email' && (
           <>
-            {!!error && (
-              <View style={[layout.errorBanner, { backgroundColor: colors.errorLight, borderLeftColor: colors.error }]} accessibilityRole="alert" accessibilityLiveRegion="assertive">
-                <Text style={{ color: colors.error, fontSize: FontSize.sm, fontWeight: '500' }}>{error}</Text>
-              </View>
-            )}
             <Input
               label="Email address"
               value={email}
@@ -810,9 +869,54 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) 
               leftIcon={<Ionicons name="mail-outline" size={18} color={colors.textDisabled} />}
               accessibilityLabel="Email address"
             />
-            <Button label="Send Code" onPress={handleSubmit} loading={loading} style={{ marginTop: 8 }} accessibilityHint="Double tap to send a reset code" />
+            <Button label="Send Code" onPress={handleSendCode} loading={loading} style={{ marginTop: 8 }} />
           </>
-        ) : (
+        )}
+
+        {step === 'otp' && (
+          <>
+            <Input
+              label="Verification code"
+              value={code}
+              onChangeText={setCode}
+              keyboardType="number-pad"
+              maxLength={6}
+              placeholder="123456"
+              leftIcon={<Ionicons name="keypad-outline" size={18} color={colors.textDisabled} />}
+              accessibilityLabel="Verification code"
+            />
+            <Button label="Verify Code" onPress={handleVerifyCode} loading={loading} style={{ marginTop: 8 }} />
+            <TouchableOpacity onPress={handleSendCode} style={{ alignItems: 'center', marginTop: 16 }}>
+              <Text style={{ color: colors.primary, fontSize: FontSize.sm }}>Resend code</Text>
+            </TouchableOpacity>
+          </>
+        )}
+
+        {step === 'password' && (
+          <>
+            <Input
+              label="New password"
+              value={newPw}
+              onChangeText={setNewPw}
+              secureTextEntry
+              placeholder="Min. 8 characters"
+              leftIcon={<Ionicons name="lock-closed-outline" size={18} color={colors.textDisabled} />}
+              accessibilityLabel="New password"
+            />
+            <Input
+              label="Confirm new password"
+              value={confirmPw}
+              onChangeText={setConfirmPw}
+              secureTextEntry
+              placeholder="Repeat your password"
+              leftIcon={<Ionicons name="lock-closed-outline" size={18} color={colors.textDisabled} />}
+              accessibilityLabel="Confirm new password"
+            />
+            <Button label="Reset Password" onPress={handleResetPassword} loading={loading} style={{ marginTop: 8 }} />
+          </>
+        )}
+
+        {step === 'done' && (
           <View style={{ alignItems: 'center', paddingTop: 12 }}>
             <Ionicons name="checkmark-circle" size={56} color={colors.success} />
             <Button label="Back to Login" onPress={onBack} variant="outline" style={{ marginTop: 28 }} />

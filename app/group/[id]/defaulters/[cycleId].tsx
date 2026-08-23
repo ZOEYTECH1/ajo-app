@@ -39,9 +39,6 @@ const DefaulterRow: React.FC<{ item: Defaulter; index: number }> = ({ item, inde
         <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }}>
           {item.user.first_name} {item.user.last_name}
         </Text>
-        <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
-          {item.user.email}
-        </Text>
       </View>
       <View style={{ alignItems: 'flex-end' }}>
         <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary }}>Paid so far</Text>

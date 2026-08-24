@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity,
+  View, Text, ScrollView, TouchableOpacity, TextInput,
   StyleSheet, Alert, ActivityIndicator, Linking,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../../src/hooks/useTheme';
 import { FontSize, Radius, Shadow } from '../../../../src/theme';
 import {
-  getOrgInvoices, generateOrgInvoice, payOrgInvoice,
+  getOrgInvoices, generateOrgInvoice, payOrgInvoice, verifyOrgInvoice,
   type ThriftInvoice,
 } from '../../../../src/services/billingService';
 
@@ -20,11 +20,21 @@ const STATUS_META = {
 };
 
 function InvoiceCard({
-  invoice, onPay,
-}: { invoice: ThriftInvoice; onPay: () => void }) {
+  invoice, orgId, onPay, onVerified,
+}: { invoice: ThriftInvoice; orgId: number; onPay: (setShowVerify: (v: boolean) => void) => void; onVerified: () => void }) {
   const { colors } = useTheme();
   const meta = STATUS_META[invoice.status];
   const totalFee = parseFloat(invoice.total_fee);
+  const [showVerify, setShowVerify] = useState(false);
+  const [txId, setTxId] = useState('');
+  const [verifyError, setVerifyError] = useState('');
+  const [verified, setVerified] = useState(false);
+
+  const { mutate: verify, isPending: verifying } = useMutation({
+    mutationFn: () => verifyOrgInvoice(orgId, invoice.id, txId.trim()),
+    onSuccess: () => { setVerified(true); setShowVerify(false); onVerified(); },
+    onError: (e: any) => setVerifyError(e?.response?.data?.detail ?? 'Verification failed. Check your transaction ID.'),
+  });
 
   return (
     <View style={[s.card, { backgroundColor: colors.surface, ...Shadow.card(colors.black) }]}>
@@ -86,28 +96,57 @@ function InvoiceCard({
         </Text>
       </View>
 
-      {invoice.status !== 'paid' && (
-        <TouchableOpacity
-          onPress={onPay}
-          style={[s.payBtn, { backgroundColor: colors.primary }]}
-          activeOpacity={0.85}
-          accessibilityRole="button"
-          accessibilityLabel={`Pay ₦${totalFee.toLocaleString()} for ${invoice.month_label}`}
-        >
-          <Ionicons name="card-outline" size={18} color="#fff" />
-          <Text style={{ color: '#fff', fontWeight: '800', fontSize: FontSize.sm, marginLeft: 8 }}>
-            Pay ₦{totalFee.toLocaleString()}
-          </Text>
-        </TouchableOpacity>
+      {invoice.status !== 'paid' && !verified && (
+        <>
+          <TouchableOpacity
+            onPress={() => onPay(setShowVerify)}
+            style={[s.payBtn, { backgroundColor: colors.primary }]}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel={`Pay ₦${totalFee.toLocaleString()} for ${invoice.month_label}`}
+          >
+            <Ionicons name="card-outline" size={18} color="#fff" />
+            <Text style={{ color: '#fff', fontWeight: '800', fontSize: FontSize.sm, marginLeft: 8 }}>
+              Pay ₦{totalFee.toLocaleString()}
+            </Text>
+          </TouchableOpacity>
+
+          {showVerify && (
+            <View style={[s.verifyBox, { borderColor: colors.border, backgroundColor: colors.background }]}>
+              <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginBottom: 10, lineHeight: 18 }}>
+                After completing payment in your browser, enter your transaction ID to confirm.
+              </Text>
+              <TextInput
+                value={txId}
+                onChangeText={t => { setTxId(t); setVerifyError(''); }}
+                placeholder="e.g. FLW-123456789"
+                placeholderTextColor={colors.textTertiary}
+                style={[s.txInput, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.surface }]}
+              />
+              {verifyError ? (
+                <Text style={{ fontSize: FontSize.xs, color: '#C62828', marginTop: 6 }}>{verifyError}</Text>
+              ) : null}
+              <TouchableOpacity
+                onPress={() => { if (txId.trim()) verify(); }}
+                disabled={!txId.trim() || verifying}
+                style={[s.verifyBtn, { backgroundColor: txId.trim() && !verifying ? colors.primary : colors.primaryTint, marginTop: 10 }]}
+                activeOpacity={0.8}
+              >
+                {verifying
+                  ? <ActivityIndicator size="small" color="#fff" />
+                  : <Text style={{ color: '#fff', fontWeight: '700', fontSize: FontSize.sm }}>Verify Payment</Text>
+                }
+              </TouchableOpacity>
+            </View>
+          )}
+        </>
       )}
 
-      {invoice.status === 'paid' && (
+      {(invoice.status === 'paid' || verified) && (
         <View style={[s.paidRow, { backgroundColor: '#E8F5E9' }]}>
           <Ionicons name="checkmark-circle" size={16} color="#2E7D32" />
           <Text style={{ color: '#2E7D32', fontWeight: '600', fontSize: FontSize.xs, marginLeft: 6 }}>
-            Paid{invoice.paid_at
-              ? ` ${new Date(invoice.paid_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}`
-              : ''}
+            {verified ? 'Payment verified!' : `Paid${invoice.paid_at ? ` ${new Date(invoice.paid_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}`}
           </Text>
         </View>
       )}
@@ -137,10 +176,12 @@ export default function OrgBillingScreen() {
   });
 
   const { mutate: pay } = useMutation({
-    mutationFn: (invoiceId: number) => payOrgInvoice(orgId, invoiceId),
-    onSuccess: (data) => {
+    mutationFn: ({ invoiceId, setShowVerify }: { invoiceId: number; setShowVerify: (v: boolean) => void }) =>
+      payOrgInvoice(orgId, invoiceId).then(data => ({ data, setShowVerify })),
+    onSuccess: ({ data, setShowVerify }) => {
       setPaying(null);
       Linking.openURL(data.payment_link);
+      setShowVerify(true);
     },
     onError: () => {
       setPaying(null);
@@ -148,9 +189,9 @@ export default function OrgBillingScreen() {
     },
   });
 
-  const handlePay = (invoice: ThriftInvoice) => {
+  const handlePay = (invoice: ThriftInvoice, setShowVerify: (v: boolean) => void) => {
     setPaying(invoice.id);
-    pay(invoice.id);
+    pay({ invoiceId: invoice.id, setShowVerify });
   };
 
   const pendingCount = (invoices ?? []).filter(i => i.status !== 'paid').length;
@@ -225,7 +266,9 @@ export default function OrgBillingScreen() {
             <InvoiceCard
               key={inv.id}
               invoice={inv}
-              onPay={() => handlePay(inv)}
+              orgId={orgId}
+              onPay={(setShowVerify) => handlePay(inv, setShowVerify)}
+              onVerified={() => qc.invalidateQueries({ queryKey: ['org-invoices', orgId] })}
             />
           ))
         )}
@@ -271,4 +314,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     paddingVertical: 10, borderRadius: Radius.md, marginTop: 12,
   },
+  verifyBox: { marginTop: 12, padding: 14, borderRadius: Radius.lg, borderWidth: 1 },
+  txInput: { borderWidth: 1, borderRadius: Radius.md, paddingHorizontal: 12, paddingVertical: 10, fontSize: FontSize.sm },
+  verifyBtn: { paddingVertical: 12, borderRadius: Radius.lg, alignItems: 'center' },
 });

@@ -314,7 +314,21 @@ function DisputePaymentModal({
       const { recording: rec } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
       setRecording(rec);
       setRecSeconds(0);
-      timerRef.current = setInterval(() => setRecSeconds((s) => s + 1), 1000);
+      timerRef.current = setInterval(() => {
+        setRecSeconds((s) => {
+          const next = s + 1;
+          if (next >= 60) {
+            clearInterval(timerRef.current!);
+            timerRef.current = null;
+            rec.stopAndUnloadAsync().then(() => {
+              const uri = rec.getURI();
+              setAudioUri(uri ?? null);
+              setRecording(null);
+            }).catch(() => setRecording(null));
+          }
+          return next;
+        });
+      }, 1000);
     } catch (e: any) {
       if (e?.message?.includes('native module') || e?.message?.includes('ExponentAV')) {
         setErr('Voice recording requires a development build. Type your dispute instead.');
@@ -426,15 +440,24 @@ function DisputePaymentModal({
           )}
 
           {!!recording && (
-            <View style={[m.voiceBtn, { backgroundColor: '#FEE2E2', borderColor: '#FECACA', justifyContent: 'space-between' }]}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444', marginRight: 8 }} />
-                <Text style={{ color: '#EF4444', fontWeight: '700', fontSize: FontSize.sm }}>Recording  {fmt(recSeconds)}</Text>
-              </View>
+            <View style={{ gap: 4 }}>
+              <View style={[m.voiceBtn, { backgroundColor: '#FEE2E2', borderColor: '#FECACA', justifyContent: 'space-between' }]}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444', marginRight: 8 }} />
+                  <Text style={{ color: '#EF4444', fontWeight: '700', fontSize: FontSize.sm }}>
+                    Recording  {fmt(recSeconds)}  ({60 - recSeconds}s left)
+                  </Text>
+                </View>
               <TouchableOpacity onPress={stopRecording} style={{ flexDirection: 'row', alignItems: 'center' }} accessibilityRole="button" accessibilityLabel="Stop recording">
                 <Ionicons name="stop-circle-outline" size={20} color="#EF4444" />
                 <Text style={{ color: '#EF4444', fontWeight: '700', fontSize: FontSize.sm, marginLeft: 4 }}>Stop</Text>
               </TouchableOpacity>
+            </View>
+            {(60 - recSeconds) <= 10 && (
+              <Text style={{ color: '#EF4444', fontSize: FontSize.xs, fontWeight: '600', marginLeft: 4 }}>
+                Stops automatically in {60 - recSeconds}s
+              </Text>
+            )}
             </View>
           )}
 

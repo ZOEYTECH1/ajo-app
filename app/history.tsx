@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  RefreshControl, StatusBar, StyleSheet,
+  RefreshControl, StatusBar, StyleSheet, ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useQuery, useQueries } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useQueries } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../src/hooks/useTheme';
@@ -329,17 +329,43 @@ export default function HistoryRoute() {
     })),
   });
 
-  const { data: ajoData, isLoading: ajoLoading, isError: ajoError, refetch: refetchAjo, isFetching: ajoFetching } = useQuery({
+  const {
+    data: ajoData, isLoading: ajoLoading, isError: ajoError,
+    refetch: refetchAjo, isFetching: ajoFetching,
+    fetchNextPage: fetchMoreAjo, hasNextPage: ajoHasMore, isFetchingNextPage: ajoFetchingMore,
+  } = useInfiniteQuery({
     queryKey: ['payment-history'],
-    queryFn:  groupService.getPaymentHistory,
-    enabled:  !isOrgAdmin,
-    initialData: [],
+    queryFn: ({ pageParam }) => groupService.getPaymentHistoryPage(pageParam as number),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+      lastPage.next ? (lastPageParam as number) + 1 : undefined,
+    enabled: !isOrgAdmin,
   });
 
-  const { data: thriftHistory, isLoading: thriftLoading, isError: thriftError, refetch: refetchThrift, isFetching: thriftFetching } = useQuery({
-    queryKey: ['thrift-payment-history'],
-    queryFn:  thriftService.getMyPaymentHistory,
-    enabled:  !isOrgAdmin,
+  const {
+    data: collectorData, isLoading: collectorLoading,
+    refetch: refetchCollector, isFetching: collectorFetching,
+    fetchNextPage: fetchMoreCollector, hasNextPage: collectorHasMore, isFetchingNextPage: collectorFetchingMore,
+  } = useInfiniteQuery({
+    queryKey: ['thrift-ph-collector'],
+    queryFn: ({ pageParam }) => thriftService.getMyPaymentHistoryPage('collector', pageParam as number),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+      lastPage.next ? (lastPageParam as number) + 1 : undefined,
+    enabled: !isOrgAdmin,
+  });
+
+  const {
+    data: payerData, isLoading: payerLoading,
+    refetch: refetchPayer, isFetching: payerFetching,
+    fetchNextPage: fetchMorePayer, hasNextPage: payerHasMore, isFetchingNextPage: payerFetchingMore,
+  } = useInfiniteQuery({
+    queryKey: ['thrift-ph-payer'],
+    queryFn: ({ pageParam }) => thriftService.getMyPaymentHistoryPage('payer', pageParam as number),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+      lastPage.next ? (lastPageParam as number) + 1 : undefined,
+    enabled: !isOrgAdmin,
   });
 
   // ── Org admin view ─────────────────────────────────────────────────────────
@@ -372,18 +398,20 @@ export default function HistoryRoute() {
   }
 
   // ── Determine which top tabs to show ──────────────────────────────────────
-  const ajoPayments         = ajoData ?? [];
-  const collectorPayments   = thriftHistory?.collector_payments ?? [];
-  const payerPayments       = thriftHistory?.payer_payments     ?? [];
-  const hasAjo              = ajoPayments.length > 0;
-  const hasThrift           = collectorPayments.length > 0 || payerPayments.length > 0;
-  const showBothTabs        = hasAjo && hasThrift;
+  const ajoPayments       = ajoData?.pages.flatMap(p => p.results) ?? [];
+  const ajoTotal          = ajoData?.pages[0]?.count ?? 0;
+  const collectorPayments = collectorData?.pages.flatMap(p => p.results) ?? [];
+  const payerPayments     = payerData?.pages.flatMap(p => p.results) ?? [];
 
-  // Default to the tab that has data
+  const hasAjo    = ajoTotal > 0 || ajoPayments.length > 0;
+  const hasThrift = (collectorData?.pages[0]?.count ?? 0) > 0 || collectorPayments.length > 0
+                 || (payerData?.pages[0]?.count ?? 0) > 0 || payerPayments.length > 0;
+  const showBothTabs = hasAjo && hasThrift;
+
   const effectiveTopTab: TopTab = showBothTabs ? topTab : (hasThrift ? 'thrift' : 'ajo');
 
-  const hasCollector = collectorPayments.length > 0;
-  const hasPayer     = payerPayments.length > 0;
+  const hasCollector = collectorPayments.length > 0 || (collectorData?.pages[0]?.count ?? 0) > 0;
+  const hasPayer     = payerPayments.length > 0 || (payerData?.pages[0]?.count ?? 0) > 0;
   const effectiveRole: ThriftRole = (hasCollector && hasPayer) ? thriftRole : (hasCollector ? 'collector' : 'payer');
 
   const ajoFiltered = ajoFilter === 'all' ? ajoPayments : ajoPayments.filter((p) => p.status === ajoFilter);
@@ -395,10 +423,15 @@ export default function HistoryRoute() {
   };
 
   const thriftDisplayList = effectiveRole === 'collector' ? collectorPayments : payerPayments;
+  const thriftHasMore = effectiveRole === 'collector' ? collectorHasMore : payerHasMore;
+  const thriftFetchingMore = effectiveRole === 'collector' ? collectorFetchingMore : payerFetchingMore;
+  const fetchMoreThrift = effectiveRole === 'collector' ? fetchMoreCollector : fetchMorePayer;
 
-  const isLoading   = ajoLoading || thriftLoading;
-  const isRefreshing = (ajoFetching && !ajoLoading) || (thriftFetching && !thriftLoading);
-  const refetchAll   = () => { refetchAjo(); refetchThrift(); };
+  const isLoading    = ajoLoading || collectorLoading || payerLoading;
+  const isRefreshing = (ajoFetching && !ajoLoading)
+                    || (collectorFetching && !collectorLoading)
+                    || (payerFetching && !payerLoading);
+  const refetchAll = () => { refetchAjo(); refetchCollector(); refetchPayer(); };
 
   const headerSubtitle =
     effectiveTopTab === 'thrift' && effectiveRole === 'collector'
@@ -474,6 +507,34 @@ export default function HistoryRoute() {
                 <ThriftPaymentCard key={p.id} payment={p} role={effectiveRole} />
               ))
           }
+          {effectiveTopTab === 'ajo' && ajoHasMore && (
+            <TouchableOpacity
+              onPress={() => fetchMoreAjo()}
+              disabled={ajoFetchingMore}
+              style={{ alignItems: 'center', paddingVertical: 20 }}
+              accessibilityRole="button"
+              accessibilityLabel="Load more payments"
+            >
+              {ajoFetchingMore
+                ? <ActivityIndicator color={colors.primary} />
+                : <Text style={{ color: colors.primary, fontWeight: '700', fontSize: FontSize.sm }}>Load More</Text>
+              }
+            </TouchableOpacity>
+          )}
+          {effectiveTopTab === 'thrift' && thriftHasMore && (
+            <TouchableOpacity
+              onPress={() => fetchMoreThrift()}
+              disabled={thriftFetchingMore}
+              style={{ alignItems: 'center', paddingVertical: 20 }}
+              accessibilityRole="button"
+              accessibilityLabel="Load more payments"
+            >
+              {thriftFetchingMore
+                ? <ActivityIndicator color={colors.success} />
+                : <Text style={{ color: colors.success, fontWeight: '700', fontSize: FontSize.sm }}>Load More</Text>
+              }
+            </TouchableOpacity>
+          )}
         </ScrollView>
       )}
     </View>

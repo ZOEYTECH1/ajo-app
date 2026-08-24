@@ -4,12 +4,12 @@ import {
   StyleSheet, ActivityIndicator, RefreshControl, Share, Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/hooks/useTheme';
 import { FontSize, Radius, Shadow } from '../../src/theme';
 import { useInventoryStore } from '../../src/store/useAppStore';
-import { getSales, type InventorySale } from '../../src/services/inventoryService';
+import { getSales, getSalesPage, type InventorySale } from '../../src/services/inventoryService';
 import ErrorBanner from '../../src/components/ErrorBanner';
 import { exportCsv, exportPdf } from '../../src/utils/exportUtils';
 
@@ -37,16 +37,25 @@ export default function SalesHistoryScreen() {
   const router = useRouter();
   const businessName = useInventoryStore(s => s.selectedBusinessName) ?? 'My Store';
 
-  const { data: sales, isLoading, isError, error, isRefetching, refetch } = useQuery({
+  const {
+    data, isLoading, isError, error, isRefetching, refetch,
+    fetchNextPage, hasNextPage, isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['inventory-sales'],
-    queryFn: getSales,
+    queryFn: ({ pageParam }) => getSalesPage(pageParam as number),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+      lastPage.next ? (lastPageParam as number) + 1 : undefined,
   });
+
+  const sales = data?.pages.flatMap(p => p.results) ?? [];
+  const totalCount = data?.pages[0]?.count ?? 0;
 
   const [expanded, setExpanded] = useState<number | null>(null);
 
   const handleExportCsv = async () => {
     try {
-      const all = sales ?? [];
+      const all = await getSales(); // fetch all records for export
       const headers = ['Date', 'Customer', 'Items', 'Total (NGN)'];
       const rows = all.map(s => [
         new Date(s.sold_at).toLocaleDateString('en-NG'),
@@ -62,7 +71,7 @@ export default function SalesHistoryScreen() {
 
   const handleExportPdf = async () => {
     try {
-      const all = sales ?? [];
+      const all = await getSales(); // fetch all records for export
       const rowsHtml = all.map(s => {
         const date = new Date(s.sold_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
         const items = s.items.map(i => `${i.product_name} ×${i.quantity}`).join(', ');
@@ -89,7 +98,7 @@ export default function SalesHistoryScreen() {
   };
 
   const promptExport = () => {
-    if ((sales ?? []).length === 0) {
+    if (totalCount === 0) {
       Alert.alert('Nothing to export', 'Record some sales first.');
       return;
     }
@@ -109,7 +118,7 @@ export default function SalesHistoryScreen() {
     }
   };
 
-  const totalRevenue = (sales ?? []).reduce((s, sale) => s + parseFloat(sale.total), 0);
+  const totalRevenue = sales.reduce((s, sale) => s + parseFloat(sale.total), 0);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -120,7 +129,7 @@ export default function SalesHistoryScreen() {
         <View style={{ flex: 1, marginLeft: 16 }}>
           <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Sales History</Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
-            {(sales ?? []).length} transactions · ₦{totalRevenue.toLocaleString()} total
+            {totalCount > 0 ? `${totalCount} transactions` : `${sales.length} transactions`} · ₦{totalRevenue.toLocaleString()} loaded
           </Text>
         </View>
         <TouchableOpacity onPress={promptExport} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }} style={{ marginRight: 12 }} accessibilityRole="button" accessibilityLabel="Export sales">
@@ -146,7 +155,7 @@ export default function SalesHistoryScreen() {
           showsVerticalScrollIndicator={false}
         >
           {isError && <ErrorBanner error={error} onRetry={refetch} />}
-          {(sales ?? []).length === 0 ? (
+          {sales.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 48 }}>
               <Ionicons name="cart-outline" size={56} color={colors.textTertiary} />
               <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginTop: 14 }}>No sales yet</Text>
@@ -162,7 +171,8 @@ export default function SalesHistoryScreen() {
               </TouchableOpacity>
             </View>
           ) : (
-            (sales ?? []).map((sale) => {
+            <>
+            {sales.map((sale) => {
               const isOpen = expanded === sale.id;
               const date = new Date(sale.sold_at);
               return (
@@ -232,7 +242,22 @@ export default function SalesHistoryScreen() {
                   )}
                 </View>
               );
-            })
+            })}
+            {hasNextPage && (
+              <TouchableOpacity
+                onPress={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                style={{ alignItems: 'center', paddingVertical: 20 }}
+                accessibilityRole="button"
+                accessibilityLabel="Load more sales"
+              >
+                {isFetchingNextPage
+                  ? <ActivityIndicator color={INV} />
+                  : <Text style={{ color: INV, fontWeight: '700', fontSize: FontSize.sm }}>Load More</Text>
+                }
+              </TouchableOpacity>
+            )}
+            </>
           )}
         </ScrollView>
       )}

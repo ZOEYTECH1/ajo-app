@@ -181,6 +181,13 @@ export interface ThriftPaymentHistory {
   payer_payments: ThriftHistoryPayment[];
 }
 
+export interface ThriftHistoryPaginated {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: ThriftHistoryPayment[];
+}
+
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 export const thriftService = {
@@ -193,6 +200,11 @@ export const thriftService = {
   // ── Cross-group payment history ──────────────────────────────────────────────
   getMyPaymentHistory: async (): Promise<ThriftPaymentHistory> => {
     const { data } = await api.get('/api/thrift/my-payment-history/');
+    return data;
+  },
+
+  getMyPaymentHistoryPage: async (type: 'payer' | 'collector', page: number): Promise<ThriftHistoryPaginated> => {
+    const { data } = await api.get('/api/thrift/my-payment-history/', { params: { type, page } });
     return data;
   },
 

@@ -7,11 +7,11 @@ import {
   StyleSheet, ActivityIndicator, RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/hooks/useTheme';
 import { FontSize, Radius, Shadow } from '../../src/theme';
-import { getTransfers, type InventoryTransfer } from '../../src/services/inventoryService';
+import { getTransfersPage, type InventoryTransfer } from '../../src/services/inventoryService';
 import { useInventoryStore } from '../../src/store/useAppStore';
 
 export default function TransfersScreen() {
@@ -19,11 +19,19 @@ export default function TransfersScreen() {
   const router = useRouter();
   const { selectedBusinessId, selectedBusinessName } = useInventoryStore();
 
-  const { data: transfers, isLoading, isRefetching, refetch } = useQuery({
+  const {
+    data, isLoading, isRefetching, refetch,
+    fetchNextPage, hasNextPage, isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['inventory-transfers', selectedBusinessId],
-    queryFn: getTransfers,
+    queryFn: ({ pageParam }) => getTransfersPage(pageParam as number),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+      lastPage.next ? (lastPageParam as number) + 1 : undefined,
     enabled: !!selectedBusinessId,
   });
+
+  const transfers = data?.pages.flatMap(p => p.results) ?? [];
 
   const fmt = (iso: string) =>
     new Date(iso).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -63,7 +71,7 @@ export default function TransfersScreen() {
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
         >
-          {(transfers ?? []).length === 0 ? (
+          {transfers.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 60 }}>
               <Ionicons name="swap-horizontal-outline" size={56} color={colors.border} />
               <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginTop: 16 }}>
@@ -82,16 +90,32 @@ export default function TransfersScreen() {
               </TouchableOpacity>
             </View>
           ) : (
-            (transfers ?? []).map(t => (
-              <TransferCard
-                key={t.id}
-                transfer={t}
-                currentBizId={selectedBusinessId!}
-                colors={colors}
-                fmt={fmt}
-                fmtTime={fmtTime}
-              />
-            ))
+            <>
+              {transfers.map(t => (
+                <TransferCard
+                  key={t.id}
+                  transfer={t}
+                  currentBizId={selectedBusinessId!}
+                  colors={colors}
+                  fmt={fmt}
+                  fmtTime={fmtTime}
+                />
+              ))}
+              {hasNextPage && (
+                <TouchableOpacity
+                  onPress={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  style={{ alignItems: 'center', paddingVertical: 20 }}
+                  accessibilityRole="button"
+                  accessibilityLabel="Load more transfers"
+                >
+                  {isFetchingNextPage
+                    ? <ActivityIndicator color="#1565C0" />
+                    : <Text style={{ color: '#1565C0', fontWeight: '700', fontSize: FontSize.sm }}>Load More</Text>
+                  }
+                </TouchableOpacity>
+              )}
+            </>
           )}
         </ScrollView>
       )}

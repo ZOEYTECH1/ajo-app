@@ -10,11 +10,26 @@ export interface AppNotification {
   created_at: string;
 }
 
+export interface PaginatedNotifications {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: AppNotification[];
+  unread_count: number;
+}
+
 export const notificationService = {
   getNotifications: async (): Promise<{ data: AppNotification[]; unreadCount: number }> => {
     const res = await api.get('/api/notifications/');
     const unreadCount = parseInt(res.headers['x-unread-count'] ?? '0', 10);
     return { data: res.data.results ?? [], unreadCount };
+  },
+
+  getNotificationsPage: async (page: number, unreadOnly?: boolean): Promise<PaginatedNotifications> => {
+    const params: Record<string, any> = { page };
+    if (unreadOnly) params.unread = 'true';
+    const res = await api.get('/api/notifications/', { params });
+    return res.data;
   },
 
   getUnreadCount: async (): Promise<number> => {

@@ -8,7 +8,19 @@ function bizP(): { params?: { business_id: number } } {
   return id ? { params: { business_id: id } } : {};
 }
 
+function bizPPage(page: number): { params: Record<string, any> } {
+  const id = useInventoryStore.getState().selectedBusinessId;
+  return { params: { page, ...(id ? { business_id: id } : {}) } };
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+export interface PaginatedResult<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
 
 export interface CustomFieldDef {
   name: string;
@@ -209,6 +221,18 @@ export const getBranchProductRequests = (
     params: statusFilter ? { status: statusFilter } : undefined,
   }).then(r => r.data);
 
+export const getBranchProductRequestsPage = (
+  bizId: number,
+  statusFilter?: 'pending' | 'approved' | 'rejected',
+  page?: number,
+): Promise<PaginatedResult<BranchProductRequest>> =>
+  api.get(`/api/inventory/businesses/${bizId}/product-requests/`, {
+    params: {
+      ...(statusFilter ? { status: statusFilter } : {}),
+      ...(page ? { page } : {}),
+    },
+  }).then(r => r.data);
+
 export const createBranchProductRequest = (
   branchId: number,
   data: { category: number; product_name: string; note?: string },
@@ -278,6 +302,9 @@ export const createTransfer = (data: CreateTransferPayload): Promise<InventoryTr
 export const getTransfers = (): Promise<InventoryTransfer[]> =>
   api.get('/api/inventory/transfers/', bizP()).then(r => r.data);
 
+export const getTransfersPage = (page: number): Promise<PaginatedResult<InventoryTransfer>> =>
+  api.get('/api/inventory/transfers/', bizPPage(page)).then(r => r.data);
+
 // ─── Customers ────────────────────────────────────────────────────────────────
 
 export interface InventoryCustomer {
@@ -337,6 +364,9 @@ export interface CreateSaleItemPayload {
 
 export const getSales = (): Promise<InventorySale[]> =>
   api.get('/api/inventory/sales/', bizP()).then(r => r.data);
+
+export const getSalesPage = (page: number): Promise<PaginatedResult<InventorySale>> =>
+  api.get('/api/inventory/sales/', bizPPage(page)).then(r => r.data);
 
 export const recordSale = (data: {
   customer_id?: number | null;

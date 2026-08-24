@@ -5,13 +5,13 @@ import {
   KeyboardAvoidingView, Platform, RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/hooks/useTheme';
 import { FontSize, Radius, Shadow } from '../../src/theme';
 import {
   getCategories,
-  getBranchProductRequests,
+  getBranchProductRequestsPage,
   createBranchProductRequest,
   reviewBranchProductRequest,
   type BranchProductRequest,
@@ -60,17 +60,26 @@ export default function ProductRequestsScreen() {
     enabled: canRequest && !!bizId,
   });
 
-  const { data: requests, isLoading, isError, error, isRefetching, refetch } = useQuery({
+  const {
+    data: requestsData, isLoading, isError, error, isRefetching, refetch,
+    fetchNextPage, hasNextPage, isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['product-requests', bizId, filter],
-    queryFn: () => getBranchProductRequests(bizId, filter === 'all' ? undefined : filter),
+    queryFn: ({ pageParam }) =>
+      getBranchProductRequestsPage(bizId, filter === 'all' ? undefined : filter, pageParam as number),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+      lastPage.next ? (lastPageParam as number) + 1 : undefined,
     enabled: !!bizId,
   });
+
+  const requests = requestsData?.pages.flatMap(p => p.results) ?? [];
 
   const { mutate: submitRequest, isPending: submitting } = useMutation({
     mutationFn: () => createBranchProductRequest(bizId, {
       category: categoryId!,
       product_name: productName.trim(),
-      note: note.trim(),
+      note: note.trim() || undefined,
     }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['product-requests', bizId] });
@@ -184,7 +193,7 @@ export default function ProductRequestsScreen() {
         {isError && <ErrorBanner error={error} onRetry={refetch} />}
         {isLoading ? (
           <ActivityIndicator size="large" color={INV} style={{ marginTop: 40 }} />
-        ) : (requests ?? []).length === 0 ? (
+        ) : requests.length === 0 ? (
           <View style={{ alignItems: 'center', paddingVertical: 60 }}>
             <Ionicons name="document-text-outline" size={48} color={colors.textTertiary} />
             <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textSecondary, marginTop: 16 }}>
@@ -197,7 +206,8 @@ export default function ProductRequestsScreen() {
             )}
           </View>
         ) : (
-          (requests ?? []).map(req => {
+          <>
+          {requests.map(req => {
             const badge = statusBadge(req.status);
             return (
               <View
@@ -268,7 +278,22 @@ export default function ProductRequestsScreen() {
                 )}
               </View>
             );
-          })
+          })}
+          {hasNextPage && (
+            <TouchableOpacity
+              onPress={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              style={{ alignItems: 'center', paddingVertical: 20 }}
+              accessibilityRole="button"
+              accessibilityLabel="Load more requests"
+            >
+              {isFetchingNextPage
+                ? <ActivityIndicator color={INV} />
+                : <Text style={{ color: INV, fontWeight: '700', fontSize: FontSize.sm }}>Load More</Text>
+              }
+            </TouchableOpacity>
+          )}
+          </>
         )}
       </ScrollView>
 

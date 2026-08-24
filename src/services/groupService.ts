@@ -1,6 +1,14 @@
 import api from './api';
 import type { AjoUser } from '../store/useAppStore';
 
+// ─── Shared paginated result type ─────────────────────────────────────────────
+export interface PaginatedResult<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
 // ─── Domain types ─────────────────────────────────────────────────────────────
 
 export interface Group {
@@ -214,6 +222,11 @@ export const groupService = {
   getPaymentHistory: async (): Promise<Payment[]> => {
     const res = await api.get('/api/payments/history/');
     return res.data.results ?? [];
+  },
+
+  getPaymentHistoryPage: async (page: number): Promise<PaginatedResult<Payment>> => {
+    const res = await api.get('/api/payments/history/', { params: { page } });
+    return res.data;
   },
 
   submitPayment: async ({ group_id, amount_entered, receipt_image }: SubmitPaymentPayload): Promise<Payment> => {

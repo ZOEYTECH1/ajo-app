@@ -1,9 +1,9 @@
 import {
   View, Text, ScrollView, StyleSheet, StatusBar,
-  TouchableOpacity, RefreshControl,
+  TouchableOpacity, RefreshControl, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../src/hooks/useTheme';
 import { useAuthStore } from '../src/store/useAppStore';
@@ -110,14 +110,20 @@ export default function NotificationsRoute() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const {
+    data, isLoading, refetch, isRefetching,
+    fetchNextPage, hasNextPage, isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['notifications'],
-    queryFn: notificationService.getNotifications,
+    queryFn: ({ pageParam }) => notificationService.getNotificationsPage(pageParam as number),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+      lastPage.next ? (lastPageParam as number) + 1 : undefined,
     enabled: !!user,
   });
 
-  const notifications = data?.data ?? [];
-  const unreadCount = data?.unreadCount ?? 0;
+  const notifications = data?.pages.flatMap(p => p.results) ?? [];
+  const unreadCount = data?.pages[0]?.unread_count ?? 0;
 
   const markReadMutation = useMutation({
     mutationFn: (id: number) => notificationService.markRead(id),
@@ -203,9 +209,25 @@ export default function NotificationsRoute() {
             </Text>
           </View>
         ) : (
-          notifications.map((n) => (
-            <NotifRow key={n.id} notif={n} onPress={handlePress} colors={colors} />
-          ))
+          <>
+            {notifications.map((n) => (
+              <NotifRow key={n.id} notif={n} onPress={handlePress} colors={colors} />
+            ))}
+            {hasNextPage && (
+              <TouchableOpacity
+                onPress={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                style={{ alignItems: 'center', paddingVertical: 20 }}
+                accessibilityRole="button"
+                accessibilityLabel="Load more notifications"
+              >
+                {isFetchingNextPage
+                  ? <ActivityIndicator color={colors.primary} />
+                  : <Text style={{ color: colors.primary, fontWeight: '700', fontSize: FontSize.sm }}>Load More</Text>
+                }
+              </TouchableOpacity>
+            )}
+          </>
         )}
       </ScrollView>
     </View>

@@ -203,8 +203,12 @@ export const thriftService = {
     return data;
   },
 
-  getMyPaymentHistoryPage: async (type: 'payer' | 'collector', page: number): Promise<ThriftHistoryPaginated> => {
-    const { data } = await api.get('/api/thrift/my-payment-history/', { params: { type, page } });
+  getMyPaymentHistoryPage: async (type: 'payer' | 'collector', pageOrUrl: string | null): Promise<ThriftHistoryPaginated> => {
+    if (pageOrUrl) {
+      const { data } = await api.get(pageOrUrl);
+      return data;
+    }
+    const { data } = await api.get('/api/thrift/my-payment-history/', { params: { type } });
     return data;
   },
 

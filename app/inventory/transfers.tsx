@@ -24,10 +24,9 @@ export default function TransfersScreen() {
     fetchNextPage, hasNextPage, isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ['inventory-transfers', selectedBusinessId],
-    queryFn: ({ pageParam }) => getTransfersPage(pageParam as number),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
-      lastPage.next ? (lastPageParam as number) + 1 : undefined,
+    queryFn: ({ pageParam }) => getTransfersPage(pageParam as string | null),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.next ?? undefined,
     enabled: !!selectedBusinessId,
   });
 

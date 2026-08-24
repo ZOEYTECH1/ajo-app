@@ -66,10 +66,9 @@ export default function ProductRequestsScreen() {
   } = useInfiniteQuery({
     queryKey: ['product-requests', bizId, filter],
     queryFn: ({ pageParam }) =>
-      getBranchProductRequestsPage(bizId, filter === 'all' ? undefined : filter, pageParam as number),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
-      lastPage.next ? (lastPageParam as number) + 1 : undefined,
+      getBranchProductRequestsPage(bizId, filter === 'all' ? undefined : filter, pageParam as string | null),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.next ?? undefined,
     enabled: !!bizId,
   });
 

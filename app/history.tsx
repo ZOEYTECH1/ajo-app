@@ -334,11 +334,10 @@ export default function HistoryRoute() {
     refetch: refetchAjo, isFetching: ajoFetching,
     fetchNextPage: fetchMoreAjo, hasNextPage: ajoHasMore, isFetchingNextPage: ajoFetchingMore,
   } = useInfiniteQuery({
-    queryKey: ['payment-history'],
-    queryFn: ({ pageParam }) => groupService.getPaymentHistoryPage(pageParam as number),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
-      lastPage.next ? (lastPageParam as number) + 1 : undefined,
+    queryKey: ['payment-history', ajoFilter],
+    queryFn: ({ pageParam }) => groupService.getPaymentHistoryPage(pageParam as string | null, ajoFilter),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.next ?? undefined,
     enabled: !isOrgAdmin,
   });
 
@@ -348,10 +347,9 @@ export default function HistoryRoute() {
     fetchNextPage: fetchMoreCollector, hasNextPage: collectorHasMore, isFetchingNextPage: collectorFetchingMore,
   } = useInfiniteQuery({
     queryKey: ['thrift-ph-collector'],
-    queryFn: ({ pageParam }) => thriftService.getMyPaymentHistoryPage('collector', pageParam as number),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
-      lastPage.next ? (lastPageParam as number) + 1 : undefined,
+    queryFn: ({ pageParam }) => thriftService.getMyPaymentHistoryPage('collector', pageParam as string | null),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.next ?? undefined,
     enabled: !isOrgAdmin,
   });
 
@@ -361,10 +359,9 @@ export default function HistoryRoute() {
     fetchNextPage: fetchMorePayer, hasNextPage: payerHasMore, isFetchingNextPage: payerFetchingMore,
   } = useInfiniteQuery({
     queryKey: ['thrift-ph-payer'],
-    queryFn: ({ pageParam }) => thriftService.getMyPaymentHistoryPage('payer', pageParam as number),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
-      lastPage.next ? (lastPageParam as number) + 1 : undefined,
+    queryFn: ({ pageParam }) => thriftService.getMyPaymentHistoryPage('payer', pageParam as string | null),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.next ?? undefined,
     enabled: !isOrgAdmin,
   });
 
@@ -414,12 +411,12 @@ export default function HistoryRoute() {
   const hasPayer     = payerPayments.length > 0 || (payerData?.pages[0]?.count ?? 0) > 0;
   const effectiveRole: ThriftRole = (hasCollector && hasPayer) ? thriftRole : (hasCollector ? 'collector' : 'payer');
 
-  const ajoFiltered = ajoFilter === 'all' ? ajoPayments : ajoPayments.filter((p) => p.status === ajoFilter);
+  const ajoFiltered = ajoPayments;
   const ajoCounts: Record<AjoFilter, number> = {
-    all:      ajoPayments.length,
-    pending:  ajoPayments.filter((p) => p.status === 'pending').length,
-    approved: ajoPayments.filter((p) => p.status === 'approved').length,
-    rejected: ajoPayments.filter((p) => p.status === 'rejected').length,
+    all:      ajoFilter === 'all' ? ajoPayments.length : 0,
+    pending:  ajoFilter === 'pending' ? ajoPayments.length : 0,
+    approved: ajoFilter === 'approved' ? ajoPayments.length : 0,
+    rejected: ajoFilter === 'rejected' ? ajoPayments.length : 0,
   };
 
   const thriftDisplayList = effectiveRole === 'collector' ? collectorPayments : payerPayments;

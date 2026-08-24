@@ -25,10 +25,12 @@ export const notificationService = {
     return { data: res.data.results ?? [], unreadCount };
   },
 
-  getNotificationsPage: async (page: number, unreadOnly?: boolean): Promise<PaginatedNotifications> => {
-    const params: Record<string, any> = { page };
-    if (unreadOnly) params.unread = 'true';
-    const res = await api.get('/api/notifications/', { params });
+  getNotificationsPage: async (pageOrUrl: string | null): Promise<PaginatedNotifications> => {
+    if (pageOrUrl) {
+      const res = await api.get(pageOrUrl);
+      return res.data;
+    }
+    const res = await api.get('/api/notifications/');
     return res.data;
   },
 

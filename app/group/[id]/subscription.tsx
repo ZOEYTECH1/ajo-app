@@ -11,6 +11,7 @@ import { useTheme } from '../../../src/hooks/useTheme';
 import { groupService, type Group, type Subscription } from '../../../src/services/groupService';
 import { FontSize, Radius, Shadow } from '../../../src/theme';
 import { Button, LoadingOverlay, feedback } from '../../../src/components';
+import { useAuthStore } from '../../../src/store/useAppStore';
 
 // Platform fee rates — must match backend _PLATFORM_FEE_RATES
 const FEE_RATES: Record<string, number> = { daily: 0.01, weekly: 0.025, monthly: 0.05 };
@@ -104,6 +105,7 @@ export default function SubscriptionRoute() {
   const { colors, isDark } = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
 
   const [cycles, setCycles] = useState(1);
   const [result, setResult] = useState<Subscription | null>(null);
@@ -155,6 +157,7 @@ export default function SubscriptionRoute() {
   const cycleUnit      = CYCLE_UNIT[frequency] ?? 'month';
   const cycleOptions   = CYCLE_OPTIONS[frequency] ?? CYCLE_OPTIONS.monthly;
 
+  const isAdmin   = user?.id === group?.admin?.id;
   const isActive  = group?.is_subscription_active;
   const isTrial   = group?.is_on_trial;
   const expiresAt = group?.subscription_expires;
@@ -216,77 +219,92 @@ export default function SubscriptionRoute() {
               </Text>
             </View>
 
-            {/* Collect-from-members banner */}
-            <View style={[s.infoCard, { backgroundColor: colors.primaryTint, borderColor: colors.primaryBorder }]}>
-              <Ionicons name="information-circle" size={18} color={colors.primary} style={{ marginTop: 1 }} />
-              <Text style={{ flex: 1, marginLeft: 8, fontSize: FontSize.sm, color: colors.primary, lineHeight: 20 }}>
-                Collect{' '}
-                <Text style={{ fontWeight: '800' }}>{fmtNGN(contribution * rate)}</Text>
-                {' '}from each of your {memberCount} member{memberCount !== 1 ? 's' : ''} (including yourself), then pay the total below.
-              </Text>
-            </View>
-
-            {/* Fee breakdown */}
-            <View style={[s.card, { backgroundColor: colors.surface, ...Shadow.soft(colors.primary) }]}>
-              <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 }}>
-                Fee breakdown
-              </Text>
-              <Row label="Members"              value={`${memberCount}`}                                    colors={colors} />
-              <Row label="Contribution per cycle" value={fmtNGN(contribution)}                               colors={colors} />
-              <Row label="Platform rate"        value={`${ratePct}% per ${cycleUnit}`}                      colors={colors} />
-              <Row label="Each member pays you" value={fmtNGN(contribution * rate)}                         colors={colors} />
-              <Row label="Cycles selected"      value={`${cycles} ${cycleUnit}${cycles !== 1 ? 's' : ''}`}  colors={colors} />
-              <View style={[s.divider, { backgroundColor: colors.border }]} />
-              <Row label="Total due to Ajo"     value={fmtNGN(total)} bold                                  colors={colors} />
-            </View>
-
-            {/* Cycle selector */}
-            <Text style={[s.label, { color: colors.textSecondary }]}>
-              Select number of {cycleUnit}s to pay for
-            </Text>
-            <View style={s.chipRow}>
-              {cycleOptions.map((n) => (
-                <CycleChip
-                  key={n}
-                  n={n}
-                  unit={cycleUnit}
-                  selected={cycles === n}
-                  onPress={() => setCycles(n)}
-                  colors={colors}
-                />
-              ))}
-            </View>
-
-            {/* What you get */}
-            <View style={[s.card, { backgroundColor: colors.surface, ...Shadow.soft(colors.primary) }]}>
-              <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.textPrimary, marginBottom: 10 }}>
-                What you get
-              </Text>
-              {[
-                'Approve unlimited members (beyond the free 10)',
-                'Full payment history and audit trail',
-                'Tamper-evident records for all contributions',
-              ].map((text, i) => (
-                <View key={i} style={s.benefitRow}>
-                  <Ionicons name="checkmark-circle" size={16} color={colors.success} style={{ marginTop: 2 }} />
-                  <Text style={{ flex: 1, marginLeft: 8, fontSize: FontSize.sm, color: colors.textPrimary, lineHeight: 20 }}>
-                    {text}
+            {isAdmin ? (
+              <>
+                {/* Collect-from-members banner */}
+                <View style={[s.infoCard, { backgroundColor: colors.primaryTint, borderColor: colors.primaryBorder }]}>
+                  <Ionicons name="information-circle" size={18} color={colors.primary} style={{ marginTop: 1 }} />
+                  <Text style={{ flex: 1, marginLeft: 8, fontSize: FontSize.sm, color: colors.primary, lineHeight: 20 }}>
+                    Collect{' '}
+                    <Text style={{ fontWeight: '800' }}>{fmtNGN(contribution * rate)}</Text>
+                    {' '}from each of your {memberCount} member{memberCount !== 1 ? 's' : ''} (including yourself), then pay the total below.
                   </Text>
                 </View>
-              ))}
-            </View>
 
-            <Button
-              label={`Pay ${fmtNGN(total)}`}
-              onPress={() => initMutation.mutate()}
-              loading={initMutation.isPending}
-              disabled={memberCount === 0}
-              style={{ marginTop: 8 }}
-            />
-            {memberCount === 0 && (
-              <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, textAlign: 'center', marginTop: 8 }}>
-                You need at least one member before paying.
-              </Text>
+                {/* Fee breakdown */}
+                <View style={[s.card, { backgroundColor: colors.surface, ...Shadow.soft(colors.primary) }]}>
+                  <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 }}>
+                    Fee breakdown
+                  </Text>
+                  <Row label="Members"              value={`${memberCount}`}                                    colors={colors} />
+                  <Row label="Contribution per cycle" value={fmtNGN(contribution)}                               colors={colors} />
+                  <Row label="Platform rate"        value={`${ratePct}% per ${cycleUnit}`}                      colors={colors} />
+                  <Row label="Each member pays you" value={fmtNGN(contribution * rate)}                         colors={colors} />
+                  <Row label="Cycles selected"      value={`${cycles} ${cycleUnit}${cycles !== 1 ? 's' : ''}`}  colors={colors} />
+                  <View style={[s.divider, { backgroundColor: colors.border }]} />
+                  <Row label="Total due to Ajo"     value={fmtNGN(total)} bold                                  colors={colors} />
+                </View>
+
+                {/* Cycle selector */}
+                <Text style={[s.label, { color: colors.textSecondary }]}>
+                  Select number of {cycleUnit}s to pay for
+                </Text>
+                <View style={s.chipRow}>
+                  {cycleOptions.map((n) => (
+                    <CycleChip
+                      key={n}
+                      n={n}
+                      unit={cycleUnit}
+                      selected={cycles === n}
+                      onPress={() => setCycles(n)}
+                      colors={colors}
+                    />
+                  ))}
+                </View>
+
+                {/* What you get */}
+                <View style={[s.card, { backgroundColor: colors.surface, ...Shadow.soft(colors.primary) }]}>
+                  <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.textPrimary, marginBottom: 10 }}>
+                    What you get
+                  </Text>
+                  {[
+                    'Approve unlimited members (beyond the free 10)',
+                    'Full payment history and audit trail',
+                    'Tamper-evident records for all contributions',
+                  ].map((text, i) => (
+                    <View key={i} style={s.benefitRow}>
+                      <Ionicons name="checkmark-circle" size={16} color={colors.success} style={{ marginTop: 2 }} />
+                      <Text style={{ flex: 1, marginLeft: 8, fontSize: FontSize.sm, color: colors.textPrimary, lineHeight: 20 }}>
+                        {text}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+
+                <Button
+                  label={`Pay ${fmtNGN(total)}`}
+                  onPress={() => initMutation.mutate()}
+                  loading={initMutation.isPending}
+                  disabled={memberCount === 0}
+                  style={{ marginTop: 8 }}
+                />
+                {memberCount === 0 && (
+                  <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, textAlign: 'center', marginTop: 8 }}>
+                    You need at least one member before paying.
+                  </Text>
+                )}
+              </>
+            ) : (
+              <View style={[s.infoCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                <Ionicons name="lock-closed-outline" size={18} color={colors.textSecondary} style={{ marginTop: 1 }} />
+                <Text style={{ flex: 1, marginLeft: 8, fontSize: FontSize.sm, color: colors.textSecondary, lineHeight: 20 }}>
+                  Only the group admin can manage the subscription. Contact{' '}
+                  <Text style={{ fontWeight: '700', color: colors.textPrimary }}>
+                    {group?.admin ? `${group.admin.first_name} ${group.admin.last_name}` : 'the admin'}
+                  </Text>
+                  {' '}to renew.
+                </Text>
+              </View>
             )}
           </>
         )}

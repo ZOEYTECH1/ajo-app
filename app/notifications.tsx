@@ -115,10 +115,9 @@ export default function NotificationsRoute() {
     fetchNextPage, hasNextPage, isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ['notifications'],
-    queryFn: ({ pageParam }) => notificationService.getNotificationsPage(pageParam as number),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
-      lastPage.next ? (lastPageParam as number) + 1 : undefined,
+    queryFn: ({ pageParam }) => notificationService.getNotificationsPage(pageParam as string | null),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.next ?? undefined,
     enabled: !!user,
   });
 

@@ -42,10 +42,9 @@ export default function SalesHistoryScreen() {
     fetchNextPage, hasNextPage, isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ['inventory-sales'],
-    queryFn: ({ pageParam }) => getSalesPage(pageParam as number),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
-      lastPage.next ? (lastPageParam as number) + 1 : undefined,
+    queryFn: ({ pageParam }) => getSalesPage(pageParam as string | null),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.next ?? undefined,
   });
 
   const sales = data?.pages.flatMap(p => p.results) ?? [];

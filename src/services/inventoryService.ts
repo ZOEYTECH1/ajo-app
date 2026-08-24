@@ -8,10 +8,6 @@ function bizP(): { params?: { business_id: number } } {
   return id ? { params: { business_id: id } } : {};
 }
 
-function bizPPage(page: number): { params: Record<string, any> } {
-  const id = useInventoryStore.getState().selectedBusinessId;
-  return { params: { page, ...(id ? { business_id: id } : {}) } };
-}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -223,15 +219,14 @@ export const getBranchProductRequests = (
 
 export const getBranchProductRequestsPage = (
   bizId: number,
-  statusFilter?: 'pending' | 'approved' | 'rejected',
-  page?: number,
-): Promise<PaginatedResult<BranchProductRequest>> =>
-  api.get(`/api/inventory/businesses/${bizId}/product-requests/`, {
-    params: {
-      ...(statusFilter ? { status: statusFilter } : {}),
-      ...(page ? { page } : {}),
-    },
+  statusFilter: 'pending' | 'approved' | 'rejected' | undefined,
+  pageOrUrl: string | null,
+): Promise<PaginatedResult<BranchProductRequest>> => {
+  if (pageOrUrl) return api.get(pageOrUrl).then(r => r.data);
+  return api.get(`/api/inventory/businesses/${bizId}/product-requests/`, {
+    params: statusFilter ? { status: statusFilter } : undefined,
   }).then(r => r.data);
+};
 
 export const createBranchProductRequest = (
   branchId: number,
@@ -302,8 +297,10 @@ export const createTransfer = (data: CreateTransferPayload): Promise<InventoryTr
 export const getTransfers = (): Promise<InventoryTransfer[]> =>
   api.get('/api/inventory/transfers/', bizP()).then(r => r.data);
 
-export const getTransfersPage = (page: number): Promise<PaginatedResult<InventoryTransfer>> =>
-  api.get('/api/inventory/transfers/', bizPPage(page)).then(r => r.data);
+export const getTransfersPage = (pageOrUrl: string | null): Promise<PaginatedResult<InventoryTransfer>> => {
+  if (pageOrUrl) return api.get(pageOrUrl).then(r => r.data);
+  return api.get('/api/inventory/transfers/', bizP()).then(r => r.data);
+};
 
 // ─── Customers ────────────────────────────────────────────────────────────────
 
@@ -365,8 +362,10 @@ export interface CreateSaleItemPayload {
 export const getSales = (): Promise<InventorySale[]> =>
   api.get('/api/inventory/sales/', bizP()).then(r => r.data);
 
-export const getSalesPage = (page: number): Promise<PaginatedResult<InventorySale>> =>
-  api.get('/api/inventory/sales/', bizPPage(page)).then(r => r.data);
+export const getSalesPage = (pageOrUrl: string | null): Promise<PaginatedResult<InventorySale>> => {
+  if (pageOrUrl) return api.get(pageOrUrl).then(r => r.data);
+  return api.get('/api/inventory/sales/', bizP()).then(r => r.data);
+};
 
 export const recordSale = (data: {
   customer_id?: number | null;

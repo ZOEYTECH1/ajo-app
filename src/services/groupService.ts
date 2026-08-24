@@ -224,8 +224,13 @@ export const groupService = {
     return res.data.results ?? [];
   },
 
-  getPaymentHistoryPage: async (page: number): Promise<PaginatedResult<Payment>> => {
-    const res = await api.get('/api/payments/history/', { params: { page } });
+  getPaymentHistoryPage: async (pageOrUrl: string | null, status?: string): Promise<PaginatedResult<Payment>> => {
+    if (pageOrUrl) {
+      const res = await api.get(pageOrUrl);
+      return res.data;
+    }
+    const params = status && status !== 'all' ? { status } : undefined;
+    const res = await api.get('/api/payments/history/', params ? { params } : undefined);
     return res.data;
   },
 

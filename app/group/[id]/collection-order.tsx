@@ -43,6 +43,15 @@ export default function CollectionOrderRoute() {
     setOrder(next);
   };
 
+  const shuffleOrder = () => {
+    const next = [...order];
+    for (let i = next.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [next[i], next[j]] = [next[j], next[i]];
+    }
+    setOrder(next);
+  };
+
   const saveMutation = useMutation({
     mutationFn: () =>
       groupService.updateCollectionOrder(groupId, order.map((s) => s.id)),
@@ -69,7 +78,15 @@ export default function CollectionOrderRoute() {
         <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">
           Collection Order
         </Text>
-        <View style={{ width: 24 }} />
+        <TouchableOpacity
+          onPress={shuffleOrder}
+          disabled={order.length < 2}
+          hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}
+          accessibilityRole="button"
+          accessibilityLabel="Shuffle order"
+        >
+          <Ionicons name="shuffle-outline" size={22} color={order.length < 2 ? colors.textTertiary : colors.primary} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={s.body} showsVerticalScrollIndicator={false}>

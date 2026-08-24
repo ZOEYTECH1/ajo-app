@@ -91,6 +91,7 @@ export interface ThriftPayment {
   status: ThriftPaymentStatus;
   payer_confirmed: boolean;
   dispute_reason: string;
+  dispute_audio: string | null;
   disputed_at: string | null;
   resolved_at: string | null;
   escalated_at: string | null;

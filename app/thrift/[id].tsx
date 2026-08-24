@@ -696,6 +696,130 @@ function RestartCycleModal({
   );
 }
 
+// ─── Dispute Detail Sheet ─────────────────────────────────────────────────────
+function DisputeDetailSheet({
+  payment, onClose,
+}: { payment: ThriftPayment; onClose: () => void }) {
+  const { colors } = useTheme();
+  const [sound, setSound]       = useState<import('expo-av').Audio.Sound | null>(null);
+  const [playing, setPlaying]   = useState(false);
+  const [audioErr, setAudioErr] = useState('');
+
+  const playAudio = async () => {
+    if (!payment.dispute_audio) return;
+    try {
+      const { Audio } = await import('expo-av');
+      if (sound) {
+        if (playing) { await sound.pauseAsync(); setPlaying(false); }
+        else          { await sound.playAsync();  setPlaying(true); }
+        return;
+      }
+      const { sound: s } = await Audio.Sound.createAsync(
+        { uri: payment.dispute_audio },
+        { shouldPlay: true },
+        (status) => { if ('didJustFinish' in status && status.didJustFinish) setPlaying(false); },
+      );
+      setSound(s);
+      setPlaying(true);
+    } catch {
+      setAudioErr('Could not play voice note.');
+    }
+  };
+
+  const stopAudio = async () => {
+    if (!sound) return;
+    await sound.stopAsync();
+    await sound.unloadAsync();
+    setSound(null);
+    setPlaying(false);
+  };
+
+  return (
+    <Modal visible animationType="slide" transparent onRequestClose={onClose}>
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
+        <View style={{ backgroundColor: colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40, gap: 16 }}>
+          <View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: colors.border, alignSelf: 'center', marginBottom: 4 }} />
+          <Text style={{ fontSize: 18, fontWeight: '800', color: colors.textPrimary }}>Dispute Details</Text>
+
+          {/* Payment info row */}
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: 12, padding: 12 }}>
+              <Text style={{ fontSize: 11, color: colors.textTertiary, fontWeight: '600', textTransform: 'uppercase', marginBottom: 4 }}>Member</Text>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary }}>{payment.member_name}</Text>
+            </View>
+            <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: 12, padding: 12 }}>
+              <Text style={{ fontSize: 11, color: colors.textTertiary, fontWeight: '600', textTransform: 'uppercase', marginBottom: 4 }}>Amount</Text>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary }}>₦{Number(payment.amount).toLocaleString()}</Text>
+            </View>
+          </View>
+
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: 12, padding: 12 }}>
+              <Text style={{ fontSize: 11, color: colors.textTertiary, fontWeight: '600', textTransform: 'uppercase', marginBottom: 4 }}>Period</Text>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary }}>{payment.period_date}</Text>
+            </View>
+            {payment.disputed_at && (
+              <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: 12, padding: 12 }}>
+                <Text style={{ fontSize: 11, color: colors.textTertiary, fontWeight: '600', textTransform: 'uppercase', marginBottom: 4 }}>Disputed</Text>
+                <Text style={{ fontSize: 12, fontWeight: '600', color: colors.textSecondary }}>
+                  {new Date(payment.disputed_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Reason */}
+          <View>
+            <Text style={{ fontSize: 11, color: colors.textTertiary, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+              Dispute Reason
+            </Text>
+            <View style={{ backgroundColor: '#FFF3E0', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#FFB74D44' }}>
+              <Text style={{ fontSize: 14, color: '#BF360C', lineHeight: 20 }}>
+                {payment.dispute_reason || 'No reason provided.'}
+              </Text>
+            </View>
+          </View>
+
+          {/* Voice note */}
+          {payment.dispute_audio ? (
+            <View>
+              <Text style={{ fontSize: 11, color: colors.textTertiary, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+                Voice Note
+              </Text>
+              {audioErr ? (
+                <Text style={{ fontSize: 13, color: '#C62828' }}>{audioErr}</Text>
+              ) : (
+                <TouchableOpacity
+                  onPress={playing ? stopAudio : playAudio}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: playing ? '#FFF3E0' : colors.background, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: playing ? '#FFB74D' : colors.border }}
+                  accessibilityRole="button"
+                  accessibilityLabel={playing ? 'Stop voice note' : 'Play voice note'}
+                >
+                  <Ionicons name={playing ? 'stop-circle' : 'play-circle'} size={28} color="#E65100" />
+                  <Text style={{ fontSize: 14, fontWeight: '700', color: '#E65100' }}>
+                    {playing ? 'Stop' : 'Play voice note'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          ) : (
+            <Text style={{ fontSize: 13, color: colors.textTertiary, fontStyle: 'italic' }}>No voice note attached.</Text>
+          )}
+
+          <TouchableOpacity
+            onPress={() => { stopAudio(); onClose(); }}
+            style={{ backgroundColor: colors.background, borderRadius: 12, paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: colors.border }}
+            accessibilityRole="button"
+            accessibilityLabel="Close dispute details"
+          >
+            <Text style={{ fontSize: 15, fontWeight: '700', color: colors.textPrimary }}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function ThriftGroupDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -713,8 +837,9 @@ export default function ThriftGroupDetail() {
   const [endCycleOpen, setEndCycleOpen]   = useState(false);
   const [restartOpen, setRestartOpen]     = useState(false);
   const [kebabOpen, setKebabOpen]         = useState(false);
-  const [disputeTarget, setDisputeTarget] = useState<ThriftPayment | null>(null);
-  const [expandedMembers, setExpandedMembers] = useState<Set<number>>(new Set());
+  const [disputeTarget, setDisputeTarget]           = useState<ThriftPayment | null>(null);
+  const [viewDisputeTarget, setViewDisputeTarget]   = useState<ThriftPayment | null>(null);
+  const [expandedMembers, setExpandedMembers]       = useState<Set<number>>(new Set());
 
   const { data: group, isLoading: groupLoading } = useQuery({
     queryKey: ['thrift-group', groupId],
@@ -1131,10 +1256,18 @@ export default function ThriftGroupDetail() {
                                 )}
                               </View>
 
-                              {isDisputed && !!p.dispute_reason && (
-                                <Text style={{ fontSize: FontSize.xs, color: WARNING, marginTop: 5, lineHeight: 16 }} numberOfLines={2}>
-                                  "{p.dispute_reason}"
-                                </Text>
+                              {isDisputed && (
+                                <TouchableOpacity
+                                  onPress={() => setViewDisputeTarget(p)}
+                                  hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }}
+                                  accessibilityRole="button"
+                                  accessibilityLabel="View dispute details"
+                                >
+                                  <Text style={{ fontSize: FontSize.xs, color: WARNING, marginTop: 5, lineHeight: 16 }} numberOfLines={2}>
+                                    {p.dispute_reason ? `"${p.dispute_reason}"` : 'Disputed'}{' '}
+                                    <Text style={{ textDecorationLine: 'underline' }}>View</Text>
+                                  </Text>
+                                </TouchableOpacity>
                               )}
                             </View>
                           );
@@ -1459,10 +1592,18 @@ export default function ThriftGroupDetail() {
                           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>{p.notes}</Text>
                         )}
                         <Text style={{ fontSize: FontSize.xs, color: badgeColor, marginTop: 3, fontWeight: '600' }}>{badgeLabel}</Text>
-                        {isDisputed && !!p.dispute_reason && (
-                          <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }} numberOfLines={2}>
-                            "{p.dispute_reason}"
-                          </Text>
+                        {isDisputed && (
+                          <TouchableOpacity
+                            onPress={() => setViewDisputeTarget(p)}
+                            hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }}
+                            accessibilityRole="button"
+                            accessibilityLabel="View dispute details"
+                          >
+                            <Text style={{ fontSize: FontSize.xs, color: WARNING, marginTop: 2 }} numberOfLines={2}>
+                              {p.dispute_reason ? `"${p.dispute_reason}"` : 'Disputed'}{' '}
+                              <Text style={{ textDecorationLine: 'underline' }}>View</Text>
+                            </Text>
+                          </TouchableOpacity>
                         )}
                       </View>
                       <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.success }}>
@@ -1537,6 +1678,12 @@ export default function ThriftGroupDetail() {
         groupId={groupId}
         onClose={() => setDisputeTarget(null)}
       />
+      {viewDisputeTarget && (
+        <DisputeDetailSheet
+          payment={viewDisputeTarget}
+          onClose={() => setViewDisputeTarget(null)}
+        />
+      )}
       <EndCycleModal
         visible={endCycleOpen}
         groupId={groupId}

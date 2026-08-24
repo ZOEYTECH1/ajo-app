@@ -870,7 +870,7 @@ export default function ExpensesScreen() {
       <Modal visible={!!editTarget} animationType="slide" transparent onRequestClose={() => setEditTarget(null)}>
         <View style={s.modalOverlay}>
           <View style={[s.modalBox, { backgroundColor: colors.surface, paddingBottom: 32 }]}>
-            <Text style={[s.modalTitle, { color: colors.textPrimary }]}>Edit Expense</Text>
+            <Text style={{ fontSize: 18, fontWeight: '800', color: colors.textPrimary, marginBottom: 4 }}>Edit Expense</Text>
             {editTarget && (
               <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginBottom: 12 }}>
                 Category: {editTarget.category_label}

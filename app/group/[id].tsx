@@ -14,8 +14,8 @@ import { FontSize, Radius, Shadow } from '../../src/theme';
 import { Skeleton, Pill, LoadingOverlay } from '../../src/components';
 
 // ─── Invite Code card ─────────────────────────────────────────────────────────
-const InviteCard: React.FC<{ groupId: number; inviteCode: string; colors: any }> = ({
-  groupId, inviteCode, colors,
+const InviteCard: React.FC<{ groupId: number; inviteCode: string; isAdmin: boolean; colors: any }> = ({
+  groupId, inviteCode, isAdmin, colors,
 }) => {
   const [copied, setCopied] = useState(false);
   const queryClient = useQueryClient();
@@ -65,15 +65,17 @@ const InviteCard: React.FC<{ groupId: number; inviteCode: string; colors: any }>
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => regenMutation.mutate()}
-          disabled={regenMutation.isPending}
-          style={[s.inviteBtn, { backgroundColor: colors.surface }]}
-          accessibilityRole="button"
-          accessibilityLabel="Regenerate invite code"
-        >
-          <Ionicons name="refresh-outline" size={16} color={colors.textSecondary} />
-        </TouchableOpacity>
+        {isAdmin && (
+          <TouchableOpacity
+            onPress={() => regenMutation.mutate()}
+            disabled={regenMutation.isPending}
+            style={[s.inviteBtn, { backgroundColor: colors.surface }]}
+            accessibilityRole="button"
+            accessibilityLabel="Regenerate invite code"
+          >
+            <Ionicons name="refresh-outline" size={16} color={colors.textSecondary} />
+          </TouchableOpacity>
+        )}
       </View>
 
       <Text style={{ fontSize: FontSize.xs, color: colors.primary, opacity: 0.7, marginTop: 8 }}>
@@ -340,6 +342,9 @@ export default function GroupDetailRoute() {
                   )}
                 </>
               )}
+              <Text style={{ fontSize: FontSize.xs, color: 'rgba(255,255,255,0.65)', marginTop: 6 }}>
+                Admin: {group.admin.first_name} {group.admin.last_name}
+              </Text>
             </View>
             {isGroupAdmin && (
               <View style={[s.adminBadge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
@@ -416,10 +421,8 @@ export default function GroupDetailRoute() {
             </TouchableOpacity>
           )}
 
-          {/* ── Invite code card (admin only) ── */}
-          {isGroupAdmin && (
-            <InviteCard groupId={groupId} inviteCode={group.invite_code} colors={colors} />
-          )}
+          {/* ── Invite code ── */}
+          <InviteCard groupId={groupId} inviteCode={group.invite_code} isAdmin={isGroupAdmin} colors={colors} />
 
           {/* ── Cycle Status ── */}
           <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginBottom: 10 }}>

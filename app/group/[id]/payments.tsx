@@ -182,9 +182,6 @@ const PaymentCard: React.FC<{
           <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }}>
             {payment.member_name}
           </Text>
-          <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
-            {payment.member_email}
-          </Text>
         </View>
         <Pill label={payment.status} bg={sc.bg} color={sc.fg} />
       </View>

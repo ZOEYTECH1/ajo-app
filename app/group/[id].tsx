@@ -211,6 +211,8 @@ export default function GroupDetailRoute() {
     enabled: !!groupId,
   });
 
+  const [showRules, setShowRules] = useState(false);
+
   const joinMutation = useMutation({
     mutationFn: () => groupService.joinGroup(groupId),
     onSuccess: () => {
@@ -319,6 +321,25 @@ export default function GroupDetailRoute() {
                   {group.description}
                 </Text>
               )}
+              {!!group.rules && (
+                <>
+                  <TouchableOpacity
+                    onPress={() => setShowRules(r => !r)}
+                    style={{ marginTop: 8 }}
+                    accessibilityRole="button"
+                    accessibilityLabel={showRules ? 'Hide group rules' : 'View group rules'}
+                  >
+                    <Text style={{ fontSize: FontSize.xs, color: 'rgba(255,255,255,0.85)', fontWeight: '600' }}>
+                      {showRules ? '▲ Hide rules' : '▼ View rules'}
+                    </Text>
+                  </TouchableOpacity>
+                  {showRules && (
+                    <Text style={{ fontSize: FontSize.xs, color: 'rgba(255,255,255,0.8)', marginTop: 6, lineHeight: 18 }}>
+                      {group.rules}
+                    </Text>
+                  )}
+                </>
+              )}
             </View>
             {isGroupAdmin && (
               <View style={[s.adminBadge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
@@ -359,6 +380,26 @@ export default function GroupDetailRoute() {
         </View>
 
         <View style={{ paddingHorizontal: 20, paddingTop: 20 }}>
+          {/* ── Subscription status ── */}
+          {(group.is_on_trial || !group.is_subscription_active) && (
+            <TouchableOpacity
+              onPress={() => router.push(`/group/${groupId}/subscription` as any)}
+              style={[s.alertBanner, {
+                backgroundColor: group.is_on_trial ? colors.primaryTint : colors.errorLight,
+                borderColor: group.is_on_trial ? colors.primaryBorder : colors.error,
+                marginBottom: 12,
+              }]}
+              accessibilityRole="button"
+              accessibilityLabel={group.is_on_trial ? 'Trial active — tap to upgrade' : 'Subscription inactive — tap to renew'}
+            >
+              <Ionicons name="shield-outline" size={18} color={group.is_on_trial ? colors.primary : colors.error} />
+              <Text style={{ fontSize: FontSize.sm, color: group.is_on_trial ? colors.primary : colors.error, flex: 1, marginLeft: 8, fontWeight: '600' }}>
+                {group.is_on_trial ? 'Trial active — upgrade to continue' : 'Subscription inactive — renew now'}
+              </Text>
+              <Ionicons name="chevron-forward" size={16} color={group.is_on_trial ? colors.primary : colors.error} />
+            </TouchableOpacity>
+          )}
+
           {/* ── Pending alert (admin only) ── */}
           {isGroupAdmin && pendingPayments > 0 && (
             <TouchableOpacity

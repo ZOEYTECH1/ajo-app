@@ -57,7 +57,11 @@ const GroupCard: React.FC<{ group: Group; isAdmin: boolean; onPress: () => void 
             ₦{Number(group.contribution_amount).toLocaleString()} / {FREQ[group.contribution_frequency]}
           </Text>
         </View>
-        {isAdmin && <Pill label="Admin" bg={colors.primaryTint} color={colors.primary} style={{ marginLeft: 'auto' }} />}
+        <View style={{ marginLeft: 'auto', flexDirection: 'row', gap: 4, alignItems: 'center' }}>
+          {group.is_on_trial && <Pill label="Trial" bg={colors.primaryTint} color={colors.primary} />}
+          {!group.is_subscription_active && !group.is_on_trial && <Pill label="Inactive" bg={colors.errorLight} color={colors.error} />}
+          {isAdmin && <Pill label="Admin" bg={colors.primaryTint} color={colors.primary} />}
+        </View>
       </View>
     </TouchableOpacity>
   );

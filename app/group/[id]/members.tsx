@@ -192,6 +192,11 @@ const MemberRow: React.FC<{
         <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
           {membership.user.email}
         </Text>
+        {membership.joined_at && (
+          <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary, marginTop: 2 }}>
+            Joined {new Date(membership.joined_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
+          </Text>
+        )}
         {membership.status === 'approved' && Number(membership.total_approved) > 0 && (
           <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary, marginTop: 2 }}>
             Total paid: ₦{Number(membership.total_approved).toLocaleString()}

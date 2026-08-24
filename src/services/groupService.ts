@@ -7,6 +7,7 @@ export interface Group {
   id: number;
   name: string;
   description: string;
+  rules?: string;
   contribution_amount: string;
   contribution_frequency: 'daily' | 'weekly' | 'monthly';
   collection_day: number | null;

@@ -171,7 +171,7 @@ const MemberRow: React.FC<{
     <View style={[s.memberRow, { borderBottomColor: colors.border }]}>
       <View style={[s.avatar, { backgroundColor: colors.primaryTint }]}>
         <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.primary }}>
-          {membership.user.first_name?.[0] ?? membership.user.email[0].toUpperCase()}
+          {membership.user.first_name?.[0]?.toUpperCase() ?? '?'}
         </Text>
       </View>
 
@@ -189,9 +189,6 @@ const MemberRow: React.FC<{
             </View>
           )}
         </View>
-        <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
-          {membership.user.email}
-        </Text>
         {membership.joined_at && (
           <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary, marginTop: 2 }}>
             Joined {new Date(membership.joined_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}

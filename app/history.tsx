@@ -247,7 +247,7 @@ type OrgEvent = {
 function buildOrgTimeline(members: ThriftOrgMember[], reports: CollectorReport[]): OrgEvent[] {
   const events: OrgEvent[] = [];
   for (const m of members) {
-    events.push({ id: `invite-${m.id}`, date: m.created_at, icon: 'mail-outline', title: `Invite sent to ${m.user.first_name} ${m.user.last_name}`, subtitle: m.user.email, variant: 'info' });
+    events.push({ id: `invite-${m.id}`, date: m.created_at, icon: 'mail-outline', title: `Invite sent to ${m.user.first_name} ${m.user.last_name}`, subtitle: '', variant: 'info' });
     if (m.joined_at) {
       events.push({ id: `joined-${m.id}`, date: m.joined_at, icon: 'checkmark-circle-outline', title: `${m.user.first_name} ${m.user.last_name} joined as collector`, subtitle: m.status === 'suspended' ? 'Currently suspended' : 'Active collector', variant: m.status === 'suspended' ? 'warning' : 'success' });
     }

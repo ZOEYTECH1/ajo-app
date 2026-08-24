@@ -295,11 +295,11 @@ export default function OrgDashboardRoute() {
       `${data.payment_stats.total},${data.payment_stats.confirmed},${data.payment_stats.disputed},${data.payment_stats.pending},${fmt(data.payment_stats.total_collected)},${data.payment_stats.savings_mobilization}`,
       '',
       '=== COLLECTORS ===',
-      'Name,Email,Status,Mobilization Rate (%),Dispute Rate (%),₦ Collected,Groups',
+      'Name,Status,Mobilization Rate (%),Dispute Rate (%),₦ Collected,Groups',
       ...(data.collectors).map((m) => {
         const st = data.collector_stats?.[m.id];
         const gCount = data.groups.filter((g) => g.collector.id === m.user.id).length;
-        return `"${m.user.first_name} ${m.user.last_name}","${m.user.email}","${m.status}","${st?.mobilization_rate ?? 'N/A'}","${st?.dispute_rate ?? 'N/A'}","${fmt(st?.confirmed_amount ?? 0)}","${gCount}"`;
+        return `"${m.user.first_name} ${m.user.last_name}","${m.status}","${st?.mobilization_rate ?? 'N/A'}","${st?.dispute_rate ?? 'N/A'}","${fmt(st?.confirmed_amount ?? 0)}","${gCount}"`;
       }),
       '',
       '=== GROUPS ===',
@@ -457,7 +457,6 @@ export default function OrgDashboardRoute() {
                       <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }}>
                         {m.user.first_name} {m.user.last_name}
                       </Text>
-                      <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>{m.user.email}</Text>
                       <View style={[s.pill, { backgroundColor: '#FDE68A', marginTop: 6 }]}>
                         <Text style={{ fontSize: 10, fontWeight: '700', color: '#92400E' }}>AWAITING APPROVAL</Text>
                       </View>
@@ -504,7 +503,6 @@ export default function OrgDashboardRoute() {
                       <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }}>
                         {m.user.first_name} {m.user.last_name}
                       </Text>
-                      <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>{m.user.email}</Text>
                       <View style={{ flexDirection: 'row', gap: 6, marginTop: 6 }}>
                         <View style={[s.pill, { backgroundColor: m.status === 'active' ? colors.successLight : colors.errorLight }]}>
                           <Text style={{ fontSize: 10, fontWeight: '700', color: m.status === 'active' ? colors.success : colors.error }}>

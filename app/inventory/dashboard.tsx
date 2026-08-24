@@ -61,9 +61,21 @@ export default function InventoryDashboardScreen() {
         <TouchableOpacity onPress={goBack} style={s.navArrow} hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Previous day">
           <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary, textAlign: 'center', flex: 1 }}>
-          {formatDate(date)}
-        </Text>
+        <View style={{ flex: 1, alignItems: 'center' }}>
+          <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary, textAlign: 'center' }}>
+            {formatDate(date)}
+          </Text>
+          {!isToday && (
+            <TouchableOpacity
+              onPress={() => setDate(new Date().toISOString().slice(0, 10))}
+              hitSlop={{ top: 6, left: 12, bottom: 6, right: 12 }}
+              accessibilityRole="button"
+              accessibilityLabel="Jump to today"
+            >
+              <Text style={{ fontSize: 10, fontWeight: '700', color: colors.primary, marginTop: 2 }}>Today →</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         <TouchableOpacity onPress={goForward} style={[s.navArrow, { opacity: isToday ? 0.3 : 1 }]} disabled={isToday}
           hitSlop={{ top: 10, left: 10, bottom: 10, right: 10 }} accessibilityRole="button" accessibilityLabel="Next day">
           <Ionicons name="chevron-forward" size={22} color={colors.textPrimary} />

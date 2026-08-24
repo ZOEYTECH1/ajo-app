@@ -329,8 +329,9 @@ export const adjustCredit = (
   id: number,
   direction: 'charge' | 'payment',
   amount: number,
+  note?: string,
 ): Promise<InventoryCustomer> =>
-  api.post(`/api/inventory/customers/${id}/credit/`, { direction, amount }).then(r => r.data);
+  api.post(`/api/inventory/customers/${id}/credit/`, { direction, amount, ...(note ? { note } : {}) }).then(r => r.data);
 
 // ─── Sales ────────────────────────────────────────────────────────────────────
 

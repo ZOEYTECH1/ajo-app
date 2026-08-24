@@ -11,7 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/hooks/useTheme';
 import { FontSize, Radius, Shadow } from '../../src/theme';
 import {
-  getExpenses, createExpense, deleteExpense,
+  getExpenses, createExpense, deleteExpense, updateExpense,
   getUserExpenseCategories, saveUserExpenseCategory, deleteUserExpenseCategory,
   PRESET_EXPENSE_CATEGORIES,
   type InventoryExpense, type UserExpenseCategory,
@@ -258,6 +258,10 @@ export default function ExpensesScreen() {
   // ── Form state ─────────────────────────────────────────────────────────────
   const [period, setPeriod]           = useState<Period>('month');
   const [modal, setModal]             = useState(false);
+  const [editTarget, setEditTarget]   = useState<InventoryExpense | null>(null);
+  const [editAmount, setEditAmount]   = useState('');
+  const [editDesc, setEditDesc]       = useState('');
+  const [editDate, setEditDate]       = useState('');
   const [category, setCategory]       = useState('other');
   const [otherName, setOtherName]     = useState('');   // name typed when Other is selected
   const [description, setDescription] = useState('');
@@ -331,6 +335,30 @@ export default function ExpensesScreen() {
     },
     onError: () => Alert.alert('Error', 'Could not delete.'),
   });
+
+  // ── Edit expense ────────────────────────────────────────────────────────────
+  const { mutate: doEdit, isPending: editing } = useMutation({
+    mutationFn: () => updateExpense(editTarget!.id, {
+      description: editDesc.trim() || undefined,
+      amount: parseFloat(editAmount),
+      spent_at: editDate || undefined,
+    }),
+    onSuccess: (updated) => {
+      qc.setQueryData<InventoryExpense[]>(['inventory-expenses'], (old = []) =>
+        old.map(e => e.id === updated.id ? updated : e),
+      );
+      qc.invalidateQueries({ queryKey: ['inventory-dashboard'] });
+      setEditTarget(null);
+    },
+    onError: () => Alert.alert('Error', 'Could not update expense.'),
+  });
+
+  const openEdit = (e: InventoryExpense) => {
+    setEditTarget(e);
+    setEditAmount(e.amount);
+    setEditDesc(e.description ?? '');
+    setEditDate(e.spent_at?.slice(0, 10) ?? '');
+  };
 
   // ── Delete user category ────────────────────────────────────────────────────
   const { mutate: delCat } = useMutation({
@@ -605,16 +633,25 @@ export default function ExpensesScreen() {
                         <Text style={{ fontSize: FontSize.sm, fontWeight: '900', color: '#C62828' }}>
                           ₦{Number(e.amount).toLocaleString()}
                         </Text>
-                        <TouchableOpacity
-                          onPress={() => confirmDelete(e)}
-                          hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
-                          style={{ marginTop: 6 }}
-                          accessibilityRole="button"
-                          accessibilityLabel={`Delete expense: ${e.category_label}`}
-                          accessibilityHint="Double tap to permanently delete this expense"
-                        >
-                          <Ionicons name="trash-outline" size={14} color={colors.textTertiary} />
-                        </TouchableOpacity>
+                        <View style={{ flexDirection: 'row', gap: 10, marginTop: 6, alignItems: 'center' }}>
+                          <TouchableOpacity
+                            onPress={() => openEdit(e)}
+                            hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Edit expense: ${e.category_label}`}
+                          >
+                            <Ionicons name="pencil-outline" size={14} color={colors.textTertiary} />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => confirmDelete(e)}
+                            hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Delete expense: ${e.category_label}`}
+                            accessibilityHint="Double tap to permanently delete this expense"
+                          >
+                            <Ionicons name="trash-outline" size={14} color={colors.textTertiary} />
+                          </TouchableOpacity>
+                        </View>
                       </View>
                     </TouchableOpacity>
                   );
@@ -826,6 +863,73 @@ export default function ExpensesScreen() {
               </TouchableOpacity>
             </View>
           </ScrollView>
+        </View>
+      </Modal>
+
+      {/* ── Edit Expense Modal ── */}
+      <Modal visible={!!editTarget} animationType="slide" transparent onRequestClose={() => setEditTarget(null)}>
+        <View style={s.modalOverlay}>
+          <View style={[s.modalBox, { backgroundColor: colors.surface, paddingBottom: 32 }]}>
+            <Text style={[s.modalTitle, { color: colors.textPrimary }]}>Edit Expense</Text>
+            {editTarget && (
+              <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginBottom: 12 }}>
+                Category: {editTarget.category_label}
+              </Text>
+            )}
+
+            <Text style={[s.label, { color: colors.textPrimary }]}>Amount (₦) *</Text>
+            <View style={[s.input, { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.background, borderColor: colors.border }]}>
+              <Text style={{ color: colors.textSecondary, marginRight: 6, fontSize: FontSize.md }}>₦</Text>
+              <TextInput
+                value={editAmount}
+                onChangeText={setEditAmount}
+                keyboardType="decimal-pad"
+                placeholder="0.00"
+                placeholderTextColor={colors.textTertiary}
+                style={{ flex: 1, fontSize: FontSize.md, color: colors.textPrimary }}
+              />
+            </View>
+
+            <Text style={[s.label, { color: colors.textPrimary, marginTop: 12 }]}>Description</Text>
+            <View style={[s.input, { backgroundColor: colors.background, borderColor: colors.border }]}>
+              <TextInput
+                value={editDesc}
+                onChangeText={setEditDesc}
+                placeholder="Optional note"
+                placeholderTextColor={colors.textTertiary}
+                style={{ fontSize: FontSize.sm, color: colors.textPrimary }}
+              />
+            </View>
+
+            <Text style={[s.label, { color: colors.textPrimary, marginTop: 12 }]}>Date (YYYY-MM-DD)</Text>
+            <View style={[s.input, { backgroundColor: colors.background, borderColor: colors.border }]}>
+              <TextInput
+                value={editDate}
+                onChangeText={setEditDate}
+                placeholder="e.g. 2026-08-24"
+                placeholderTextColor={colors.textTertiary}
+                style={{ fontSize: FontSize.sm, color: colors.textPrimary }}
+              />
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 12, marginTop: 16 }}>
+              <TouchableOpacity onPress={() => setEditTarget(null)}
+                style={[s.modalBtn, { backgroundColor: colors.background, borderWidth: 1.5, borderColor: colors.border, flex: 1 }]}
+                accessibilityRole="button" accessibilityLabel="Cancel edit">
+                <Text style={{ color: colors.textPrimary, fontWeight: '700', fontSize: FontSize.sm }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => { if (!editAmount || isNaN(parseFloat(editAmount))) return; doEdit(); }}
+                disabled={editing || !editAmount}
+                style={[s.modalBtn, { backgroundColor: INV, flex: 2, opacity: editing ? 0.6 : 1 }]}
+                accessibilityRole="button" accessibilityLabel="Save changes">
+                {editing
+                  ? <ActivityIndicator color="#fff" size="small" />
+                  : <Text style={{ color: '#fff', fontWeight: '800', fontSize: FontSize.sm }}>Save Changes</Text>
+                }
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </Modal>
     </View>

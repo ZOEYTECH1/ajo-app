@@ -39,6 +39,7 @@ export default function CustomersScreen() {
   const [creditCustomer, setCreditCustomer] = useState<InventoryCustomer | null>(null);
   const [creditDirection, setCreditDirection] = useState<'charge' | 'payment'>('charge');
   const [creditAmount, setCreditAmount]   = useState('');
+  const [creditNote, setCreditNote]       = useState('');
 
   const [search, setSearch] = useState('');
 
@@ -58,6 +59,7 @@ export default function CustomersScreen() {
     setCreditCustomer(c);
     setCreditDirection(direction);
     setCreditAmount('');
+    setCreditNote('');
     setCreditModal(true);
   };
 
@@ -81,7 +83,7 @@ export default function CustomersScreen() {
 
   const { mutate: doCredit, isPending: creditPending } = useMutation({
     mutationFn: () =>
-      adjustCredit(creditCustomer!.id, creditDirection, parseFloat(creditAmount)),
+      adjustCredit(creditCustomer!.id, creditDirection, parseFloat(creditAmount), creditNote.trim() || undefined),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['inventory-customers'] });
       setCreditModal(false);
@@ -311,6 +313,18 @@ export default function CustomersScreen() {
                 style={{ flex: 1, fontSize: FontSize.md, color: colors.textPrimary }}
                 accessibilityLabel="Credit amount"
                 accessibilityHint="Enter amount in Naira"
+              />
+            </View>
+
+            <Text style={[s.label, { color: colors.textPrimary, marginTop: 12 }]}>Note (optional)</Text>
+            <View style={[s.input, { backgroundColor: colors.background, borderColor: colors.border }]}>
+              <TextInput
+                value={creditNote}
+                onChangeText={setCreditNote}
+                placeholder="e.g. Bread x2"
+                placeholderTextColor={colors.textTertiary}
+                style={{ fontSize: FontSize.sm, color: colors.textPrimary }}
+                accessibilityLabel="Credit note"
               />
             </View>
 

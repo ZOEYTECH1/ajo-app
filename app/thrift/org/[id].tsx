@@ -94,6 +94,7 @@ function ResolveReportModal({
     onSuccess: () => {
       feedback('success');
       queryClient.invalidateQueries({ queryKey: ['thrift-org', orgId] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-org-reports', orgId] });
       setNotes('');
       onClose();
     },
@@ -248,11 +249,18 @@ export default function OrgDashboardRoute() {
   const [inviteVisible, setInvite]    = useState(false);
   const [selectedReport, setReport]   = useState<CollectorReport | null>(null);
   const [resolveVisible, setResolve]  = useState(false);
+  const [reportFilter, setReportFilter] = useState<'all' | 'pending' | 'reviewed' | 'resolved' | 'dismissed'>('all');
   const [collectorGroups, setCollectorGroups] = useState<ThriftOrgMember | null>(null);
 
   const { data, isLoading, isError, refetch, isRefetching } = useQuery({
     queryKey: ['thrift-org', orgId],
     queryFn:  () => thriftService.getOrgDashboard(orgId),
+  });
+
+  const { data: allReports = [], isLoading: reportsLoading } = useQuery({
+    queryKey: ['thrift-org-reports', orgId, reportFilter],
+    queryFn:  () => thriftService.getOrgReports(orgId, reportFilter === 'all' ? undefined : reportFilter),
+    enabled:  !!orgId,
   });
 
   const memberActionMutation = useMutation({
@@ -312,7 +320,7 @@ export default function OrgDashboardRoute() {
   const TABS: { key: Tab; label: string }[] = [
     { key: 'collectors', label: `Collectors (${data?.collectors.length ?? 0})${pendingCount ? ` · ${pendingCount} pending` : ''}` },
     { key: 'groups',     label: `Groups (${data?.groups.length ?? 0})` },
-    { key: 'reports',    label: `Reports (${data?.recent_reports.filter(r => r.status === 'pending').length ?? 0})` },
+    { key: 'reports',    label: `Reports (${allReports.filter(r => r.status === 'pending').length} pending)` },
   ];
 
   return (
@@ -610,7 +618,35 @@ export default function OrgDashboardRoute() {
         {/* ── Reports tab ── */}
         {tab === 'reports' && (
           <>
-            {(data?.recent_reports ?? []).map((r) => (
+            {/* Status filter pills */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+              {(['all', 'pending', 'reviewed', 'resolved', 'dismissed'] as const).map(f => (
+                <TouchableOpacity
+                  key={f}
+                  onPress={() => setReportFilter(f)}
+                  style={{
+                    paddingHorizontal: 12, paddingVertical: 5, borderRadius: 99,
+                    backgroundColor: reportFilter === f ? colors.primary : colors.surface,
+                    borderWidth: 1,
+                    borderColor: reportFilter === f ? colors.primary : colors.border,
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Filter by ${f}`}
+                >
+                  <Text style={{ fontSize: 11, fontWeight: '700', color: reportFilter === f ? '#fff' : colors.textSecondary, textTransform: 'capitalize' }}>
+                    {f}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {reportsLoading ? (
+              <Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 16, fontSize: FontSize.sm }}>Loading reports…</Text>
+            ) : allReports.length === 0 ? (
+              <Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 24, fontSize: FontSize.sm }}>
+                No {reportFilter !== 'all' ? reportFilter : ''} reports found.
+              </Text>
+            ) : allReports.map((r) => (
               <View key={r.id} style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border, flexDirection: 'column', alignItems: 'flex-start', gap: 8 }]}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                   <View style={[s.pill, { backgroundColor: `${REPORT_STATUS_COLOR[r.status]}20` }]}>
@@ -625,7 +661,7 @@ export default function OrgDashboardRoute() {
                 <Text style={{ fontSize: FontSize.sm, color: colors.textPrimary, lineHeight: 20 }} numberOfLines={3}>
                   {r.reason}
                 </Text>
-                {r.status === 'pending' && (
+                {(r.status === 'pending' || r.status === 'reviewed') && (
                   <TouchableOpacity
                     onPress={() => { setReport(r); setResolve(true); }}
                     style={[s.miniBtn, { borderColor: colors.primary, alignSelf: 'flex-end' }]}
@@ -637,11 +673,6 @@ export default function OrgDashboardRoute() {
                 )}
               </View>
             ))}
-            {!isLoading && (data?.recent_reports ?? []).length === 0 && (
-              <Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 24, fontSize: FontSize.sm }}>
-                No reports filed yet.
-              </Text>
-            )}
           </>
         )}
         </ScrollView>

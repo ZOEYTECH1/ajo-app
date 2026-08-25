@@ -76,7 +76,7 @@ export default function ProductRequestsScreen() {
 
   const { mutate: submitRequest, isPending: submitting } = useMutation({
     mutationFn: () => createBranchProductRequest(bizId, {
-      category: categoryId!,
+      category: categoryId ?? undefined,
       product_name: productName.trim(),
       note: note.trim() || undefined,
     }),
@@ -107,7 +107,6 @@ export default function ProductRequestsScreen() {
   };
 
   const handleSubmit = () => {
-    if (!categoryId) return Alert.alert('Required', 'Please select a category.');
     if (!productName.trim()) return Alert.alert('Required', 'Please enter the product name.');
     submitRequest();
   };

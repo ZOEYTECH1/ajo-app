@@ -432,9 +432,16 @@ export default function CategoryDetailScreen() {
                   accessibilityLabel={`${p.name}, ${p.quantity} in stock`}
                 >
                   <View style={{ flex: 1, paddingRight: 6 }}>
-                    <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }} numberOfLines={1}>
-                      {p.name}
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary, flex: 1 }} numberOfLines={1}>
+                        {p.name}
+                      </Text>
+                      {p.discount_percent > 0 && (
+                        <View style={{ backgroundColor: '#E65100', borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1 }}>
+                          <Text style={{ fontSize: 10, color: '#fff', fontWeight: '700' }}>-{p.discount_percent}%</Text>
+                        </View>
+                      )}
+                    </View>
                     {Object.keys(p.custom_fields).length > 0 && (
                       <Text style={{ fontSize: 10, color: colors.textTertiary, marginTop: 2 }} numberOfLines={1}>
                         {Object.entries(p.custom_fields).map(([k, v]) => `${k}: ${v}`).join(' · ')}

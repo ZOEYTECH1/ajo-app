@@ -30,6 +30,7 @@ export default function WarehouseDispatchScreen() {
   const [destination, setDestination] = useState('');
   const [reference, setReference] = useState('');
   const [note, setNote] = useState('');
+  const [successInfo, setSuccessInfo] = useState<{ productName: string; qty: number; remaining: number } | null>(null);
 
   const { data: categories } = useQuery({
     queryKey: ['inventory-categories', selectedBusinessId],
@@ -47,11 +48,9 @@ export default function WarehouseDispatchScreen() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['inventory-products'] });
       qc.invalidateQueries({ queryKey: ['inventory-categories'] });
-      Alert.alert(
-        'Stock dispatched',
-        `${quantity} units of "${selectedProduct?.name}" dispatched.`,
-        [{ text: 'Dispatch more', onPress: resetForm }, { text: 'Done', onPress: () => router.back() }],
-      );
+      const remaining = (selectedProduct?.quantity ?? 0) - (parseInt(quantity, 10) || 0);
+      setSuccessInfo({ productName: selectedProduct?.name ?? '', qty: parseInt(quantity, 10), remaining });
+      resetForm();
     },
     onError: () => Alert.alert('Error', 'Could not record dispatch. Try again.'),
   });
@@ -87,6 +86,35 @@ export default function WarehouseDispatchScreen() {
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
+        {/* Inline success card */}
+        {successInfo && (
+          <View style={{ backgroundColor: '#FFF3E0', borderRadius: 16, padding: 20, marginBottom: 24, alignItems: 'center' }}>
+            <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: '#E65100', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+              <Ionicons name="checkmark" size={32} color="#fff" />
+            </View>
+            <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: '#BF360C', marginBottom: 4 }}>Stock Dispatched</Text>
+            <Text style={{ fontSize: FontSize.sm, color: '#E64A19', textAlign: 'center' }}>
+              <Text style={{ fontWeight: '700' }}>{successInfo.qty} units</Text> of "{successInfo.productName}" dispatched.{'\n'}Remaining stock: <Text style={{ fontWeight: '700' }}>{successInfo.remaining} units</Text>
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 12, marginTop: 16 }}>
+              <TouchableOpacity
+                onPress={() => setSuccessInfo(null)}
+                style={{ flex: 1, backgroundColor: '#fff', borderRadius: 12, paddingVertical: 12, alignItems: 'center', borderWidth: 1.5, borderColor: '#E65100' }}
+                accessibilityRole="button" accessibilityLabel="Dispatch more stock"
+              >
+                <Text style={{ color: '#E65100', fontWeight: '700', fontSize: FontSize.sm }}>Dispatch More</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => router.back()}
+                style={{ flex: 1, backgroundColor: '#E65100', borderRadius: 12, paddingVertical: 12, alignItems: 'center' }}
+                accessibilityRole="button" accessibilityLabel="Done"
+              >
+                <Text style={{ color: '#fff', fontWeight: '700', fontSize: FontSize.sm }}>Done</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
         {/* Product selector */}
         <Text style={[s.label, { color: colors.textSecondary }]}>Product *</Text>
         <TouchableOpacity

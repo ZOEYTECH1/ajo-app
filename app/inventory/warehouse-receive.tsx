@@ -30,6 +30,7 @@ export default function WarehouseReceiveScreen() {
   const [supplier, setSupplier] = useState('');
   const [reference, setReference] = useState('');
   const [note, setNote] = useState('');
+  const [successInfo, setSuccessInfo] = useState<{ productName: string; qty: number; newStock: number } | null>(null);
 
   const { data: categories } = useQuery({
     queryKey: ['inventory-categories', selectedBusinessId],
@@ -52,11 +53,9 @@ export default function WarehouseReceiveScreen() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['inventory-products'] });
       qc.invalidateQueries({ queryKey: ['inventory-categories'] });
-      Alert.alert(
-        'Goods received',
-        `${quantity} units of "${selectedProduct?.name}" added to stock.`,
-        [{ text: 'Receive more', onPress: resetForm }, { text: 'Done', onPress: () => router.back() }],
-      );
+      const newStock = (selectedProduct?.quantity ?? 0) + (parseInt(quantity, 10) || 0);
+      setSuccessInfo({ productName: selectedProduct?.name ?? '', qty: parseInt(quantity, 10), newStock });
+      resetForm();
     },
     onError: () => Alert.alert('Error', 'Could not record stock receipt. Try again.'),
   });
@@ -89,6 +88,35 @@ export default function WarehouseReceiveScreen() {
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
+        {/* Inline success card */}
+        {successInfo && (
+          <View style={{ backgroundColor: '#E8F5E9', borderRadius: 16, padding: 20, marginBottom: 24, alignItems: 'center' }}>
+            <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: '#4CAF50', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+              <Ionicons name="checkmark" size={32} color="#fff" />
+            </View>
+            <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: '#1B5E20', marginBottom: 4 }}>Goods Received</Text>
+            <Text style={{ fontSize: FontSize.sm, color: '#2E7D32', textAlign: 'center' }}>
+              <Text style={{ fontWeight: '700' }}>{successInfo.qty} units</Text> of "{successInfo.productName}" added.{'\n'}New stock: <Text style={{ fontWeight: '700' }}>{successInfo.newStock} units</Text>
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 12, marginTop: 16 }}>
+              <TouchableOpacity
+                onPress={() => setSuccessInfo(null)}
+                style={{ flex: 1, backgroundColor: '#fff', borderRadius: 12, paddingVertical: 12, alignItems: 'center', borderWidth: 1.5, borderColor: '#4CAF50' }}
+                accessibilityRole="button" accessibilityLabel="Receive more goods"
+              >
+                <Text style={{ color: '#2E7D32', fontWeight: '700', fontSize: FontSize.sm }}>Receive More</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => router.back()}
+                style={{ flex: 1, backgroundColor: '#4CAF50', borderRadius: 12, paddingVertical: 12, alignItems: 'center' }}
+                accessibilityRole="button" accessibilityLabel="Done"
+              >
+                <Text style={{ color: '#fff', fontWeight: '700', fontSize: FontSize.sm }}>Done</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
         {/* Product selector */}
         <Text style={[s.label, { color: colors.textSecondary }]}>Product *</Text>
         <TouchableOpacity

@@ -1,18 +1,23 @@
 const EMOJI_MAP: { keywords: string[]; emoji: string }[] = [
+  // These must come BEFORE 'cloth' so 'bag' and 'shoe' match here first
+  { keywords: ['shoe', 'footwear', 'sandal', 'boot', 'slipper', 'sneaker', 'heel', 'loafer'], emoji: '👟' },
+  { keywords: ['bag', 'purse', 'handbag', 'luggage', 'backpack', 'suitcase', 'wallet', 'clutch'], emoji: '👜' },
+
   { keywords: ['provision', 'grocery', 'grocerie', 'supermarket', 'food store'], emoji: '🛒' },
-  { keywords: ['cloth', 'fashion', 'wear', 'dress', 'shirt', 'trouser', 'shoe', 'bag', 'textile'], emoji: '👗' },
+  { keywords: ['cloth', 'fashion', 'wear', 'dress', 'shirt', 'trouser', 'textile', 'fabric', 'ankara', 'lace', 'skirt', 'blouse'], emoji: '👗' },
   { keywords: ['electron', 'phone', 'laptop', 'computer', 'gadget', 'device', 'tech'], emoji: '📱' },
-  { keywords: ['food', 'cooked', 'meal', 'restaurant', 'eatery', 'snack', 'drink', 'water', 'bev'], emoji: '🍲' },
-  { keywords: ['beauty', 'cosmetic', 'makeup', 'hair', 'cream', 'lotion', 'skincare'], emoji: '💄' },
-  { keywords: ['build', 'material', 'cement', 'iron', 'rod', 'tile', 'paint', 'hardware'], emoji: '🏗️' },
-  { keywords: ['pharma', 'medicine', 'drug', 'health', 'hospital', 'clinic', 'medical'], emoji: '💊' },
-  { keywords: ['auto', 'car', 'vehicle', 'spare', 'part', 'motor', 'tyre', 'bike'], emoji: '🚗' },
-  { keywords: ['book', 'station', 'pen', 'paper', 'school', 'office'], emoji: '📚' },
-  { keywords: ['farm', 'produce', 'crop', 'grain', 'seed', 'agro', 'fish', 'meat', 'poultry'], emoji: '🌾' },
-  { keywords: ['furniture', 'household', 'home', 'chair', 'table', 'kitchen', 'decor'], emoji: '🪑' },
-  { keywords: ['recharge', 'airtime', 'data', 'card'], emoji: '📶' },
-  { keywords: ['jewelry', 'jewellery', 'gold', 'silver', 'accessory', 'watch'], emoji: '💍' },
-  { keywords: ['baby', 'child', 'children', 'kid', 'toy', 'infant'], emoji: '🍼' },
+  { keywords: ['drink', 'water', 'bev', 'juice', 'wine', 'beer', 'alcohol', 'soda', 'bottle', 'soft'], emoji: '🥤' },
+  { keywords: ['food', 'cooked', 'meal', 'restaurant', 'eatery', 'snack', 'rice', 'soup', 'bread'], emoji: '🍲' },
+  { keywords: ['beauty', 'cosmetic', 'makeup', 'hair', 'cream', 'lotion', 'skincare', 'perfume', 'fragrance'], emoji: '💄' },
+  { keywords: ['build', 'material', 'cement', 'iron', 'rod', 'tile', 'paint', 'hardware', 'plumb'], emoji: '🏗️' },
+  { keywords: ['pharma', 'medicine', 'drug', 'health', 'hospital', 'clinic', 'medical', 'supplement'], emoji: '💊' },
+  { keywords: ['auto', 'car', 'vehicle', 'spare', 'part', 'motor', 'tyre', 'bike', 'engine'], emoji: '🚗' },
+  { keywords: ['book', 'station', 'pen', 'paper', 'school', 'office', 'print'], emoji: '📚' },
+  { keywords: ['farm', 'produce', 'crop', 'grain', 'seed', 'agro', 'fish', 'meat', 'poultry', 'egg', 'vegetable', 'fruit'], emoji: '🌾' },
+  { keywords: ['furniture', 'household', 'home', 'chair', 'table', 'kitchen', 'decor', 'mattress', 'bed'], emoji: '🪑' },
+  { keywords: ['recharge', 'airtime', 'data', 'card', 'voucher'], emoji: '📶' },
+  { keywords: ['jewelry', 'jewellery', 'gold', 'silver', 'accessory', 'watch', 'bead', 'chain', 'ring'], emoji: '💍' },
+  { keywords: ['baby', 'child', 'children', 'kid', 'toy', 'infant', 'diaper', 'pamper'], emoji: '🍼' },
 ];
 
 export function getCategoryEmoji(name: string): string {

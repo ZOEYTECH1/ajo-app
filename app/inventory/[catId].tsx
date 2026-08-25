@@ -14,7 +14,7 @@ import {
   type CustomFieldDef,
 } from '../../src/services/inventoryService';
 import ErrorBanner from '../../src/components/ErrorBanner';
-import { getCategoryEmoji, getProductEmoji, formatStock, stockColor } from '../../src/utils/inventoryHelpers';
+import { getCategoryEmoji, formatStock, stockColor } from '../../src/utils/inventoryHelpers';
 import { useInventoryStore } from '../../src/store/useAppStore';
 
 export default function CategoryDetailScreen() {
@@ -431,9 +431,8 @@ export default function CategoryDetailScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={`${p.name}, ${p.quantity} in stock`}
                 >
-                  <View style={{ flex: 1, paddingRight: 6, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text style={{ fontSize: 18 }}>{getProductEmoji(p.name)}</Text>
-                    <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary, flex: 1 }} numberOfLines={1}>
+                  <View style={{ flex: 1, paddingRight: 6 }}>
+                    <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }} numberOfLines={1}>
                       {p.name}
                     </Text>
                     {Object.keys(p.custom_fields).length > 0 && (

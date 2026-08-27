@@ -230,7 +230,7 @@ export const getBranchProductRequestsPage = (
 
 export const createBranchProductRequest = (
   branchId: number,
-  data: { category: number; product_name: string; note?: string },
+  data: { category?: number; product_name: string; note?: string },
 ): Promise<BranchProductRequest> =>
   api.post(`/api/inventory/businesses/${branchId}/product-requests/`, data).then(r => r.data);
 

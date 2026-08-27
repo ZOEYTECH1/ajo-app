@@ -436,7 +436,7 @@ export default function CategoryDetailScreen() {
                       <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary, flex: 1 }} numberOfLines={1}>
                         {p.name}
                       </Text>
-                      {p.discount_percent > 0 && (
+                      {Number(p.discount_percent) > 0 && (
                         <View style={{ backgroundColor: '#E65100', borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1 }}>
                           <Text style={{ fontSize: 10, color: '#fff', fontWeight: '700' }}>-{p.discount_percent}%</Text>
                         </View>

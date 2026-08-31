@@ -1006,7 +1006,7 @@ export default function ThriftGroupDetail() {
 
       {/* Kebab menu for payer */}
       <Modal visible={kebabOpen} transparent animationType="fade" onRequestClose={() => setKebabOpen(false)}>
-        <TouchableOpacity style={m.overlay} activeOpacity={1} onPress={() => setKebabOpen(false)}>
+        <TouchableOpacity style={m.overlay} activeOpacity={1} onPress={() => setKebabOpen(false)} accessibilityRole="button" accessibilityLabel="Dismiss">
           <View style={[s.kebabMenu, { backgroundColor: colors.surface, ...Shadow.strong(colors.black) }]}>
             <TouchableOpacity
               style={s.kebabItem}

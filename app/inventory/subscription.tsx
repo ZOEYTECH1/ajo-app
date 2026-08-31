@@ -155,6 +155,7 @@ export default function InventorySubscriptionScreen() {
                   },
                 ]}
                 accessibilityRole="radio"
+                accessibilityLabel={opt.label}
                 accessibilityState={{ checked: active }}
               >
                 <View style={{ flex: 1 }}>

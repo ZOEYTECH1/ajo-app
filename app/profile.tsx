@@ -29,7 +29,7 @@ const ConfirmModal: React.FC<{
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <Pressable style={s.overlay} onPress={onCancel} accessibilityRole="button" accessibilityLabel="Dismiss dialog">
-        <Pressable style={[s.modalBox, { backgroundColor: colors.surface }]} onPress={() => {}}>
+        <Pressable style={[s.modalBox, { backgroundColor: colors.surface }]} onPress={() => {}} accessible={false}>
           <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary, marginBottom: 8 }}>
             {title}
           </Text>
@@ -473,8 +473,8 @@ export default function ProfileRoute() {
 
         {/* Change password modal */}
         <Modal visible={showChangePw} animationType="slide" transparent onRequestClose={() => setShowChangePw(false)}>
-          <Pressable style={s.overlay} onPress={() => setShowChangePw(false)}>
-            <Pressable style={[s.modalBox, { backgroundColor: colors.surface }]} onPress={(e) => e.stopPropagation()}>
+          <Pressable style={s.overlay} onPress={() => setShowChangePw(false)} accessibilityRole="button" accessibilityLabel="Dismiss">
+            <Pressable style={[s.modalBox, { backgroundColor: colors.surface }]} onPress={(e) => e.stopPropagation()} accessible={false}>
               <Text style={{ fontSize: FontSize.lg, fontWeight: '700', color: colors.textPrimary, marginBottom: 16 }}>Change Password</Text>
               {!!pwError && (
                 <View style={{ backgroundColor: colors.errorLight, borderRadius: 8, padding: 10, marginBottom: 12 }}>
@@ -485,7 +485,7 @@ export default function ProfileRoute() {
                 <View style={{ alignItems: 'center', paddingVertical: 12 }}>
                   <Ionicons name="checkmark-circle" size={48} color={colors.success} />
                   <Text style={{ color: colors.success, marginTop: 8, fontWeight: '600' }}>Password changed!</Text>
-                  <TouchableOpacity onPress={() => { setShowChangePw(false); setPwSuccess(false); }} style={{ marginTop: 16 }}>
+                  <TouchableOpacity onPress={() => { setShowChangePw(false); setPwSuccess(false); }} style={{ marginTop: 16 }} accessibilityRole="button" accessibilityLabel="Done">
                     <Text style={{ color: colors.primary, fontWeight: '600' }}>Done</Text>
                   </TouchableOpacity>
                 </View>
@@ -519,10 +519,10 @@ export default function ProfileRoute() {
                     accessibilityLabel="Confirm new password"
                   />
                   <View style={[s.row, { gap: 10 }]}>
-                    <TouchableOpacity onPress={() => setShowChangePw(false)} style={[s.modalBtn, { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 }]}>
+                    <TouchableOpacity onPress={() => setShowChangePw(false)} style={[s.modalBtn, { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 }]} accessibilityRole="button" accessibilityLabel="Cancel">
                       <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm }}>Cancel</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={handleChangePw} disabled={changePwMutation.isPending} style={[s.modalBtn, { backgroundColor: colors.primary }]}>
+                    <TouchableOpacity onPress={handleChangePw} disabled={changePwMutation.isPending} style={[s.modalBtn, { backgroundColor: colors.primary }]} accessibilityRole="button" accessibilityLabel={changePwMutation.isPending ? 'Saving' : 'Save'}>
                       <Text style={{ color: '#FFF', fontWeight: '700', fontSize: FontSize.sm }}>
                         {changePwMutation.isPending ? 'Saving…' : 'Save'}
                       </Text>

@@ -28,7 +28,7 @@ const ReceiptModal: React.FC<{
   if (!uri) return null;
   return (
     <Modal visible animationType="fade" transparent onRequestClose={onClose}>
-      <Pressable style={lay.receiptOverlay} onPress={onClose}>
+      <Pressable style={lay.receiptOverlay} onPress={onClose} accessibilityRole="button" accessibilityLabel="Dismiss">
         <View style={[lay.receiptBox, { backgroundColor: colors.surface }]}>
           <Image
             source={{ uri }}

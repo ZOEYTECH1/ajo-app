@@ -25,8 +25,8 @@ const ConfirmModal: React.FC<{
   const { colors } = useTheme();
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <Pressable style={s.modalOverlay} onPress={onCancel}>
-        <Pressable style={[s.modalBox, { backgroundColor: colors.surface }]} onPress={() => {}}>
+      <Pressable style={s.modalOverlay} onPress={onCancel} accessibilityRole="button" accessibilityLabel="Dismiss">
+        <Pressable style={[s.modalBox, { backgroundColor: colors.surface }]} onPress={() => {}} accessible={false}>
           <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary, marginBottom: 8 }}>
             {title}
           </Text>

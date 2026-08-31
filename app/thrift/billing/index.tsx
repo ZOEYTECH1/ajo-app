@@ -115,6 +115,8 @@ function InvoiceCard({ invoice, onPay, onVerified }: {
                 disabled={!txId.trim() || verifying}
                 style={[s.verifyBtn, { backgroundColor: txId.trim() && !verifying ? colors.primary : colors.primaryTint, marginTop: 10 }]}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Verify Payment"
               >
                 {verifying
                   ? <ActivityIndicator size="small" color="#fff" />

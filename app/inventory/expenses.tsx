@@ -673,6 +673,8 @@ export default function ExpensesScreen() {
                     key={c.id}
                     onLongPress={() => confirmDeleteCat(c)}
                     style={[s.userCatChip, { backgroundColor: FALLBACK_META.bg, borderColor: FALLBACK_META.color + '44' }]}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${c.name} category, long press to delete`}
                   >
                     <Ionicons name="pricetag-outline" size={12} color={FALLBACK_META.color} />
                     <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: FALLBACK_META.color, marginLeft: 5 }}>
@@ -721,6 +723,9 @@ export default function ExpensesScreen() {
                       borderColor: sel ? meta.color : colors.border,
                     }]}
                     activeOpacity={0.8}
+                    accessibilityRole="radio"
+                    accessibilityLabel={cat.label}
+                    accessibilityState={{ checked: sel }}
                   >
                     <Ionicons name={meta.icon as any} size={22} color={sel ? '#fff' : meta.color} />
                     <Text style={{ fontSize: FontSize.xs, fontWeight: '700', marginTop: 6, textAlign: 'center',
@@ -743,6 +748,9 @@ export default function ExpensesScreen() {
                       borderColor: sel ? FALLBACK_META.color : colors.border,
                     }]}
                     activeOpacity={0.8}
+                    accessibilityRole="radio"
+                    accessibilityLabel={c.name}
+                    accessibilityState={{ checked: sel }}
                   >
                     <Ionicons name="pricetag-outline" size={22} color={sel ? '#fff' : FALLBACK_META.color} />
                     <Text style={{ fontSize: FontSize.xs, fontWeight: '700', marginTop: 6, textAlign: 'center',
@@ -813,6 +821,9 @@ export default function ExpensesScreen() {
                     borderColor: dateMode === d ? INV : colors.border,
                     flex: 1,
                   }]}
+                  accessibilityRole="radio"
+                  accessibilityLabel={d === 'today' ? 'Today' : d === 'yesterday' ? 'Yesterday' : 'Other date'}
+                  accessibilityState={{ checked: dateMode === d }}
                 >
                   <Text style={{ fontSize: FontSize.xs, fontWeight: '700', textAlign: 'center',
                     color: dateMode === d ? '#fff' : colors.textPrimary }}>

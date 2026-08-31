@@ -173,7 +173,7 @@ export default function CategoryDetailScreen() {
       {/* Edit category modal */}
       <Modal visible={editModal} transparent animationType="slide" onRequestClose={() => setEditModal(false)}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-          <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setEditModal(false)} />
+          <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setEditModal(false)} accessibilityRole="button" accessibilityLabel="Dismiss" />
           <View style={[s.modalSheet, { backgroundColor: colors.surface }]}>
             <Text style={[s.modalTitle, { color: colors.textPrimary }]}>Rename Category</Text>
             <Text style={[s.modalLabel, { color: colors.textSecondary }]}>Category name</Text>
@@ -204,7 +204,7 @@ export default function CategoryDetailScreen() {
       {/* Custom fields modal */}
       <Modal visible={fieldsModal} transparent animationType="slide" onRequestClose={() => setFieldsModal(false)}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-          <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setFieldsModal(false)} />
+          <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setFieldsModal(false)} accessibilityRole="button" accessibilityLabel="Dismiss" />
           <View style={[s.modalSheet, { backgroundColor: colors.surface, maxHeight: '80%' }]}>
             <Text style={[s.modalTitle, { color: colors.textPrimary }]}>Custom Fields</Text>
             <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginBottom: 16 }}>
@@ -261,6 +261,9 @@ export default function CategoryDetailScreen() {
                           backgroundColor: newFieldType === t ? '#E65100' : colors.background,
                           borderWidth: 1, borderColor: newFieldType === t ? '#E65100' : colors.border,
                         }]}
+                        accessibilityRole="radio"
+                        accessibilityLabel={t}
+                        accessibilityState={{ checked: newFieldType === t }}
                       >
                         <Text style={{ fontSize: FontSize.xs, fontWeight: '600', color: newFieldType === t ? '#fff' : colors.textSecondary }}>
                           {t}
@@ -271,6 +274,9 @@ export default function CategoryDetailScreen() {
                   <TouchableOpacity
                     onPress={() => setNewFieldReq(r => !r)}
                     style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+                    accessibilityRole="checkbox"
+                    accessibilityLabel="Required"
+                    accessibilityState={{ checked: newFieldReq }}
                   >
                     <View style={{
                       width: 20, height: 20, borderRadius: 4, borderWidth: 1.5,
@@ -283,10 +289,10 @@ export default function CategoryDetailScreen() {
                     <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary }}>Required</Text>
                   </TouchableOpacity>
                   <View style={{ flexDirection: 'row', gap: 10 }}>
-                    <TouchableOpacity onPress={() => setAddingField(false)} style={[s.modalSaveBtn, { flex: 1, backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border }]}>
+                    <TouchableOpacity onPress={() => setAddingField(false)} style={[s.modalSaveBtn, { flex: 1, backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border }]} accessibilityRole="button" accessibilityLabel="Cancel">
                       <Text style={{ fontWeight: '700', color: colors.textSecondary }}>Cancel</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={addField} disabled={!newFieldName.trim()} style={[s.modalSaveBtn, { flex: 1, backgroundColor: '#E65100', opacity: newFieldName.trim() ? 1 : 0.4 }]}>
+                    <TouchableOpacity onPress={addField} disabled={!newFieldName.trim()} style={[s.modalSaveBtn, { flex: 1, backgroundColor: '#E65100', opacity: newFieldName.trim() ? 1 : 0.4 }]} accessibilityRole="button" accessibilityLabel="Add field">
                       <Text style={{ fontWeight: '700', color: '#fff' }}>Add</Text>
                     </TouchableOpacity>
                   </View>
@@ -298,6 +304,8 @@ export default function CategoryDetailScreen() {
               <TouchableOpacity
                 onPress={() => setAddingField(true)}
                 style={[s.modalSaveBtn, { backgroundColor: colors.background, borderWidth: 1, borderColor: '#E65100', marginTop: 12 }]}
+                accessibilityRole="button"
+                accessibilityLabel="Add a field"
               >
                 <Ionicons name="add" size={18} color="#E65100" />
                 <Text style={{ fontWeight: '700', color: '#E65100', marginLeft: 6 }}>Add a field</Text>
@@ -308,6 +316,8 @@ export default function CategoryDetailScreen() {
               onPress={() => saveFields()}
               disabled={savingFields}
               style={[s.modalSaveBtn, { backgroundColor: '#E65100', marginTop: 10, opacity: savingFields ? 0.6 : 1 }]}
+              accessibilityRole="button"
+              accessibilityLabel={savingFields ? 'Saving fields' : 'Save fields'}
             >
               {savingFields
                 ? <ActivityIndicator color="#fff" />

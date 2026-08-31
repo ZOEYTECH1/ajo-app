@@ -62,8 +62,8 @@ const ConfirmModal: React.FC<{
   const { colors } = useTheme();
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <Pressable style={lay.overlay} onPress={onCancel}>
-        <Pressable style={[lay.modalBox, { backgroundColor: colors.surface }]} onPress={() => {}}>
+      <Pressable style={lay.overlay} onPress={onCancel} accessibilityRole="button" accessibilityLabel="Dismiss">
+        <Pressable style={[lay.modalBox, { backgroundColor: colors.surface }]} onPress={() => {}} accessible={false}>
           <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary, marginBottom: 8 }}>
             {title}
           </Text>
@@ -122,8 +122,8 @@ const StartCycleModal: React.FC<{
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={handleCancel}>
-      <Pressable style={lay.overlay} onPress={handleCancel}>
-        <Pressable style={[lay.startCycleBox, { backgroundColor: colors.surface }]} onPress={() => {}}>
+      <Pressable style={lay.overlay} onPress={handleCancel} accessibilityRole="button" accessibilityLabel="Dismiss">
+        <Pressable style={[lay.startCycleBox, { backgroundColor: colors.surface }]} onPress={() => {}} accessible={false}>
           <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary, marginBottom: 20 }}>
             Start New Cycle
           </Text>

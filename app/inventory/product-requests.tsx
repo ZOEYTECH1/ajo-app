@@ -298,7 +298,7 @@ export default function ProductRequestsScreen() {
       {/* New request modal */}
       <Modal visible={modal} transparent animationType="slide" onRequestClose={closeModal}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-          <TouchableOpacity style={s.overlay} activeOpacity={1} onPress={closeModal} />
+          <TouchableOpacity style={s.overlay} activeOpacity={1} onPress={closeModal} accessibilityRole="button" accessibilityLabel="Dismiss" />
           <View style={[s.sheet, { backgroundColor: colors.surface }]}>
             <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary, marginBottom: 4 }}>
               Request a Product
@@ -313,6 +313,7 @@ export default function ProductRequestsScreen() {
               onPress={() => setCatOpen(o => !o)}
               style={[s.input, { borderColor: colors.border, backgroundColor: colors.background }]}
               accessibilityRole="button"
+              accessibilityLabel={selectedCat ? `Category: ${selectedCat.name}` : 'Select a category'}
             >
               <Text style={{ fontSize: FontSize.sm, color: categoryId ? colors.textPrimary : colors.textTertiary, flex: 1 }}>
                 {selectedCat?.name ?? 'Select a category'}
@@ -326,6 +327,8 @@ export default function ProductRequestsScreen() {
                     key={c.id}
                     onPress={() => { setCategoryId(c.id); setCatOpen(false); }}
                     style={[s.dropdownItem, c.id === categoryId && { backgroundColor: '#FFF3E0' }]}
+                    accessibilityRole="button"
+                    accessibilityLabel={c.name}
                   >
                     <Text style={{ fontSize: FontSize.sm, color: c.id === categoryId ? INV : colors.textPrimary, fontWeight: c.id === categoryId ? '700' : '400' }}>
                       {c.name}

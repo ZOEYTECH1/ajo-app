@@ -886,7 +886,7 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) 
               accessibilityLabel="Verification code"
             />
             <Button label="Verify Code" onPress={handleVerifyCode} loading={loading} style={{ marginTop: 8 }} />
-            <TouchableOpacity onPress={handleSendCode} style={{ alignItems: 'center', marginTop: 16 }}>
+            <TouchableOpacity onPress={handleSendCode} style={{ alignItems: 'center', marginTop: 16 }} accessibilityRole="button" accessibilityLabel="Resend code">
               <Text style={{ color: colors.primary, fontSize: FontSize.sm }}>Resend code</Text>
             </TouchableOpacity>
           </>

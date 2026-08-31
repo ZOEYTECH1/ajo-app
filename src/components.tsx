@@ -405,7 +405,7 @@ export const SectionHeader: React.FC<{ title: string; action?: string; onAction?
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
       <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary }}>{title}</Text>
       {action && (
-        <TouchableOpacity onPress={onAction}>
+        <TouchableOpacity onPress={onAction} accessibilityRole="button" accessibilityLabel={action}>
           <Text style={{ fontSize: FontSize.sm, color: colors.primary, fontWeight: '600' }}>{action}</Text>
         </TouchableOpacity>
       )}

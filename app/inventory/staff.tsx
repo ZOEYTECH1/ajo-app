@@ -183,7 +183,7 @@ export default function StaffScreen() {
 
       {/* Invite modal */}
       <Modal visible={inviteModal} transparent animationType="slide" onRequestClose={() => setInviteModal(false)}>
-        <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setInviteModal(false)} />
+        <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={() => setInviteModal(false)} accessibilityRole="button" accessibilityLabel="Dismiss" />
         <View style={[s.modalSheet, { backgroundColor: colors.surface }]}>
           <Text style={[s.modalTitle, { color: colors.textPrimary }]}>Invite Team Member</Text>
 

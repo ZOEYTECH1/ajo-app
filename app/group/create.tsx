@@ -55,8 +55,8 @@ const MonthDayModal: React.FC<{
   const { colors } = useTheme();
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={lay.overlay} onPress={onClose}>
-        <Pressable style={[lay.monthModal, { backgroundColor: colors.surface }]} onPress={() => {}}>
+      <Pressable style={lay.overlay} onPress={onClose} accessibilityRole="button" accessibilityLabel="Dismiss">
+        <Pressable style={[lay.monthModal, { backgroundColor: colors.surface }]} onPress={() => {}} accessible={false}>
           <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary, marginBottom: 16 }}>
             Collection Day
           </Text>

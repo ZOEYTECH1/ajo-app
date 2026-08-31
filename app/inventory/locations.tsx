@@ -271,7 +271,7 @@ export default function LocationsScreen() {
 
       {/* Add location modal */}
       <Modal visible={addModal} transparent animationType="slide" onRequestClose={closeModal}>
-        <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={closeModal} />
+        <TouchableOpacity style={s.modalOverlay} activeOpacity={1} onPress={closeModal} accessibilityRole="button" accessibilityLabel="Dismiss" />
         <View style={[s.modalSheet, { backgroundColor: colors.surface }]}>
           <Text style={[s.modalTitle, { color: colors.textPrimary }]}>Add a Location</Text>
 
@@ -352,6 +352,8 @@ export default function LocationsScreen() {
                       key={p.id}
                       onPress={() => { setSelectedParentId(p.id); setParentPickerOpen(false); }}
                       style={[s.parentOption, { borderBottomColor: colors.border }]}
+                      accessibilityRole="button"
+                      accessibilityLabel={p.name}
                     >
                       <Ionicons
                         name={p.mode === 'warehouse' ? 'cube-outline' : 'storefront-outline'}

@@ -336,6 +336,8 @@ export default function CustomersScreen() {
                 onPress={handleCredit}
                 disabled={creditPending}
                 style={[s.modalBtn, { backgroundColor: creditDirection === 'charge' ? '#C62828' : '#2E7D32', flex: 1 }]}
+                accessibilityRole="button"
+                accessibilityLabel={creditDirection === 'charge' ? 'Charge' : 'Record'}
               >
                 {creditPending
                   ? <ActivityIndicator color="#fff" size="small" />

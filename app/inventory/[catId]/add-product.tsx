@@ -316,7 +316,7 @@ export default function AddProductScreen() {
               : 'No expiry date'}
           </Text>
           {expiryDate && (
-            <TouchableOpacity onPress={() => setExpiryDate(null)} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }}>
+            <TouchableOpacity onPress={() => setExpiryDate(null)} hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }} accessibilityRole="button" accessibilityLabel="Clear expiry date">
               <Ionicons name="close-circle" size={18} color={colors.textTertiary} />
             </TouchableOpacity>
           )}
@@ -334,7 +334,7 @@ export default function AddProductScreen() {
             />
             {Platform.OS === 'ios' && (
               <TouchableOpacity onPress={() => setShowExpiryPicker(false)}
-                style={{ alignItems: 'center', paddingVertical: 8 }}>
+                style={{ alignItems: 'center', paddingVertical: 8 }} accessibilityRole="button" accessibilityLabel="Done">
                 <Text style={{ color: INV, fontWeight: '700', fontSize: FontSize.sm }}>Done</Text>
               </TouchableOpacity>
             )}
@@ -346,6 +346,8 @@ export default function AddProductScreen() {
           disabled={isPending}
           style={[s.saveBtn, { backgroundColor: INV, marginTop: 16, opacity: isPending ? 0.6 : 1 }]}
           activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel={isPending ? 'Saving' : 'Save Product'}
         >
           {isPending
             ? <>

@@ -5,6 +5,10 @@ import { useAuthStore } from '../store/useAppStore';
 
 // ─── Base URL ────────────────────────────────────────────────────────────────
 
+/**
+ * Resolves the API base URL from environment variables or the Metro bundler
+ * host, allowing physical devices to reach the local Django dev server.
+ */
 const getBaseUrl = (): string => {
   const useLocal = process.env.EXPO_PUBLIC_USE_LOCAL === 'true';
   const remoteUrl = process.env.EXPO_PUBLIC_API_URL;
@@ -40,7 +44,40 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// ─── Response interceptor — auto-refresh on 401 ──────────────────────────────
+// ─── Exponential backoff helper ───────────────────────────────────────────────
+
+/**
+ * Retries a failed request with exponential backoff when the server responds
+ * with HTTP 429 Too Many Requests.
+ *
+ * @param config   - The original Axios request config to retry.
+ * @param attempt  - The current retry attempt number (1-based).
+ * @param maxRetries - Maximum number of retry attempts before giving up.
+ * @param retryAfterMs - Optional Retry-After value from the response header (ms).
+ * @returns The Axios response on success, or rejects after max retries.
+ */
+const retryWithBackoff = (
+  config: any,
+  attempt: number,
+  maxRetries: number,
+  retryAfterMs?: number,
+): Promise<any> => {
+  if (attempt > maxRetries) {
+    const err: any = new Error('Too many requests. Please wait a moment and try again.');
+    err.userMessage = 'We\'re receiving too many requests right now. Please try again in a moment.';
+    err.code = 'RATE_LIMITED';
+    return Promise.reject(err);
+  }
+
+  // Honour the server's Retry-After header when present; otherwise back off exponentially.
+  const backoffMs = retryAfterMs ?? Math.min(1000 * Math.pow(2, attempt - 1), 30000);
+
+  return new Promise((resolve) => setTimeout(resolve, backoffMs)).then(() =>
+    api(config),
+  );
+};
+
+// ─── Response interceptor — auto-refresh on 401, backoff on 429 ─────────────
 
 let isRefreshing = false;
 type Resolver = { resolve: (token: string) => void; reject: (err: unknown) => void };
@@ -63,6 +100,23 @@ api.interceptors.response.use(
     }
 
     const original = error.config;
+
+    // ── 429 Too Many Requests — retry with exponential backoff ───────────────
+    if (error.response?.status === 429) {
+      const retryCount: number = (original._429retryCount ?? 0) + 1;
+      original._429retryCount = retryCount;
+
+      // Parse Retry-After header (seconds → ms), if the server provides it.
+      const retryAfterHeader = error.response.headers?.['retry-after'];
+      const retryAfterMs = retryAfterHeader
+        ? parseFloat(retryAfterHeader) * 1000
+        : undefined;
+
+      error.userMessage = 'Too many requests. Please wait a moment and try again.';
+      return retryWithBackoff(original, retryCount, 5, retryAfterMs);
+    }
+
+    // ── 401 Unauthorized — refresh the access token ──────────────────────────
 
     // Only attempt refresh for 401 on non-refresh endpoints and only once
     if (

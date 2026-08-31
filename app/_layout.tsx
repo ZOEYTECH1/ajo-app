@@ -1,4 +1,5 @@
 import '../src/crashLogger'; // must be first — installs global error handler before any other import runs
+import '../src/sentry';     // initialise Sentry (no-op when EXPO_PUBLIC_SENTRY_DSN is unset)
 import { Stack, useSegments, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';

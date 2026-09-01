@@ -980,6 +980,32 @@ export default function ThriftGroupDetail() {
           </View>
         )}
 
+        {/* Subscription status banner (non-org groups only) */}
+        {!group.organization && (group.is_on_trial || !group.is_subscription_active) && (
+          <TouchableOpacity
+            onPress={() => router.push('/thrift/billing' as any)}
+            style={[
+              s.subBanner,
+              {
+                backgroundColor: group.is_on_trial ? colors.primaryTint : colors.errorLight,
+                borderColor:     group.is_on_trial ? colors.primaryBorder : colors.error,
+              },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel={group.is_on_trial ? 'Trial active — tap to upgrade' : 'Subscription expired — tap to renew'}
+          >
+            <Ionicons
+              name={group.is_on_trial ? 'time-outline' : 'warning-outline'}
+              size={16}
+              color={group.is_on_trial ? colors.primary : colors.error}
+            />
+            <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: group.is_on_trial ? colors.primary : colors.error, flex: 1, marginLeft: 8 }}>
+              {group.is_on_trial ? 'Trial active — upgrade to continue' : 'Subscription expired — renew now'}
+            </Text>
+            <Ionicons name="chevron-forward" size={16} color={group.is_on_trial ? colors.primary : colors.error} />
+          </TouchableOpacity>
+        )}
+
         {/* Cycle info card */}
         <View style={[s.cycleCard, { backgroundColor: colors.surface, borderColor: colors.border, ...Shadow.card(colors.black) }]}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -1696,6 +1722,11 @@ const s = StyleSheet.create({
   kebabItem: {
     flexDirection: 'row', alignItems: 'center',
     paddingVertical: 12, paddingHorizontal: 16,
+  },
+  subBanner: {
+    flexDirection: 'row', alignItems: 'center',
+    borderWidth: 1, borderRadius: Radius.md,
+    paddingVertical: 10, paddingHorizontal: 14, marginBottom: 12,
   },
 });
 

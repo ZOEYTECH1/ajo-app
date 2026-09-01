@@ -1,9 +1,10 @@
 import '../src/crashLogger'; // must be first — installs global error handler before any other import runs
 import '../src/sentry';     // initialise Sentry (no-op when EXPO_PUBLIC_SENTRY_DSN is unset)
+import { captureException } from '../src/sentry';
 import { Stack, useSegments, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
-import { Component, useEffect, useRef } from 'react';
+import { Component, type ErrorInfo, useEffect, useRef } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, ScrollView, AppState, type AppStateStatus } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
@@ -29,6 +30,10 @@ class ErrorBoundary extends Component<
   state = { error: null };
   static getDerivedStateFromError(error: Error) {
     return { error };
+  }
+  componentDidCatch(error: Error, info: ErrorInfo): void {
+    // Forward to Sentry so crashes are tracked even when the tree unmounts.
+    captureException(error, { componentStack: info.componentStack ?? '' });
   }
   render() {
     if (this.state.error) {

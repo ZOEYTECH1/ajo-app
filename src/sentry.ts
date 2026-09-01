@@ -21,6 +21,11 @@ try {
 
 const dsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
 
+/** Fields that must never appear in Sentry event payloads. */
+const SENSITIVE_FIELDS = [
+  'password', 'token', 'secret', 'authorization', 'credit_card', 'pin', 'access_token', 'refresh_token',
+] as const;
+
 if (SentryMod && dsn) {
   SentryMod.init({
     dsn,
@@ -31,6 +36,18 @@ if (SentryMod && dsn) {
     enableNative: false,
     // Attach console.warn / console.error breadcrumbs automatically.
     enableAutoPerformanceTracing: false,
+    // Scrub PII / secrets from outbound events before they reach Sentry servers.
+    // Configure Sentry alert rules in: https://sentry.io → [project] → Alerts → Create Alert Rule
+    // Recommended: error rate spike alert (>10 new issues/hour) and p95 latency alert.
+    beforeSend(event: { request?: { data?: unknown }; [key: string]: unknown }) {
+      const data = (event.request as { data?: Record<string, unknown> } | undefined)?.data;
+      if (data && typeof data === 'object') {
+        SENSITIVE_FIELDS.forEach((field) => {
+          if (field in data) data[field] = '[Filtered]';
+        });
+      }
+      return event;
+    },
   });
 }
 

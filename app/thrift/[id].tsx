@@ -99,7 +99,7 @@ function MarkPaymentModal({
       <View style={m.overlay}>
         <View style={[m.sheet, { backgroundColor: colors.surface }]}>
           <View style={m.handle} />
-          <Text style={[m.title, { color: colors.textPrimary }]} accessibilityRole="header">Mark Payment</Text>
+          <Text style={[m.title, { color: colors.textPrimary }]} accessibilityRole="header">Approve Payment</Text>
           <Text style={[m.sub, { color: colors.textSecondary }]}>
             {member.user.first_name} {member.user.last_name} · usual ₦{Number(member.personal_amount).toLocaleString()}/period
           </Text>
@@ -144,9 +144,9 @@ function MarkPaymentModal({
             disabled={mutation.isPending}
             style={[m.btn, { backgroundColor: colors.success, marginTop: 20 }]}
             accessibilityRole="button"
-            accessibilityLabel="Mark as Paid"
+            accessibilityLabel="Approve Payment"
           >
-            <Text style={m.btnText}>{mutation.isPending ? 'Marking…' : 'Mark as Paid'}</Text>
+            <Text style={m.btnText}>{mutation.isPending ? 'Approving…' : 'Approve Payment'}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={onClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]} accessibilityRole="button" accessibilityLabel="Cancel">
             <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm }}>Cancel</Text>
@@ -846,7 +846,7 @@ export default function ThriftGroupDetail() {
     queryFn: () => thriftService.getGroup(groupId),
   });
 
-  const isCollector = group?.collector.id === user?.id;
+  const isCollector = group?.is_collector ?? false;
 
   const {
     data: members,
@@ -1441,10 +1441,10 @@ export default function ThriftGroupDetail() {
                             onPress={() => setMarkTarget(mem)}
                             style={[s.markBtn, { backgroundColor: colors.success }]}
                             accessibilityRole="button"
-                            accessibilityLabel={`Mark ${mem.user.first_name} ${mem.user.last_name} as paid`}
+                            accessibilityLabel={`Approve payment for ${mem.user.first_name} ${mem.user.last_name}`}
                           >
                             <Ionicons name="checkmark" size={14} color="#fff" />
-                            <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: '#fff', marginLeft: 3 }}>Mark Paid</Text>
+                            <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: '#fff', marginLeft: 3 }}>Approve</Text>
                           </TouchableOpacity>
                         </View>
 

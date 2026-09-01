@@ -50,113 +50,6 @@ const pill = StyleSheet.create({
   label: { fontSize: FontSize.xs, fontWeight: '700' },
 });
 
-// ─── Mark Payment Modal ───────────────────────────────────────────────────────
-function MarkPaymentModal({
-  visible, member, groupId, onClose,
-}: { visible: boolean; member: ThriftMember | null; groupId: number; onClose: () => void }) {
-  const { colors } = useTheme();
-  const queryClient = useQueryClient();
-  const [date, setDate]   = useState(new Date().toISOString().slice(0, 10));
-  const [amount, setAmt]  = useState('');
-  const [notes, setNotes] = useState('');
-  const [err, setErr]     = useState('');
-
-  const mutation = useMutation({
-    mutationFn: () => thriftService.markPayment(groupId, {
-      member_id: member!.id,
-      period_date: date,
-      amount: amount.trim(),
-      notes: notes.trim() || undefined,
-    }),
-    onSuccess: () => {
-      feedback('success');
-      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupId] });
-      setAmt(''); setNotes(''); setErr('');
-      onClose();
-    },
-    onError: (e: any) => {
-      feedback('error');
-      const d = e.response?.data;
-      setErr(d?.detail ?? d?.amount?.[0] ?? d?.member_id?.[0] ?? 'Failed to mark payment.');
-    },
-  });
-
-  const handleMark = () => {
-    if (!date.trim()) { setErr('Enter a period date.'); return; }
-    if (!amount.trim() || isNaN(Number(amount)) || Number(amount) <= 0) {
-      setErr('Enter a valid amount.'); return;
-    }
-    setErr('');
-    mutation.mutate();
-  };
-
-  if (!member) return null;
-
-  return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={m.overlay}>
-        <View style={[m.sheet, { backgroundColor: colors.surface }]}>
-          <View style={m.handle} />
-          <Text style={[m.title, { color: colors.textPrimary }]} accessibilityRole="header">Approve Payment</Text>
-          <Text style={[m.sub, { color: colors.textSecondary }]}>
-            {member.user.first_name} {member.user.last_name} · usual ₦{Number(member.personal_amount).toLocaleString()}/period
-          </Text>
-
-          <Text style={[m.lbl, { color: colors.textSecondary }]}>Period date</Text>
-          <TextInput
-            value={date}
-            onChangeText={(v) => { setDate(v); setErr(''); }}
-            placeholder="YYYY-MM-DD"
-            style={[m.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
-            placeholderTextColor={colors.textTertiary}
-            accessibilityLabel="Period date"
-            accessibilityHint="Enter date in YYYY-MM-DD format"
-          />
-
-          <Text style={[m.lbl, { color: colors.textSecondary, marginTop: 14 }]}>Amount received (₦)</Text>
-          <TextInput
-            value={amount}
-            onChangeText={(v) => { setAmt(v.replace(/[^0-9.]/g, '')); setErr(''); }}
-            placeholder={`e.g. ${Number(member.personal_amount).toLocaleString()}`}
-            keyboardType="decimal-pad"
-            style={[m.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
-            placeholderTextColor={colors.textTertiary}
-            accessibilityLabel="Amount received"
-          />
-
-          <Text style={[m.lbl, { color: colors.textSecondary, marginTop: 14 }]}>Notes (optional)</Text>
-          <TextInput
-            value={notes}
-            onChangeText={setNotes}
-            placeholder="Any note…"
-            multiline
-            style={[m.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border, height: 70 }]}
-            placeholderTextColor={colors.textTertiary}
-            accessibilityLabel="Notes"
-          />
-
-          {!!err && <Text style={{ color: colors.error, fontSize: FontSize.xs, marginTop: 8 }}>{err}</Text>}
-
-          <TouchableOpacity
-            onPress={handleMark}
-            disabled={mutation.isPending}
-            style={[m.btn, { backgroundColor: colors.success, marginTop: 20 }]}
-            accessibilityRole="button"
-            accessibilityLabel="Approve Payment"
-          >
-            <Text style={m.btnText}>{mutation.isPending ? 'Approving…' : 'Approve Payment'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]} accessibilityRole="button" accessibilityLabel="Cancel">
-            <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm }}>Cancel</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
 // ─── Flag Amount Modal ────────────────────────────────────────────────────────
 function FlagAmountModal({
   visible, member, groupId, onClose,
@@ -830,7 +723,8 @@ export default function ThriftGroupDetail() {
   const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab]         = useState<'pending' | 'payments'>('pending');
-  const [markTarget, setMarkTarget]       = useState<ThriftMember | null>(null);
+  const [approvingMemberId, setApprovingMemberId] = useState<number | null>(null);
+  const [approveAmount, setApproveAmount]         = useState('');
   const [flagTarget, setFlagTarget]       = useState<ThriftMember | null>(null);
   const [correctOpen, setCorrectOpen]     = useState(false);
   const [reportOpen, setReportOpen]       = useState(false);
@@ -885,6 +779,24 @@ export default function ThriftGroupDetail() {
     mutationFn: (paymentId: number) => thriftService.unmarkPayment(groupId, paymentId),
     onSuccess: () => {
       feedback('success');
+      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupId] });
+    },
+    onError: () => feedback('error'),
+  });
+
+  const quickApproveMutation = useMutation({
+    mutationFn: ({ memberId, amount }: { memberId: number; amount: string }) =>
+      thriftService.markPayment(groupId, {
+        member_id: memberId,
+        period_date: new Date().toISOString().slice(0, 10),
+        amount,
+      }),
+    onSuccess: () => {
+      feedback('success');
+      setApprovingMemberId(null);
+      setApproveAmount('');
       queryClient.invalidateQueries({ queryKey: ['thrift-group', groupId] });
       queryClient.invalidateQueries({ queryKey: ['thrift-members', groupId] });
       queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupId] });
@@ -1437,15 +1349,50 @@ export default function ThriftGroupDetail() {
                               Total saved: ₦{Number(mem.total_saved).toLocaleString()}
                             </Text>
                           </View>
-                          <TouchableOpacity
-                            onPress={() => setMarkTarget(mem)}
-                            style={[s.markBtn, { backgroundColor: colors.success }]}
-                            accessibilityRole="button"
-                            accessibilityLabel={`Approve payment for ${mem.user.first_name} ${mem.user.last_name}`}
-                          >
-                            <Ionicons name="checkmark" size={14} color="#fff" />
-                            <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: '#fff', marginLeft: 3 }}>Approve</Text>
-                          </TouchableOpacity>
+                          {approvingMemberId === mem.id ? (
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                              <TextInput
+                                value={approveAmount}
+                                onChangeText={setApproveAmount}
+                                keyboardType="decimal-pad"
+                                placeholder="Amount"
+                                placeholderTextColor={colors.textTertiary}
+                                style={{
+                                  width: 90, fontSize: FontSize.xs, borderWidth: 1,
+                                  borderColor: colors.border, borderRadius: 8,
+                                  paddingHorizontal: 8, paddingVertical: 4,
+                                  backgroundColor: colors.background, color: colors.textPrimary,
+                                }}
+                                autoFocus
+                              />
+                              <TouchableOpacity
+                                onPress={() => {
+                                  if (!approveAmount || Number(approveAmount) <= 0) return;
+                                  quickApproveMutation.mutate({ memberId: mem.id, amount: approveAmount });
+                                }}
+                                disabled={quickApproveMutation.isPending}
+                                style={[s.markBtn, { backgroundColor: colors.success }]}
+                                accessibilityRole="button"
+                              >
+                                <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: '#fff' }}>
+                                  {quickApproveMutation.isPending ? '…' : 'OK'}
+                                </Text>
+                              </TouchableOpacity>
+                              <TouchableOpacity onPress={() => { setApprovingMemberId(null); setApproveAmount(''); }}>
+                                <Ionicons name="close" size={16} color={colors.textSecondary} />
+                              </TouchableOpacity>
+                            </View>
+                          ) : (
+                            <TouchableOpacity
+                              onPress={() => { setApprovingMemberId(mem.id); setApproveAmount(String(mem.personal_amount)); }}
+                              style={[s.markBtn, { backgroundColor: colors.success }]}
+                              accessibilityRole="button"
+                              accessibilityLabel={`Approve payment for ${mem.user.first_name} ${mem.user.last_name}`}
+                            >
+                              <Ionicons name="checkmark" size={14} color="#fff" />
+                              <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: '#fff', marginLeft: 3 }}>Approve</Text>
+                            </TouchableOpacity>
+                          )}
                         </View>
 
                         {memberPayments.slice(0, 3).map((p) => {
@@ -1649,12 +1596,6 @@ export default function ThriftGroupDetail() {
       </ScrollView>
 
       {/* Modals */}
-      <MarkPaymentModal
-        visible={!!markTarget}
-        member={markTarget}
-        groupId={groupId}
-        onClose={() => setMarkTarget(null)}
-      />
       <FlagAmountModal
         visible={!!flagTarget}
         member={flagTarget}

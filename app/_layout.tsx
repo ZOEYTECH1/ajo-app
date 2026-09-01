@@ -53,7 +53,17 @@ class ErrorBoundary extends Component<
 
 SplashScreen.preventAutoHideAsync();
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      // 5 minutes — stable data (profiles, group details, rate tables) should
+      // not re-fetch on every navigation; individual queries that need fresher
+      // data (notifications) override this with their own refetchInterval/staleTime.
+      staleTime: 5 * 60 * 1000,
+    },
+  },
+});
 
 const PUBLIC_ROUTES = new Set(['index', 'onboarding', 'login', 'register', 'otp', 'forgot']);
 

@@ -21,6 +21,7 @@ import {
 import { FontSize, Radius, Shadow } from './theme';
 import { useTheme } from './hooks/useTheme';
 import { AjoLoader } from './AjoLoader';
+import { cloudinaryUrl } from './lib/cloudinary';
 
 // ─── Haptic Feedback Utility ───────────────────────────────────────────────
 export const feedback = (type: 'light' | 'medium' | 'heavy' | 'success' | 'error' | 'warning' = 'light') => {
@@ -363,7 +364,7 @@ export const Avatar: React.FC<AvatarProps> = ({ initials, size = 48, color, imag
   if (imageUri) {
     return (
       <Image
-        source={{ uri: imageUri }}
+        source={{ uri: cloudinaryUrl(imageUri, size * 2, size * 2) }}
         style={{ width: size, height: size, borderRadius: size / 2, borderWidth: 2, borderColor }}
       />
     );

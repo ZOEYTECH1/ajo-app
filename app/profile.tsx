@@ -11,6 +11,7 @@ import { useTheme } from '../src/hooks/useTheme';
 import { useAuthStore } from '../src/store/useAppStore';
 import { authService } from '../src/services/authService';
 import { userService } from '../src/services/userService';
+import { cloudinaryUrl } from '../src/lib/cloudinary';
 import { groupService } from '../src/services/groupService';
 import { thriftService } from '../src/services/thriftService';
 import { FontSize, Radius, Shadow } from '../src/theme';
@@ -263,7 +264,7 @@ export default function ProfileRoute() {
         {/* Avatar */}
         <TouchableOpacity onPress={pickAndUpload} style={s.avatarWrap} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel="Change profile photo" accessibilityHint="Opens photo picker">
           {user?.profile_photo ? (
-            <Image source={{ uri: user.profile_photo }} style={[s.avatar, { borderColor: colors.primaryBorder }]} accessible={true} accessibilityRole="image" accessibilityLabel={`Profile photo of ${user?.first_name ?? 'user'} ${user?.last_name ?? ''}`.trim()} />
+            <Image source={{ uri: cloudinaryUrl(user.profile_photo, 240, 240) }} style={[s.avatar, { borderColor: colors.primaryBorder }]} accessible={true} accessibilityRole="image" accessibilityLabel={`Profile photo of ${user?.first_name ?? 'user'} ${user?.last_name ?? ''}`.trim()} />
           ) : (
             <View style={[s.avatarPlaceholder, { backgroundColor: colors.primaryTint, borderColor: colors.primaryBorder }]}>
               <Ionicons name="person" size={44} color={colors.primary} />

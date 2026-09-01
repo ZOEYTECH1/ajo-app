@@ -11,6 +11,7 @@ import { useAuthStore } from '../../../src/store/useAppStore';
 import { groupService, type Membership, type RemovalProposal } from '../../../src/services/groupService';
 import { FontSize, Radius, Shadow } from '../../../src/theme';
 import { Pill, Skeleton, LoadingOverlay, feedback } from '../../../src/components';
+import { cloudinaryUrl } from '../../../src/lib/cloudinary';
 
 // ─── Confirm modal ────────────────────────────────────────────────────────────
 const ConfirmModal: React.FC<{
@@ -76,7 +77,7 @@ const ProposalCard: React.FC<{
     <View style={[s.proposalCard, { backgroundColor: colors.surface, borderColor: colors.warningLight, ...Shadow.soft(colors.black) }]}>
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
         {proposal.target_photo ? (
-          <Image source={{ uri: proposal.target_photo }} style={s.proposalAvatar} />
+          <Image source={{ uri: cloudinaryUrl(proposal.target_photo, 96, 96) }} style={s.proposalAvatar} />
         ) : (
           <View style={[s.proposalAvatar, { backgroundColor: colors.primaryTint, alignItems: 'center', justifyContent: 'center' }]}>
             <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.primary }}>

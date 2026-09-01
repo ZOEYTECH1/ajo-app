@@ -17,6 +17,7 @@ import {
   type InventoryMovement, type InventoryCustomer, type CreateSaleItemPayload,
 } from '../../../src/services/inventoryService';
 import { formatStock, stockColor } from '../../../src/utils/inventoryHelpers';
+import { cloudinaryUrl } from '../../../src/lib/cloudinary';
 
 const MOVE_DISPLAY: Record<string, { label: string; color: string; icon: string }> = {
   in:         { label: 'Received goods',  color: '#2E7D32', icon: 'arrow-down-circle-outline' },
@@ -512,7 +513,7 @@ export default function ProductDetailScreen() {
           <View style={[s.infoCard, { backgroundColor: '#FFF3E0' }]}>
             {/* Product image */}
             {product.image_url && (
-              <Image source={{ uri: product.image_url }} style={s.productImg} accessible={true} accessibilityRole="image" accessibilityLabel={`${product.name} product image`} />
+              <Image source={{ uri: cloudinaryUrl(product.image_url, 400, 400) }} style={s.productImg} accessible={true} accessibilityRole="image" accessibilityLabel={`${product.name} product image`} />
             )}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <View>

@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from './hooks/useTheme';
 import { usePinStore } from './store/usePinStore';
 import { useAuthStore } from './store/useAppStore';
+import { authService } from './services/authService';
 import { feedback } from './components';
 import { FontSize } from './theme';
 
@@ -107,7 +108,7 @@ export function AppLockScreen({ mode }: Props) {
 
   const handleForgot = async () => {
     await SecureStore.deleteItemAsync(PIN_KEY);
-    logout();
+    authService.logout();
   };
 
   const title =

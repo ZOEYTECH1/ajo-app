@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../src/hooks/useTheme';
 import { useAuthStore, useModuleStore, type ModuleKey } from '../src/store/useAppStore';
+import { authService } from '../src/services/authService';
 import { groupService, type Group } from '../src/services/groupService';
 import { thriftService, type ThriftGroup } from '../src/services/thriftService';
 import { getCategories, getBusinesses, type InventoryCategory } from '../src/services/inventoryService';
@@ -325,7 +326,7 @@ export default function HomeRoute() {
     setSelectedModules(updated, primary);
   }, [ajoLoading, thriftLoading, bizLoading, groups, thriftGroups, businesses, selectedModules]);
 
-  const handleLogout = () => { resetModules(); logout(); router.replace('/login'); };
+  const handleLogout = () => { resetModules(); authService.logout(); router.replace('/login'); };
 
   const requirePhoto = (action: () => void) => {
     if (!user?.profile_photo) {

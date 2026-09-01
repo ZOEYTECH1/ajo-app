@@ -170,10 +170,17 @@ export const authService = {
   },
 
   /**
-   * Logs the current user out by clearing the auth store.
-   * Tokens are removed from secure storage by the store's logout action.
+   * Logs the current user out.
+   * Clears local tokens immediately, then fire-and-forgets a backend call to
+   * blacklist the refresh token so it cannot be reused on other devices.
    */
-  logout: () => {
+  logout: async (): Promise<void> => {
+    const refreshToken = useAuthStore.getState().refreshToken;
+    // Clear local state first so the UI reflects logout immediately.
     useAuthStore.getState().logout();
+    // Best-effort: revoke the refresh token on the server.
+    if (refreshToken) {
+      api.post('/api/auth/logout/', { refresh: refreshToken }).catch(() => {});
+    }
   },
 };

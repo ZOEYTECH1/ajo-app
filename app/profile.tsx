@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../src/hooks/useTheme';
 import { useAuthStore } from '../src/store/useAppStore';
+import { authService } from '../src/services/authService';
 import { userService } from '../src/services/userService';
 import { groupService } from '../src/services/groupService';
 import { thriftService } from '../src/services/thriftService';
@@ -169,7 +170,7 @@ export default function ProfileRoute() {
   const deleteAccountMutation = useMutation({
     mutationFn: userService.deleteAccount,
     onSuccess: () => {
-      logout();
+      authService.logout();
       queryClient.clear();
       router.replace('/login');
     },
@@ -210,7 +211,7 @@ export default function ProfileRoute() {
       destructive: false,
       onConfirm: () => {
         setConfirmModal((p) => ({ ...p, visible: false }));
-        logout();
+        authService.logout();
         queryClient.clear();
         router.replace('/login');
       },

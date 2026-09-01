@@ -65,6 +65,7 @@ export interface ThriftGroup {
   active_cycle: ThriftCycle | null;
   created_at: string;
   is_org_admin?: boolean;
+  is_collector?: boolean;
 }
 
 export interface ThriftMember {

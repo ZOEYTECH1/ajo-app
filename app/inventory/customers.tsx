@@ -13,6 +13,7 @@ import {
   getCustomers, createCustomer, updateCustomer, deleteCustomer, adjustCredit,
   type InventoryCustomer,
 } from '../../src/services/inventoryService';
+import { useDebounce } from '../../src/hooks/useDebounce';
 import ErrorBanner from '../../src/components/ErrorBanner';
 
 const INV = '#E65100';
@@ -42,6 +43,7 @@ export default function CustomersScreen() {
   const [creditNote, setCreditNote]       = useState('');
 
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search);
 
   const openAdd = () => {
     setEditing(null);
@@ -110,8 +112,8 @@ export default function CustomersScreen() {
   };
 
   const filtered = (customers ?? []).filter(c =>
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.phone.includes(search),
+    c.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+    c.phone.includes(debouncedSearch),
   );
 
   const totalOwed = (customers ?? []).reduce((s, c) => s + parseFloat(c.credit_balance || '0'), 0);
@@ -173,9 +175,9 @@ export default function CustomersScreen() {
             <View style={{ alignItems: 'center', paddingVertical: 48 }}>
               <Ionicons name="people-outline" size={56} color={colors.textTertiary} />
               <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginTop: 14 }}>
-                {search ? 'No results' : 'No customers yet'}
+                {debouncedSearch ? 'No results' : 'No customers yet'}
               </Text>
-              {!search && (
+              {!debouncedSearch && (
                 <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 6, textAlign: 'center' }}>
                   Add customers to link them to sales and track credit balances.
                 </Text>

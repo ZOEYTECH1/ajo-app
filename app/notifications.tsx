@@ -141,7 +141,7 @@ export default function NotificationsRoute() {
     // Ajo groups
     if (d.group_id)       { router.push(`/group/${d.group_id}` as any); return; }
     // Thrift groups
-    if (d.thrift_group_id) { router.push(`/thrift/${d.thrift_group_id}` as any); return; }
+    if (d.group_uuid) { router.push(`/thrift/${d.group_uuid}` as any); return; }
     // Inventory — product-level (low stock, out of stock, expiry)
     if (d.category_id && d.product_id) {
       router.push(`/inventory/${d.category_id}/${d.product_id}` as any);
@@ -277,3 +277,4 @@ const s = StyleSheet.create({
     paddingHorizontal: 40,
   },
 });
+

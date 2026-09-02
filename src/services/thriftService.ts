@@ -1,7 +1,7 @@
-import api from './api';
+﻿import api from './api';
 import type { AjoUser } from '../store/useAppStore';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export type ThriftFrequency      = 'daily' | 'weekly' | 'monthly';
 export type ThriftMemberStatus   = 'pending' | 'approved' | 'rejected' | 'amount_pending';
@@ -49,6 +49,7 @@ export interface ThriftCycle {
 
 export interface ThriftGroup {
   id: number;
+  uuid: string;
   name: string;
   description: string;
   frequency: ThriftFrequency;
@@ -132,7 +133,7 @@ export interface CollectorReport {
 export interface QueueMember {
   id: number;
   user: AjoUser;
-  group_id: number;
+  group_uuid: string;
   group_name: string;
   personal_amount: string;
   status: ThriftMemberStatus;
@@ -144,7 +145,7 @@ export interface QueuePayment {
   id: number;
   member_id: number;
   member_name: string;
-  group_id: number;
+  group_uuid: string;
   group_name: string;
   amount: string;
   period_date: string;
@@ -164,7 +165,7 @@ export interface ThriftHistoryPayment {
   id: number;
   member_id: number;
   member_name: string;
-  group_id: number;
+  group_uuid: string;
   group_name: string;
   amount: string;
   period_date: string;
@@ -190,16 +191,16 @@ export interface ThriftHistoryPaginated {
   results: ThriftHistoryPayment[];
 }
 
-// ─── Service ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Service â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export const thriftService = {
-  // ── Collector queue ──────────────────────────────────────────────────────────
+  // â”€â”€ Collector queue â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   getCollectorQueue: async (): Promise<CollectorQueue> => {
     const { data } = await api.get('/api/thrift/collector-queue/');
     return data;
   },
 
-  // ── Cross-group payment history ──────────────────────────────────────────────
+  // â”€â”€ Cross-group payment history â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   getMyPaymentHistory: async (): Promise<ThriftPaymentHistory> => {
     const { data } = await api.get('/api/thrift/my-payment-history/');
     return data;
@@ -214,14 +215,14 @@ export const thriftService = {
     return data;
   },
 
-  // ── Groups ──────────────────────────────────────────────────────────────────
+  // â”€â”€ Groups â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   getGroups: async (): Promise<ThriftGroup[]> => {
     const { data } = await api.get('/api/thrift/');
     return data;
   },
 
-  getGroup: async (id: number): Promise<ThriftGroup> => {
-    const { data } = await api.get(`/api/thrift/${id}/`);
+  getGroup: async (uuid: string): Promise<ThriftGroup> => {
+    const { data } = await api.get(`/api/thrift/${uuid}/`);
     return data;
   },
 
@@ -239,15 +240,15 @@ export const thriftService = {
     return data;
   },
 
-  regenerateInvite: async (id: number): Promise<{ invite_code: string }> => {
-    const { data } = await api.post(`/api/thrift/${id}/invite/regenerate/`);
+  regenerateInvite: async (uuid: string): Promise<{ invite_code: string }> => {
+    const { data } = await api.post(`/api/thrift/${uuid}/invite/regenerate/`);
     return data;
   },
 
-  // ── Members ─────────────────────────────────────────────────────────────────
-  getMembers: async (groupId: number, statusFilter?: string): Promise<ThriftMember[]> => {
+  // â”€â”€ Members â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  getMembers: async (groupUuid: string, statusFilter?: string): Promise<ThriftMember[]> => {
     const params = statusFilter ? { status: statusFilter } : {};
-    const { data } = await api.get(`/api/thrift/${groupId}/members/`, { params });
+    const { data } = await api.get(`/api/thrift/${groupUuid}/members/`, { params });
     return data;
   },
 
@@ -256,88 +257,87 @@ export const thriftService = {
     return data;
   },
 
-  reviewMember: async (
-    groupId: number,
+  reviewMember: async (groupUuid: string,
     memberId: number,
     payload: { action: 'approve' | 'reject' | 'flag_amount'; reason?: string },
   ): Promise<ThriftMember> => {
-    const { data } = await api.patch(`/api/thrift/${groupId}/members/${memberId}/`, payload);
+    const { data } = await api.patch(`/api/thrift/${groupUuid}/members/${memberId}/`, payload);
     return data;
   },
 
-  updateMyAmount: async (groupId: number, memberId: number, personalAmount: string): Promise<ThriftMember> => {
-    const { data } = await api.patch(`/api/thrift/${groupId}/members/${memberId}/`, { personal_amount: personalAmount });
+  updateMyAmount: async (groupUuid: string, memberId: number, personalAmount: string): Promise<ThriftMember> => {
+    const { data } = await api.patch(`/api/thrift/${groupUuid}/members/${memberId}/`, { personal_amount: personalAmount });
     return data;
   },
 
-  toggleMemberKyc: async (groupId: number, memberId: number, isKycVerified: boolean): Promise<AjoUser> => {
-    const { data } = await api.patch<AjoUser>(`/api/thrift/${groupId}/members/${memberId}/kyc/`, { is_kyc_verified: isKycVerified });
+  toggleMemberKyc: async (groupUuid: string, memberId: number, isKycVerified: boolean): Promise<AjoUser> => {
+    const { data } = await api.patch<AjoUser>(`/api/thrift/${groupUuid}/members/${memberId}/kyc/`, { is_kyc_verified: isKycVerified });
     return data;
   },
 
-  // ── Payments ────────────────────────────────────────────────────────────────
-  getPayments: async (groupId: number, memberId?: number): Promise<ThriftPayment[]> => {
+  // â”€â”€ Payments â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  getPayments: async (groupUuid: string, memberId?: number): Promise<ThriftPayment[]> => {
     const params = memberId ? { member_id: memberId } : {};
-    const { data } = await api.get(`/api/thrift/${groupId}/payments/`, { params });
+    const { data } = await api.get(`/api/thrift/${groupUuid}/payments/`, { params });
     return data;
   },
 
-  markPayment: async (groupId: number, payload: {
+  markPayment: async (groupUuid: string, payload: {
     member_id: number;
     period_date: string;
     amount: string;
     notes?: string;
   }): Promise<ThriftPayment> => {
-    const { data } = await api.post(`/api/thrift/${groupId}/payments/`, payload);
+    const { data } = await api.post(`/api/thrift/${groupUuid}/payments/`, payload);
     return data;
   },
 
-  unmarkPayment: async (groupId: number, paymentId: number): Promise<void> => {
-    await api.delete(`/api/thrift/${groupId}/payments/${paymentId}/`);
+  unmarkPayment: async (groupUuid: string, paymentId: number): Promise<void> => {
+    await api.delete(`/api/thrift/${groupUuid}/payments/${paymentId}/`);
   },
 
-  confirmPayment: async (groupId: number, paymentId: number): Promise<ThriftPayment> => {
-    const { data } = await api.post(`/api/thrift/${groupId}/payments/${paymentId}/confirm/`);
+  confirmPayment: async (groupUuid: string, paymentId: number): Promise<ThriftPayment> => {
+    const { data } = await api.post(`/api/thrift/${groupUuid}/payments/${paymentId}/confirm/`);
     return data;
   },
 
-  disputePayment: async (groupId: number, paymentId: number, reason: string, audioUri?: string): Promise<ThriftPayment> => {
+  disputePayment: async (groupUuid: string, paymentId: number, reason: string, audioUri?: string): Promise<ThriftPayment> => {
     if (audioUri) {
       const form = new FormData();
       if (reason) form.append('reason', reason);
       form.append('dispute_audio', { uri: audioUri, name: 'dispute.m4a', type: 'audio/m4a' } as any);
-      const { data } = await api.post(`/api/thrift/${groupId}/payments/${paymentId}/dispute/`, form, {
+      const { data } = await api.post(`/api/thrift/${groupUuid}/payments/${paymentId}/dispute/`, form, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       return data;
     }
-    const { data } = await api.post(`/api/thrift/${groupId}/payments/${paymentId}/dispute/`, { reason });
+    const { data } = await api.post(`/api/thrift/${groupUuid}/payments/${paymentId}/dispute/`, { reason });
     return data;
   },
 
-  // ── Cycles ──────────────────────────────────────────────────────────────────
-  getCycles: async (groupId: number): Promise<ThriftCycle[]> => {
-    const { data } = await api.get(`/api/thrift/${groupId}/cycles/`);
+  // â”€â”€ Cycles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  getCycles: async (groupUuid: string): Promise<ThriftCycle[]> => {
+    const { data } = await api.get(`/api/thrift/${groupUuid}/cycles/`);
     return data;
   },
 
-  endCycle: async (groupId: number): Promise<ThriftCycle> => {
-    const { data } = await api.post(`/api/thrift/${groupId}/cycles/end/`);
+  endCycle: async (groupUuid: string): Promise<ThriftCycle> => {
+    const { data } = await api.post(`/api/thrift/${groupUuid}/cycles/end/`);
     return data;
   },
 
-  restartCycle: async (groupId: number, payload: { start_date?: string; end_date?: string | null }): Promise<ThriftCycle> => {
-    const { data } = await api.post(`/api/thrift/${groupId}/cycles/restart/`, payload);
+  restartCycle: async (groupUuid: string, payload: { start_date?: string; end_date?: string | null }): Promise<ThriftCycle> => {
+    const { data } = await api.post(`/api/thrift/${groupUuid}/cycles/restart/`, payload);
     return data;
   },
 
-  // ── Reports ─────────────────────────────────────────────────────────────────
-  reportCollector: async (groupId: number, reason: string): Promise<CollectorReport> => {
-    const { data } = await api.post(`/api/thrift/${groupId}/report/`, { reason });
+  // â”€â”€ Reports â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  reportCollector: async (groupUuid: string, reason: string): Promise<CollectorReport> => {
+    const { data } = await api.post(`/api/thrift/${groupUuid}/report/`, { reason });
     return data;
   },
 
-  // ── Organisations ────────────────────────────────────────────────────────────
+  // â”€â”€ Organisations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   getPartnerOrgs: async (): Promise<ThriftOrganization[]> => {
     const { data } = await api.get('/api/thrift/orgs/partners/');
     return data;
@@ -429,3 +429,6 @@ export const thriftService = {
     return data;
   },
 };
+
+
+

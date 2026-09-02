@@ -52,19 +52,19 @@ const pill = StyleSheet.create({
 
 // ─── Flag Amount Modal ────────────────────────────────────────────────────────
 function FlagAmountModal({
-  visible, member, groupId, onClose,
-}: { visible: boolean; member: ThriftMember | null; groupId: number; onClose: () => void }) {
+  visible, member, groupUuid, onClose,
+}: { visible: boolean; member: ThriftMember | null; groupUuid: string; onClose: () => void }) {
   const { colors } = useTheme();
   const queryClient = useQueryClient();
   const [reason, setReason] = useState('');
 
   const mutation = useMutation({
-    mutationFn: () => thriftService.reviewMember(groupId, member!.id, { action: 'flag_amount', reason: reason.trim() || undefined }),
+    mutationFn: () => thriftService.reviewMember(groupUuid, member!.id, { action: 'flag_amount', reason: reason.trim() || undefined }),
     onSuccess: () => {
       feedback('success');
-      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupUuid] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupUuid] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupUuid] });
       setReason('');
       onClose();
     },
@@ -112,20 +112,20 @@ function FlagAmountModal({
 
 // ─── Correct Amount Modal ─────────────────────────────────────────────────────
 function CorrectAmountModal({
-  visible, member, groupId, onClose,
-}: { visible: boolean; member: ThriftMember | null; groupId: number; onClose: () => void }) {
+  visible, member, groupUuid, onClose,
+}: { visible: boolean; member: ThriftMember | null; groupUuid: string; onClose: () => void }) {
   const { colors } = useTheme();
   const queryClient = useQueryClient();
   const [amount, setAmount] = useState('');
   const [err, setErr]       = useState('');
 
   const mutation = useMutation({
-    mutationFn: () => thriftService.updateMyAmount(groupId, member!.id, amount.trim()),
+    mutationFn: () => thriftService.updateMyAmount(groupUuid, member!.id, amount.trim()),
     onSuccess: () => {
       feedback('success');
-      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupUuid] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupUuid] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupUuid] });
       setAmount(''); setErr('');
       onClose();
     },
@@ -183,8 +183,8 @@ function CorrectAmountModal({
 
 // ─── Dispute Payment Modal ────────────────────────────────────────────────────
 function DisputePaymentModal({
-  visible, payment, groupId, onClose,
-}: { visible: boolean; payment: ThriftPayment | null; groupId: number; onClose: () => void }) {
+  visible, payment, groupUuid, onClose,
+}: { visible: boolean; payment: ThriftPayment | null; groupUuid: string; onClose: () => void }) {
   const { colors } = useTheme();
   const queryClient = useQueryClient();
   const [reason, setReason]         = useState('');
@@ -274,10 +274,10 @@ function DisputePaymentModal({
   };
 
   const mutation = useMutation({
-    mutationFn: () => thriftService.disputePayment(groupId, payment!.id, reason.trim(), audioUri ?? undefined),
+    mutationFn: () => thriftService.disputePayment(groupUuid, payment!.id, reason.trim(), audioUri ?? undefined),
     onSuccess: () => {
       feedback('success');
-      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupUuid] });
       setReason(''); setErr(''); setAudioUri(null); setRecSeconds(0);
       onClose();
     },
@@ -393,14 +393,14 @@ function DisputePaymentModal({
 
 // ─── Report Collector Modal ───────────────────────────────────────────────────
 function ReportCollectorModal({
-  visible, groupId, onClose,
-}: { visible: boolean; groupId: number; onClose: () => void }) {
+  visible, groupUuid, onClose,
+}: { visible: boolean; groupUuid: string; onClose: () => void }) {
   const { colors } = useTheme();
   const [reason, setReason] = useState('');
   const [err, setErr]       = useState('');
 
   const mutation = useMutation({
-    mutationFn: () => thriftService.reportCollector(groupId, reason.trim()),
+    mutationFn: () => thriftService.reportCollector(groupUuid, reason.trim()),
     onSuccess: () => {
       feedback('success');
       setReason(''); setErr('');
@@ -456,18 +456,18 @@ function ReportCollectorModal({
 
 // ─── End Cycle Modal ──────────────────────────────────────────────────────────
 function EndCycleModal({
-  visible, groupId, onClose,
-}: { visible: boolean; groupId: number; onClose: () => void }) {
+  visible, groupUuid, onClose,
+}: { visible: boolean; groupUuid: string; onClose: () => void }) {
   const { colors } = useTheme();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: () => thriftService.endCycle(groupId),
+    mutationFn: () => thriftService.endCycle(groupUuid),
     onSuccess: () => {
       feedback('success');
-      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupUuid] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupUuid] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupUuid] });
       onClose();
     },
     onError: () => feedback('error'),
@@ -505,8 +505,8 @@ function EndCycleModal({
 
 // ─── Restart Cycle Modal ──────────────────────────────────────────────────────
 function RestartCycleModal({
-  visible, groupId, isFixed, onClose,
-}: { visible: boolean; groupId: number; isFixed: boolean; onClose: () => void }) {
+  visible, groupUuid, isFixed, onClose,
+}: { visible: boolean; groupUuid: string; isFixed: boolean; onClose: () => void }) {
   const { colors } = useTheme();
   const queryClient = useQueryClient();
   const [startDate, setStartDate] = useState('');
@@ -514,15 +514,15 @@ function RestartCycleModal({
   const [err, setErr]             = useState('');
 
   const mutation = useMutation({
-    mutationFn: () => thriftService.restartCycle(groupId, {
+    mutationFn: () => thriftService.restartCycle(groupUuid, {
       start_date: startDate.trim() || undefined,
       end_date: isFixed ? (endDate.trim() || null) : undefined,
     }),
     onSuccess: () => {
       feedback('success');
-      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupUuid] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupUuid] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupUuid] });
       setStartDate(''); setEndDate(''); setErr('');
       onClose();
     },
@@ -716,7 +716,7 @@ function DisputeDetailSheet({
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function ThriftGroupDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const groupId = Number(id);
+  const groupUuid = id as string;
   const { colors, isDark } = useTheme();
   const { user } = useAuthStore();
   const router = useRouter();
@@ -736,8 +736,8 @@ export default function ThriftGroupDetail() {
   const [expandedMembers, setExpandedMembers]       = useState<Set<number>>(new Set());
 
   const { data: group, isLoading: groupLoading } = useQuery({
-    queryKey: ['thrift-group', groupId],
-    queryFn: () => thriftService.getGroup(groupId),
+    queryKey: ['thrift-group', groupUuid],
+    queryFn: () => thriftService.getGroup(groupUuid),
   });
 
   const isCollector = group?.is_collector ?? false;
@@ -748,8 +748,8 @@ export default function ThriftGroupDetail() {
     refetch: refetchMembers,
     isRefetching,
   } = useQuery({
-    queryKey: ['thrift-members', groupId],
-    queryFn: () => thriftService.getMembers(groupId),
+    queryKey: ['thrift-members', groupUuid],
+    queryFn: () => thriftService.getMembers(groupUuid),
     enabled: !!group,
   });
 
@@ -758,37 +758,37 @@ export default function ThriftGroupDetail() {
     isLoading: paymentsLoading,
     refetch: refetchPayments,
   } = useQuery({
-    queryKey: ['thrift-payments', groupId],
-    queryFn: () => thriftService.getPayments(groupId),
+    queryKey: ['thrift-payments', groupUuid],
+    queryFn: () => thriftService.getPayments(groupUuid),
     enabled: !!group,
   });
 
   const reviewMutation = useMutation({
     mutationFn: ({ memberId, action }: { memberId: number; action: 'approve' | 'reject' }) =>
-      thriftService.reviewMember(groupId, memberId, { action }),
+      thriftService.reviewMember(groupUuid, memberId, { action }),
     onSuccess: () => {
       feedback('success');
-      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupUuid] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupUuid] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupUuid] });
     },
     onError: () => feedback('error'),
   });
 
   const unmarkMutation = useMutation({
-    mutationFn: (paymentId: number) => thriftService.unmarkPayment(groupId, paymentId),
+    mutationFn: (paymentId: number) => thriftService.unmarkPayment(groupUuid, paymentId),
     onSuccess: () => {
       feedback('success');
-      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupUuid] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupUuid] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupUuid] });
     },
     onError: () => feedback('error'),
   });
 
   const quickApproveMutation = useMutation({
     mutationFn: ({ memberId, amount }: { memberId: number; amount: string }) =>
-      thriftService.markPayment(groupId, {
+      thriftService.markPayment(groupUuid, {
         member_id: memberId,
         period_date: new Date().toISOString().slice(0, 10),
         amount,
@@ -797,28 +797,28 @@ export default function ThriftGroupDetail() {
       feedback('success');
       setApprovingMemberId(null);
       setApproveAmount('');
-      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupUuid] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupUuid] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupUuid] });
     },
     onError: () => feedback('error'),
   });
 
   const confirmMutation = useMutation({
-    mutationFn: (paymentId: number) => thriftService.confirmPayment(groupId, paymentId),
+    mutationFn: (paymentId: number) => thriftService.confirmPayment(groupUuid, paymentId),
     onSuccess: () => {
       feedback('success');
-      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupUuid] });
     },
     onError: () => feedback('error'),
   });
 
   const kycMutation = useMutation({
     mutationFn: ({ memberId, value }: { memberId: number; value: boolean }) =>
-      thriftService.toggleMemberKyc(groupId, memberId, value),
+      thriftService.toggleMemberKyc(groupUuid, memberId, value),
     onSuccess: () => {
       feedback('success');
-      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-members', groupUuid] });
     },
     onError: () => feedback('error'),
   });
@@ -1625,24 +1625,24 @@ export default function ThriftGroupDetail() {
       <FlagAmountModal
         visible={!!flagTarget}
         member={flagTarget}
-        groupId={groupId}
+        groupUuid={groupUuid}
         onClose={() => setFlagTarget(null)}
       />
       <CorrectAmountModal
         visible={correctOpen}
         member={ownMember}
-        groupId={groupId}
+        groupUuid={groupUuid}
         onClose={() => setCorrectOpen(false)}
       />
       <ReportCollectorModal
         visible={reportOpen}
-        groupId={groupId}
+        groupUuid={groupUuid}
         onClose={() => setReportOpen(false)}
       />
       <DisputePaymentModal
         visible={!!disputeTarget}
         payment={disputeTarget}
-        groupId={groupId}
+        groupUuid={groupUuid}
         onClose={() => setDisputeTarget(null)}
       />
       {viewDisputeTarget && (
@@ -1653,12 +1653,12 @@ export default function ThriftGroupDetail() {
       )}
       <EndCycleModal
         visible={endCycleOpen}
-        groupId={groupId}
+        groupUuid={groupUuid}
         onClose={() => setEndCycleOpen(false)}
       />
       <RestartCycleModal
         visible={restartOpen}
-        groupId={groupId}
+        groupUuid={groupUuid}
         isFixed={group.cycle_type === 'fixed'}
         onClose={() => setRestartOpen(false)}
       />
@@ -1743,3 +1743,4 @@ const m = StyleSheet.create({
   voiceBtn: { flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: Radius.md, borderWidth: 1, marginTop: 8 },
   iconWrap: { width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center', alignSelf: 'center' },
 });
+

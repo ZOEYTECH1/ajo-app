@@ -521,7 +521,7 @@ export default function HomeRoute() {
               <>
                 <SectionTitle label="My Groups" />
                 {adminGroups.map((g) => (
-                  <GroupCard key={g.id} group={g} isAdmin onPress={() => router.push(`/group/${g.id}` as any)} />
+                  <GroupCard key={g.uuid} group={g} isAdmin onPress={() => router.push(`/group/${g.id}` as any)} />
                 ))}
               </>
             )}
@@ -530,7 +530,7 @@ export default function HomeRoute() {
                 {adminGroups.length > 0 && <View style={s.sectionDivider} />}
                 <SectionTitle label="Groups I've Joined" />
                 {joinedGroups.map((g) => (
-                  <GroupCard key={g.id} group={g} isAdmin={false} onPress={() => router.push(`/group/${g.id}` as any)} />
+                  <GroupCard key={g.uuid} group={g} isAdmin={false} onPress={() => router.push(`/group/${g.id}` as any)} />
                 ))}
               </>
             )}
@@ -616,7 +616,7 @@ export default function HomeRoute() {
               <>
                 <SectionTitle label="My Contribution Groups" />
                 {myThriftGroups.map((g) => (
-                  <ThriftCard key={g.id} group={g} isCollector onPress={() => router.push(`/thrift/${g.id}` as any)} />
+                  <ThriftCard key={g.uuid} group={g} isCollector onPress={() => router.push(`/thrift/${g.uuid}` as any)} />
                 ))}
               </>
             )}
@@ -625,7 +625,7 @@ export default function HomeRoute() {
                 {myThriftGroups.length > 0 && <View style={s.sectionDivider} />}
                 <SectionTitle label="Contributions I've Joined" />
                 {joinedThriftGroups.map((g) => (
-                  <ThriftCard key={g.id} group={g} isCollector={false} onPress={() => router.push(`/thrift/${g.id}` as any)} />
+                  <ThriftCard key={g.uuid} group={g} isCollector={false} onPress={() => router.push(`/thrift/${g.uuid}` as any)} />
                 ))}
               </>
             )}
@@ -882,3 +882,4 @@ const s = StyleSheet.create({
   billsBanner: { flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: Radius.lg, borderWidth: 1, marginBottom: 20 },
   billsIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
 });
+

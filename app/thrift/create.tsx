@@ -87,7 +87,7 @@ export default function CreateThriftRoute() {
     onSuccess: (group) => {
       feedback('success');
       queryClient.invalidateQueries({ queryKey: ['thrift-groups'] });
-      router.replace(`/thrift/${group.id}` as any);
+      router.replace(`/thrift/${group.uuid}` as any);
     },
     onError: (err: any) => {
       feedback('error');
@@ -313,3 +313,4 @@ const s = StyleSheet.create({
   dot: { width: 18, height: 18, borderRadius: 9 },
   orgIcon: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
 });
+

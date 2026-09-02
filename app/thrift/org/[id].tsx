@@ -204,7 +204,7 @@ function CollectorGroupsModal({
               collectorGroups.map((g) => (
                 <TouchableOpacity
                   key={g.id}
-                  onPress={() => { onClose(); router.push(`/thrift/${g.id}` as any); }}
+                  onPress={() => { onClose(); router.push(`/thrift/${g.uuid}` as any); }}
                   activeOpacity={0.8}
                   style={[s.card, { backgroundColor: colors.background, borderColor: colors.border, ...Shadow.soft(colors.black) }]}
                   accessibilityRole="button"
@@ -585,7 +585,7 @@ export default function OrgDashboardRoute() {
         {tab === 'groups' && (
           <>
             {(data?.groups ?? []).map((g) => (
-              <TouchableOpacity key={g.id} onPress={() => router.push(`/thrift/${g.id}` as any)} activeOpacity={0.85}
+              <TouchableOpacity key={g.id} onPress={() => router.push(`/thrift/${g.uuid}` as any)} activeOpacity={0.85}
                 style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
                 accessibilityRole="button"
                 accessibilityLabel={`Open group: ${g.name}`}
@@ -714,3 +714,4 @@ const s = StyleSheet.create({
   actionBtn: { flex: 1, padding: 10, borderRadius: Radius.sm, alignItems: 'center', minWidth: 90 },
   actionBtnLabel: { color: '#fff', fontSize: FontSize.xs, fontWeight: '700' },
 });
+

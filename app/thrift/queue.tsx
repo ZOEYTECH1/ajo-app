@@ -226,9 +226,9 @@ export default function CollectorQueueScreen() {
   });
 
   const reviewMut = useMutation({
-    mutationFn: ({ groupId, memberId, action, reason }: {
-      groupId: number; memberId: number; action: 'approve' | 'reject' | 'flag_amount'; reason?: string;
-    }) => thriftService.reviewMember(groupId, memberId, { action, reason }),
+    mutationFn: ({ groupUuid, memberId, action, reason }: {
+      groupUuid: number; memberId: number; action: 'approve' | 'reject' | 'flag_amount'; reason?: string;
+    }) => thriftService.reviewMember(groupUuid, memberId, { action, reason }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['thrift-collector-queue'] });
       qc.invalidateQueries({ queryKey: ['thrift-groups'] });
@@ -243,7 +243,7 @@ export default function CollectorQueueScreen() {
     reason?: string,
   ) => {
     setBusyId(member.id);
-    reviewMut.mutate({ groupId: member.group_id, memberId: member.id, action, reason });
+    reviewMut.mutate({ groupUuid: member.group_uuid, memberId: member.id, action, reason });
   }, [reviewMut]);
 
   const pendingMembers   = data?.pending_members   ?? [];
@@ -312,7 +312,7 @@ export default function CollectorQueueScreen() {
               <DisputeCard
                 key={p.id}
                 item={p}
-                onViewGroup={() => router.push(`/thrift/${p.group_id}` as any)}
+                onViewGroup={() => router.push(`/thrift/${p.group_uuid}` as any)}
               />
             ))}
           </>
@@ -371,3 +371,4 @@ const s = StyleSheet.create({
   input:      { borderWidth: 1, borderRadius: 10, padding: 12, fontSize: FontSize.sm, textAlignVertical: 'top', minHeight: 80 },
   sheetBtn:   { paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
 });
+

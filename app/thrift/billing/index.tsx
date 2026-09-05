@@ -210,7 +210,7 @@ export default function BillingScreen() {
         >
           {generating
             ? <ActivityIndicator size="small" color={colors.primary} />
-            : <Text style={{ color: colors.primary, fontWeight: '700', fontSize: FontSize.xs }}>Generate</Text>
+            : <Text style={{ color: colors.primary, fontWeight: '700', fontSize: FontSize.xs }}>Generate Invoice</Text>
           }
         </TouchableOpacity>
       </View>
@@ -233,7 +233,7 @@ export default function BillingScreen() {
               No invoices yet
             </Text>
             <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 6, textAlign: 'center', lineHeight: 20 }}>
-              An invoice generates automatically once a circle completes, or tap "Generate" once one has.
+              An invoice generates automatically once a circle completes, or tap "Generate Invoice" once one has.
             </Text>
           </View>
         ) : (

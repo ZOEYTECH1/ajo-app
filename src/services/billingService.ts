@@ -17,8 +17,6 @@ export interface InvoiceLineItem {
   monthly_earnings: string;
   rate: string;
   rate_percent: string;
-  bank_rate: string;
-  bank_rate_percent: string;
   fee: string;
 }
 

@@ -77,7 +77,7 @@ function InvoiceCard({
           </View>
           <View style={{ alignItems: 'flex-end' }}>
             <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary }}>
-              {item.bank_rate_percent ?? item.rate_percent}
+              {item.rate_percent}
             </Text>
             <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }}>
               ₦{parseFloat(item.fee).toLocaleString()}

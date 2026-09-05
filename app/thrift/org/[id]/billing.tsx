@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../../src/hooks/useTheme';
 import { FontSize, Radius, Shadow } from '../../../../src/theme';
 import {
-  getOrgInvoices, generateOrgInvoice, payOrgInvoice, verifyOrgInvoice,
+  getOrgInvoices, getOrgBillingStatus, generateOrgInvoice, payOrgInvoice, verifyOrgInvoice,
   type ThriftInvoice,
 } from '../../../../src/services/billingService';
 
@@ -20,8 +20,8 @@ const STATUS_META = {
 };
 
 function InvoiceCard({
-  invoice, orgId, onPay, onVerified,
-}: { invoice: ThriftInvoice; orgId: number; onPay: (setShowVerify: (v: boolean) => void) => void; onVerified: () => void }) {
+  invoice, orgUuid, onPay, onVerified,
+}: { invoice: ThriftInvoice; orgUuid: string; onPay: (setShowVerify: (v: boolean) => void) => void; onVerified: () => void }) {
   const { colors } = useTheme();
   const meta = STATUS_META[invoice.status];
   const totalFee = parseFloat(invoice.total_fee);
@@ -31,7 +31,7 @@ function InvoiceCard({
   const [verified, setVerified] = useState(false);
 
   const { mutate: verify, isPending: verifying } = useMutation({
-    mutationFn: () => verifyOrgInvoice(orgId, invoice.id, txId.trim()),
+    mutationFn: () => verifyOrgInvoice(orgUuid, invoice.id, txId.trim()),
     onSuccess: () => { setVerified(true); setShowVerify(false); onVerified(); },
     onError: (e: any) => setVerifyError(e?.response?.data?.detail ?? 'Verification failed. Check your transaction ID.'),
   });
@@ -56,7 +56,7 @@ function InvoiceCard({
         <View style={[s.bankNote, { backgroundColor: colors.primaryTint }]}>
           <Ionicons name="business-outline" size={13} color={colors.primary} />
           <Text style={{ fontSize: FontSize.xs, color: colors.primary, marginLeft: 6, flex: 1 }}>
-            Organisation rate applied (bank discount −2% per group)
+            Organisation rate applied (bank discount −0.25% per group)
           </Text>
         </View>
       )}
@@ -158,28 +158,38 @@ function InvoiceCard({
 
 export default function OrgBillingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const orgId = Number(id);
+  const orgUuid = id;
   const { colors } = useTheme();
   const router = useRouter();
   const qc = useQueryClient();
   const [paying, setPaying] = useState<number | null>(null);
 
   const { data: invoices, isLoading } = useQuery({
-    queryKey: ['org-invoices', orgId],
-    queryFn: () => getOrgInvoices(orgId),
-    enabled: !!orgId,
+    queryKey: ['org-invoices', orgUuid],
+    queryFn: () => getOrgInvoices(orgUuid),
+    enabled: !!orgUuid,
   });
 
+  const { data: billingStatus } = useQuery({
+    queryKey: ['org-billing-status', orgUuid],
+    queryFn: () => getOrgBillingStatus(orgUuid),
+    enabled: !!orgUuid,
+  });
+  const canGenerate = billingStatus?.can_generate_invoice ?? false;
+
   const { mutate: generate, isPending: generating } = useMutation({
-    mutationFn: () => generateOrgInvoice(orgId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['org-invoices', orgId] }),
+    mutationFn: () => generateOrgInvoice(orgUuid),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['org-invoices', orgUuid] });
+      qc.invalidateQueries({ queryKey: ['org-billing-status', orgUuid] });
+    },
     onError: (e: any) =>
       Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate invoice.'),
   });
 
   const { mutate: pay } = useMutation({
     mutationFn: ({ invoiceId, setShowVerify }: { invoiceId: number; setShowVerify: (v: boolean) => void }) =>
-      payOrgInvoice(orgId, invoiceId).then(data => ({ data, setShowVerify })),
+      payOrgInvoice(orgUuid, invoiceId).then(data => ({ data, setShowVerify })),
     onSuccess: ({ data, setShowVerify }) => {
       setPaying(null);
       Linking.openURL(data.payment_link);
@@ -222,15 +232,15 @@ export default function OrgBillingScreen() {
         </View>
         <TouchableOpacity
           onPress={() => generate()}
-          disabled={generating}
-          style={[s.generateBtn, { backgroundColor: colors.primaryTint }]}
+          disabled={generating || !canGenerate}
+          style={[s.generateBtn, { backgroundColor: colors.primaryTint, opacity: canGenerate ? 1 : 0.5 }]}
           accessibilityRole="button"
-          accessibilityLabel="Generate this month's invoice"
+          accessibilityLabel="Generate invoice"
         >
           {generating
             ? <ActivityIndicator size="small" color={colors.primary} />
             : <Text style={{ color: colors.primary, fontWeight: '700', fontSize: FontSize.xs }}>
-                This Month
+                Generate
               </Text>
           }
         </TouchableOpacity>
@@ -240,7 +250,7 @@ export default function OrgBillingScreen() {
       <View style={[s.rateBanner, { backgroundColor: colors.primaryTint }]}>
         <Ionicons name="business-outline" size={16} color={colors.primary} />
         <Text style={{ fontSize: FontSize.xs, color: colors.primary, marginLeft: 8, flex: 1, lineHeight: 18 }}>
-          Each group is billed at the bank rate (standard rate −2%). All groups are consolidated into one monthly invoice.
+          Each group is billed at the bank rate (standard rate −0.25%) once its circle completes. All groups are consolidated into one invoice — generation also happens automatically.
         </Text>
       </View>
 
@@ -260,7 +270,7 @@ export default function OrgBillingScreen() {
               fontSize: FontSize.sm, color: colors.textSecondary,
               marginTop: 6, textAlign: 'center', lineHeight: 20,
             }}>
-              Tap "This Month" to generate your organisation's current invoice.
+              An invoice generates automatically once a circle completes, or tap "Generate" once one has.
             </Text>
           </View>
         ) : (
@@ -268,9 +278,9 @@ export default function OrgBillingScreen() {
             <InvoiceCard
               key={inv.id}
               invoice={inv}
-              orgId={orgId}
+              orgUuid={orgUuid}
               onPay={(setShowVerify) => handlePay(inv, setShowVerify)}
-              onVerified={() => qc.invalidateQueries({ queryKey: ['org-invoices', orgId] })}
+              onVerified={() => qc.invalidateQueries({ queryKey: ['org-invoices', orgUuid] })}
             />
           ))
         )}

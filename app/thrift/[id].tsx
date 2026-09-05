@@ -848,6 +848,7 @@ export default function ThriftGroupDetail() {
   const [auditDate, setAuditDate]   = useState(() => new Date().toISOString().slice(0, 10));
   const [auditCycleId, setAuditCycleId] = useState<number | null>(null);
   const [isLive, setIsLive]         = useState(false);
+  const [earlyEndAlert, setEarlyEndAlert] = useState<string | null>(null);
 
   const { data: cycles } = useQuery({
     queryKey: ['thrift-cycles', groupUuid],
@@ -855,9 +856,17 @@ export default function ThriftGroupDetail() {
     enabled: !!group,
   });
 
-  useThriftGroupSocket(groupUuid, () => {
+  useThriftGroupSocket(groupUuid, (e) => {
     setIsLive(true);
-    queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupUuid] });
+    if (e.event === 'cycle_end_blocked') {
+      setEarlyEndAlert(`${e.collector_name} tried to end Cycle #${e.cycle_number} early — it runs until ${e.scheduled_end_date}.`);
+    }
+    if (e.event === 'cycle_ended' || e.event === 'cycle_end_blocked') {
+      queryClient.invalidateQueries({ queryKey: ['thrift-group', groupUuid] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-cycles', groupUuid] });
+    } else {
+      queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupUuid] });
+    }
   });
 
   const periodPayments = useMemo(() => {
@@ -1144,6 +1153,18 @@ export default function ThriftGroupDetail() {
                 )}
               </View>
             </View>
+
+            {earlyEndAlert && (
+              <View style={{ flexDirection: 'row', alignItems: 'flex-start', backgroundColor: WARNING_LIGHT, borderRadius: Radius.md, padding: 12, marginBottom: 12 }}>
+                <Ionicons name="warning-outline" size={16} color={WARNING} style={{ marginTop: 1 }} />
+                <Text style={{ flex: 1, fontSize: FontSize.xs, color: WARNING, marginLeft: 8, lineHeight: 17 }}>
+                  {earlyEndAlert}
+                </Text>
+                <TouchableOpacity onPress={() => setEarlyEndAlert(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} accessibilityRole="button" accessibilityLabel="Dismiss">
+                  <Ionicons name="close" size={16} color={WARNING} />
+                </TouchableOpacity>
+              </View>
+            )}
 
             <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, textAlign: 'center', marginBottom: 12 }}>
               Lifetime collected: <Text style={{ fontWeight: '800', color: colors.textPrimary }}>₦{lifetimeCollected.toLocaleString()}</Text>

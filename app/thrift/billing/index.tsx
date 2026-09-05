@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../src/hooks/useTheme';
 import { FontSize, Radius, Shadow } from '../../../src/theme';
 import {
-  getMyInvoices, generateMyInvoice, payInvoice, verifyInvoice,
+  getMyInvoices, getBillingStatus, generateMyInvoice, payInvoice, verifyInvoice,
   type ThriftInvoice,
 } from '../../../src/services/billingService';
 
@@ -151,9 +151,18 @@ export default function BillingScreen() {
     queryFn: getMyInvoices,
   });
 
+  const { data: billingStatus } = useQuery({
+    queryKey: ['thrift-billing-status'],
+    queryFn: getBillingStatus,
+  });
+  const canGenerate = billingStatus?.can_generate_invoice ?? false;
+
   const { mutate: generate, isPending: generating } = useMutation({
     mutationFn: generateMyInvoice,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['thrift-invoices'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['thrift-invoices'] });
+      qc.invalidateQueries({ queryKey: ['thrift-billing-status'] });
+    },
     onError: (e: any) => Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate invoice.'),
   });
 
@@ -194,14 +203,14 @@ export default function BillingScreen() {
         </View>
         <TouchableOpacity
           onPress={() => generate()}
-          disabled={generating}
-          style={[s.generateBtn, { backgroundColor: colors.primaryTint }]}
+          disabled={generating || !canGenerate}
+          style={[s.generateBtn, { backgroundColor: colors.primaryTint, opacity: canGenerate ? 1 : 0.5 }]}
           accessibilityRole="button"
-          accessibilityLabel="Generate this month's invoice"
+          accessibilityLabel="Generate invoice"
         >
           {generating
             ? <ActivityIndicator size="small" color={colors.primary} />
-            : <Text style={{ color: colors.primary, fontWeight: '700', fontSize: FontSize.xs }}>This Month</Text>
+            : <Text style={{ color: colors.primary, fontWeight: '700', fontSize: FontSize.xs }}>Generate</Text>
           }
         </TouchableOpacity>
       </View>
@@ -210,7 +219,7 @@ export default function BillingScreen() {
       <View style={[s.rateBanner, { backgroundColor: colors.primaryTint }]}>
         <Ionicons name="information-circle-outline" size={16} color={colors.primary} />
         <Text style={{ fontSize: FontSize.xs, color: colors.primary, marginLeft: 8, flex: 1, lineHeight: 18 }}>
-          Platform fee is 5%–10% of your one-day earnings per group, based on group size. Rate adjusts automatically each month.
+          Platform fee is 0.5%–1.5% of your circle's total recorded payments, based on volume. Generated automatically once a circle completes.
         </Text>
       </View>
 
@@ -224,7 +233,7 @@ export default function BillingScreen() {
               No invoices yet
             </Text>
             <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 6, textAlign: 'center', lineHeight: 20 }}>
-              Tap "This Month" to generate your current month's invoice.
+              An invoice generates automatically once a circle completes, or tap "Generate" once one has.
             </Text>
           </View>
         ) : (

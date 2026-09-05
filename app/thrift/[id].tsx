@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StatusBar,
   StyleSheet, RefreshControl, Modal, TextInput, Share, Image, Alert,
@@ -7,6 +7,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/hooks/useTheme';
+import { useThriftGroupSocket } from '../../src/hooks/useThriftGroupSocket';
 import { useAuthStore } from '../../src/store/useAppStore';
 import {
   thriftService,
@@ -49,6 +50,25 @@ const pill = StyleSheet.create({
   wrap: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: Radius.full },
   label: { fontSize: FontSize.xs, fontWeight: '700' },
 });
+
+/** Monday–Sunday range (as YYYY-MM-DD strings) containing the given date. */
+function weekRangeOf(dateStr: string): [string, string] {
+  const d = new Date(`${dateStr}T00:00:00`);
+  const day = d.getDay(); // 0 = Sun .. 6 = Sat
+  const diffToMonday = (day === 0 ? -6 : 1) - day;
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + diffToMonday);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const toISO = (x: Date) => x.toISOString().slice(0, 10);
+  return [toISO(monday), toISO(sunday)];
+}
+
+function shiftDate(dateStr: string, days: number): string {
+  const d = new Date(`${dateStr}T00:00:00`);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
 
 // ─── Flag Amount Modal ────────────────────────────────────────────────────────
 function FlagAmountModal({
@@ -823,6 +843,52 @@ export default function ThriftGroupDetail() {
     onError: () => feedback('error'),
   });
 
+  // ── Org admin audit: real-time updates, day/week/circle breakdown ─────────
+  const [auditMode, setAuditMode]   = useState<'day' | 'week' | 'circle' | 'all'>('day');
+  const [auditDate, setAuditDate]   = useState(() => new Date().toISOString().slice(0, 10));
+  const [auditCycleId, setAuditCycleId] = useState<number | null>(null);
+  const [isLive, setIsLive]         = useState(false);
+
+  const { data: cycles } = useQuery({
+    queryKey: ['thrift-cycles', groupUuid],
+    queryFn: () => thriftService.getCycles(groupUuid),
+    enabled: !!group,
+  });
+
+  useThriftGroupSocket(groupUuid, () => {
+    setIsLive(true);
+    queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupUuid] });
+  });
+
+  const periodPayments = useMemo(() => {
+    const all = payments ?? [];
+    if (auditMode === 'day') return all.filter((p) => p.period_date === auditDate);
+    if (auditMode === 'week') {
+      const [start, end] = weekRangeOf(auditDate);
+      return all.filter((p) => p.period_date >= start && p.period_date <= end);
+    }
+    if (auditMode === 'circle') {
+      return auditCycleId == null ? [] : all.filter((p) => p.cycle_id === auditCycleId);
+    }
+    return all;
+  }, [payments, auditMode, auditDate, auditCycleId]);
+
+  const auditTotals = useMemo(() => {
+    let expected = 0, actual = 0, disputedAmount = 0, disputedCount = 0, pendingCount = 0;
+    for (const p of periodPayments) {
+      const amt = Number(p.amount);
+      if (p.status === 'confirmed') { actual += amt; expected += amt; }
+      else if (p.status === 'disputed') { disputedAmount += amt; expected += amt; disputedCount++; }
+      else pendingCount++;
+    }
+    return { expected, actual, disputedAmount, disputedCount, pendingCount };
+  }, [periodPayments]);
+
+  const lifetimeCollected = useMemo(
+    () => (payments ?? []).filter((p) => p.status === 'confirmed').reduce((sum, p) => sum + Number(p.amount), 0),
+    [payments],
+  );
+
   const toggleKyc = (mem: ThriftMember) => {
     const nextValue = !mem.user.is_kyc_verified;
     const name = `${mem.user.first_name} ${mem.user.last_name}`;
@@ -1064,12 +1130,126 @@ export default function ThriftGroupDetail() {
         {/* ── ORG ADMIN VIEW (read-only oversight) ── */}
         {isOrgAdmin ? (
           <>
-            <View style={[s.tabBar, { backgroundColor: colors.surface, borderColor: colors.border, marginBottom: 16 }]}>
+            <View style={[s.tabBar, { backgroundColor: colors.surface, borderColor: colors.border, marginBottom: 12 }]}>
               <View style={{ flex: 1, paddingVertical: 12, alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
                 <Ionicons name="shield-checkmark-outline" size={15} color={colors.primary} />
                 <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.primary, marginLeft: 6 }}>
                   Organisation Oversight
                 </Text>
+                {isLive && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8 }}>
+                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success, marginRight: 4 }} />
+                    <Text style={{ fontSize: 10, fontWeight: '700', color: colors.success }}>LIVE</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+
+            <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, textAlign: 'center', marginBottom: 12 }}>
+              Lifetime collected: <Text style={{ fontWeight: '800', color: colors.textPrimary }}>₦{lifetimeCollected.toLocaleString()}</Text>
+            </Text>
+
+            {/* Period selector */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+              {(['day', 'week', 'circle', 'all'] as const).map((mode) => (
+                <TouchableOpacity
+                  key={mode}
+                  onPress={() => setAuditMode(mode)}
+                  style={{
+                    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 99,
+                    backgroundColor: auditMode === mode ? colors.primary : colors.surface,
+                    borderWidth: 1, borderColor: auditMode === mode ? colors.primary : colors.border,
+                  }}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: auditMode === mode }}
+                  accessibilityLabel={mode === 'all' ? 'All Circles' : mode}
+                >
+                  <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: auditMode === mode ? '#fff' : colors.textSecondary, textTransform: 'capitalize' }}>
+                    {mode === 'all' ? 'All Circles' : mode}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {(auditMode === 'day' || auditMode === 'week') && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 12 }}>
+                <TouchableOpacity
+                  onPress={() => setAuditDate((d) => shiftDate(d, auditMode === 'day' ? -1 : -7))}
+                  accessibilityRole="button"
+                  accessibilityLabel="Previous period"
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Ionicons name="chevron-back-circle-outline" size={22} color={colors.primary} />
+                </TouchableOpacity>
+                <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }}>
+                  {auditMode === 'day' ? auditDate : weekRangeOf(auditDate).join(' → ')}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => setAuditDate((d) => shiftDate(d, auditMode === 'day' ? 1 : 7))}
+                  accessibilityRole="button"
+                  accessibilityLabel="Next period"
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Ionicons name="chevron-forward-circle-outline" size={22} color={colors.primary} />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {auditMode === 'circle' && (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ marginBottom: 12 }}
+                contentContainerStyle={{ gap: 8 }}
+              >
+                {(cycles ?? []).slice().sort((a, b) => b.cycle_number - a.cycle_number).map((c) => (
+                  <TouchableOpacity
+                    key={c.id}
+                    onPress={() => setAuditCycleId(c.id)}
+                    style={{
+                      paddingHorizontal: 12, paddingVertical: 6, borderRadius: 99,
+                      backgroundColor: auditCycleId === c.id ? colors.primary : colors.surface,
+                      borderWidth: 1, borderColor: auditCycleId === c.id ? colors.primary : colors.border,
+                    }}
+                    accessibilityRole="button"
+                  >
+                    <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: auditCycleId === c.id ? '#fff' : colors.textSecondary }}>
+                      Circle #{c.cycle_number}{c.status === 'active' ? ' (active)' : ''}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+
+            {/* Expected vs Actual */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
+              <View style={{ flex: 1, minWidth: '45%', backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 12, padding: 12 }}>
+                <Text style={{ fontSize: 10, fontWeight: '700', color: colors.textTertiary, letterSpacing: 0.5 }}>EXPECTED</Text>
+                <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.textPrimary, marginTop: 2 }}>
+                  ₦{auditTotals.expected.toLocaleString()}
+                </Text>
+                <Text style={{ fontSize: 10, color: colors.textTertiary, marginTop: 1 }}>Confirmed + disputed</Text>
+              </View>
+              <View style={{ flex: 1, minWidth: '45%', backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 12, padding: 12 }}>
+                <Text style={{ fontSize: 10, fontWeight: '700', color: colors.success, letterSpacing: 0.5 }}>ACTUAL COLLECTED</Text>
+                <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.textPrimary, marginTop: 2 }}>
+                  ₦{auditTotals.actual.toLocaleString()}
+                </Text>
+                <Text style={{ fontSize: 10, color: colors.textTertiary, marginTop: 1 }}>Confirmed by payer</Text>
+              </View>
+              <View style={{ flex: 1, minWidth: '45%', backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 12, padding: 12 }}>
+                <Text style={{ fontSize: 10, fontWeight: '700', color: WARNING, letterSpacing: 0.5 }}>DISPUTED</Text>
+                <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.textPrimary, marginTop: 2 }}>
+                  ₦{auditTotals.disputedAmount.toLocaleString()}
+                </Text>
+                <Text style={{ fontSize: 10, color: colors.textTertiary, marginTop: 1 }}>{auditTotals.disputedCount} to resolve</Text>
+              </View>
+              <View style={{ flex: 1, minWidth: '45%', backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 12, padding: 12 }}>
+                <Text style={{ fontSize: 10, fontWeight: '700', color: colors.textTertiary, letterSpacing: 0.5 }}>PENDING</Text>
+                <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.textPrimary, marginTop: 2 }}>
+                  {auditTotals.pendingCount}
+                </Text>
+                <Text style={{ fontSize: 10, color: colors.textTertiary, marginTop: 1 }}>Awaiting payer</Text>
               </View>
             </View>
 
@@ -1087,7 +1267,7 @@ export default function ThriftGroupDetail() {
               </View>
             ) : (
               approvedMembers.map((mem) => {
-                const memberPayments = (payments ?? []).filter((p) => p.member === mem.id);
+                const memberPayments = periodPayments.filter((p) => p.member === mem.id);
                 const isExpanded     = expandedMembers.has(mem.id);
                 const visiblePayments = isExpanded ? memberPayments : memberPayments.slice(0, 1);
                 const toggleExpand   = () => setExpandedMembers((prev) => {
@@ -1143,7 +1323,7 @@ export default function ThriftGroupDetail() {
                     {/* Payment rows with dual confirmation */}
                     {memberPayments.length === 0 ? (
                       <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary, paddingTop: 2 }}>
-                        No payments recorded yet.
+                        {auditMode === 'all' ? 'No payments recorded yet.' : 'No collections for this period.'}
                       </Text>
                     ) : (
                       <>

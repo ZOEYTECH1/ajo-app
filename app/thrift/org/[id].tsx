@@ -29,17 +29,17 @@ const REPORT_STATUS_LABEL: Record<string, string> = {
 
 // ─── Invite modal ─────────────────────────────────────────────────────────────
 
-function InviteModal({ orgId, visible, onClose }: { orgId: number; visible: boolean; onClose: () => void }) {
+function InviteModal({ orgUuid, visible, onClose }: { orgUuid: string; visible: boolean; onClose: () => void }) {
   const { colors } = useTheme();
   const queryClient = useQueryClient();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
 
   const mutation = useMutation({
-    mutationFn: () => thriftService.inviteCollector(orgId, email.trim().toLowerCase()),
+    mutationFn: () => thriftService.inviteCollector(orgUuid, email.trim().toLowerCase()),
     onSuccess: () => {
       feedback('success');
-      queryClient.invalidateQueries({ queryKey: ['thrift-org', orgId] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-org', orgUuid] });
       setEmail('');
       setError('');
       onClose();
@@ -82,19 +82,19 @@ function InviteModal({ orgId, visible, onClose }: { orgId: number; visible: bool
 // ─── Report resolution modal ──────────────────────────────────────────────────
 
 function ResolveReportModal({
-  orgId, report, visible, onClose,
-}: { orgId: number; report: CollectorReport | null; visible: boolean; onClose: () => void }) {
+  orgUuid, report, visible, onClose,
+}: { orgUuid: string; report: CollectorReport | null; visible: boolean; onClose: () => void }) {
   const { colors } = useTheme();
   const queryClient = useQueryClient();
   const [notes, setNotes] = useState('');
 
   const resolveMutation = useMutation({
     mutationFn: (action: 'resolve' | 'dismiss' | 'review') =>
-      thriftService.resolveReport(orgId, report!.id, action, notes),
+      thriftService.resolveReport(orgUuid, report!.id, action, notes),
     onSuccess: () => {
       feedback('success');
-      queryClient.invalidateQueries({ queryKey: ['thrift-org', orgId] });
-      queryClient.invalidateQueries({ queryKey: ['thrift-org-reports', orgId] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-org', orgUuid] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-org-reports', orgUuid] });
       setNotes('');
       onClose();
     },
@@ -240,7 +240,7 @@ function CollectorGroupsModal({
 
 export default function OrgDashboardRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const orgId  = Number(id);
+  const orgUuid = id;
   const { colors, isDark } = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -253,22 +253,22 @@ export default function OrgDashboardRoute() {
   const [collectorGroups, setCollectorGroups] = useState<ThriftOrgMember | null>(null);
 
   const { data, isLoading, isError, refetch, isRefetching } = useQuery({
-    queryKey: ['thrift-org', orgId],
-    queryFn:  () => thriftService.getOrgDashboard(orgId),
+    queryKey: ['thrift-org', orgUuid],
+    queryFn:  () => thriftService.getOrgDashboard(orgUuid),
   });
 
   const { data: allReports = [], isLoading: reportsLoading } = useQuery({
-    queryKey: ['thrift-org-reports', orgId, reportFilter],
-    queryFn:  () => thriftService.getOrgReports(orgId, reportFilter === 'all' ? undefined : reportFilter),
-    enabled:  !!orgId,
+    queryKey: ['thrift-org-reports', orgUuid, reportFilter],
+    queryFn:  () => thriftService.getOrgReports(orgUuid, reportFilter === 'all' ? undefined : reportFilter),
+    enabled:  !!orgUuid,
   });
 
   const memberActionMutation = useMutation({
     mutationFn: ({ memberId, action }: { memberId: number; action: 'approve' | 'suspend' | 'activate' | 'reject' | 'remove' }) =>
-      thriftService.orgMemberAction(orgId, memberId, action),
+      thriftService.orgMemberAction(orgUuid, memberId, action),
     onSuccess: () => {
       feedback('success');
-      queryClient.invalidateQueries({ queryKey: ['thrift-org', orgId] });
+      queryClient.invalidateQueries({ queryKey: ['thrift-org', orgUuid] });
     },
     onError: () => feedback('error'),
   });
@@ -350,7 +350,7 @@ export default function OrgDashboardRoute() {
           </View>
         )}
         <TouchableOpacity
-          onPress={() => router.push(`/thrift/org/${orgId}/billing` as any)}
+          onPress={() => router.push(`/thrift/org/${orgUuid}/billing` as any)}
           hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}
           style={{ marginLeft: 8 }}
           accessibilityRole="button"
@@ -679,8 +679,8 @@ export default function OrgDashboardRoute() {
         </View>
       )}
 
-      <InviteModal orgId={orgId} visible={inviteVisible} onClose={() => setInvite(false)} />
-      <ResolveReportModal orgId={orgId} report={selectedReport} visible={resolveVisible} onClose={() => { setResolve(false); setReport(null); }} />
+      <InviteModal orgUuid={orgUuid} visible={inviteVisible} onClose={() => setInvite(false)} />
+      <ResolveReportModal orgUuid={orgUuid} report={selectedReport} visible={resolveVisible} onClose={() => { setResolve(false); setReport(null); }} />
       <CollectorGroupsModal
         collector={collectorGroups}
         groups={data?.groups ?? []}

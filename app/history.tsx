@@ -322,8 +322,8 @@ export default function HistoryRoute() {
 
   const orgDashboardResults = useQueries({
     queries: (myOrgs ?? []).map((org) => ({
-      queryKey: ['thrift-org-dash', org.id] as const,
-      queryFn:  () => thriftService.getOrgDashboard(org.id),
+      queryKey: ['thrift-org-dash', org.uuid] as const,
+      queryFn:  () => thriftService.getOrgDashboard(org.uuid),
       enabled:  isOrgAdmin,
       staleTime: 2 * 60 * 1000,
     })),

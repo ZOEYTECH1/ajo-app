@@ -34,7 +34,7 @@ export default function CreateThriftRoute() {
   const [cycleType, setCycleType]     = useState<ThriftCycleType>('rolling');
   const [startDate, setStartDate]     = useState('');
   const [endDate, setEndDate]         = useState('');
-  const [selectedOrgId, setOrgId]     = useState<number | null>(null);
+  const [selectedOrgUuid, setOrgUuid] = useState<string | null>(null);
   const [inviteToken, setInviteToken] = useState('');
   const [errors, setErrors]           = useState<Record<string, string>>({});
 
@@ -58,18 +58,18 @@ export default function CreateThriftRoute() {
   // Auto-select on first load if already a member of an org
   useEffect(() => {
     const confirmed = (myMemberships ?? []).filter((m) => m.joined_at !== null && m.status !== 'suspended');
-    if (confirmed.length > 0 && selectedOrgId === null) {
-      setOrgId(confirmed[0].organization.id);
+    if (confirmed.length > 0 && selectedOrgUuid === null) {
+      setOrgUuid(confirmed[0].organization.uuid);
     }
   }, [myMemberships]);
 
   // True when the selected org is one the user is already an approved member of
-  const isAlreadyMember = confirmedMemberOrgs.some((o) => o.id === selectedOrgId);
+  const isAlreadyMember = confirmedMemberOrgs.some((o) => o.uuid === selectedOrgUuid);
 
   // Org list: member orgs first (they may not be in partnerOrgs), then remaining partner orgs
   const displayedOrgs = [
     ...confirmedMemberOrgs,
-    ...(partnerOrgs ?? []).filter((o) => !confirmedMemberOrgs.some((m) => m.id === o.id)),
+    ...(partnerOrgs ?? []).filter((o) => !confirmedMemberOrgs.some((m) => m.uuid === o.uuid)),
   ];
 
   const mutation = useMutation({
@@ -80,8 +80,8 @@ export default function CreateThriftRoute() {
       cycle_type:  cycleType,
       start_date:  cycleType === 'fixed' ? startDate || null : null,
       end_date:    cycleType === 'fixed' ? endDate   || null : null,
-      org_id:      selectedOrgId,
-      invite_token: selectedOrgId && !isAlreadyMember ? inviteToken.trim() || null : null,
+      org_uuid:    selectedOrgUuid,
+      invite_token: selectedOrgUuid && !isAlreadyMember ? inviteToken.trim() || null : null,
     }),
     onSuccess: (group) => {
       feedback('success');
@@ -225,18 +225,18 @@ export default function CreateThriftRoute() {
         {orgsLoading ? (
           <ActivityIndicator size="small" color={colors.primary} style={{ marginVertical: 12 }} />
         ) : displayedOrgs.map((org) => {
-          const active = selectedOrgId === org.id;
-          const isMember = confirmedMemberOrgs.some((o) => o.id === org.id);
+          const active = selectedOrgUuid === org.uuid;
+          const isMember = confirmedMemberOrgs.some((o) => o.uuid === org.uuid);
           return (
             <TouchableOpacity
-              key={org.id}
+              key={org.uuid}
               onPress={() => {
                 if (active) {
-                  setOrgId(null);
+                  setOrgUuid(null);
                   setInviteToken('');
                   setErrors((p) => ({ ...p, invite_token: '' }));
                 } else {
-                  setOrgId(org.id);
+                  setOrgUuid(org.uuid);
                   setInviteToken('');
                   setErrors((p) => ({ ...p, invite_token: '' }));
                 }
@@ -267,7 +267,7 @@ export default function CreateThriftRoute() {
         })}
 
         {/* Invite token — only required when selecting an org the user hasn't joined yet */}
-        {selectedOrgId !== null && !isAlreadyMember && (
+        {selectedOrgUuid !== null && !isAlreadyMember && (
           <View style={{ marginTop: 16 }}>
             <Input
               label="Organisation invite token"

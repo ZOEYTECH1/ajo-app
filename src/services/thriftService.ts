@@ -14,7 +14,7 @@ export type OrgMemberStatus      = 'pending' | 'active' | 'suspended';
 export type ReportStatus         = 'pending' | 'reviewed' | 'resolved' | 'dismissed';
 
 export interface ThriftOrganization {
-  id: number;
+  uuid: string;
   name: string;
   org_type: OrgType;
   logo: string | null;
@@ -233,7 +233,7 @@ export const thriftService = {
     cycle_type: ThriftCycleType;
     start_date?: string | null;
     end_date?: string | null;
-    org_id?: number | null;
+    org_uuid?: string | null;
     invite_token?: string | null;
   }): Promise<ThriftGroup> => {
     const { data } = await api.post('/api/thrift/', payload);
@@ -348,8 +348,8 @@ export const thriftService = {
     return data;
   },
 
-  getOrg: async (orgId: number): Promise<ThriftOrganization> => {
-    const { data } = await api.get(`/api/thrift/orgs/${orgId}/`);
+  getOrg: async (orgUuid: string): Promise<ThriftOrganization> => {
+    const { data } = await api.get(`/api/thrift/orgs/${orgUuid}/`);
     return data;
   },
 
@@ -370,18 +370,18 @@ export const thriftService = {
     return data;
   },
 
-  updateOrg: async (orgId: number, payload: Partial<{ name: string; org_type: OrgType; registration_number: string; logo: any }>): Promise<ThriftOrganization> => {
-    const { data } = await api.patch(`/api/thrift/orgs/${orgId}/`, payload);
+  updateOrg: async (orgUuid: string, payload: Partial<{ name: string; org_type: OrgType; registration_number: string; logo: any }>): Promise<ThriftOrganization> => {
+    const { data } = await api.patch(`/api/thrift/orgs/${orgUuid}/`, payload);
     return data;
   },
 
-  getOrgMembers: async (orgId: number): Promise<ThriftOrgMember[]> => {
-    const { data } = await api.get(`/api/thrift/orgs/${orgId}/members/`);
+  getOrgMembers: async (orgUuid: string): Promise<ThriftOrgMember[]> => {
+    const { data } = await api.get(`/api/thrift/orgs/${orgUuid}/members/`);
     return data;
   },
 
-  inviteCollector: async (orgId: number, email: string): Promise<{ detail: string }> => {
-    const { data } = await api.post(`/api/thrift/orgs/${orgId}/members/`, { email });
+  inviteCollector: async (orgUuid: string, email: string): Promise<{ detail: string }> => {
+    const { data } = await api.post(`/api/thrift/orgs/${orgUuid}/members/`, { email });
     return data;
   },
 
@@ -395,16 +395,16 @@ export const thriftService = {
     return data;
   },
 
-  orgMemberAction: async (orgId: number, memberId: number, action: 'approve' | 'suspend' | 'activate' | 'reject' | 'remove'): Promise<ThriftOrgMember | void> => {
+  orgMemberAction: async (orgUuid: string, memberId: number, action: 'approve' | 'suspend' | 'activate' | 'reject' | 'remove'): Promise<ThriftOrgMember | void> => {
     if (action === 'remove' || action === 'reject') {
-      await api.patch(`/api/thrift/orgs/${orgId}/members/${memberId}/`, { action });
+      await api.patch(`/api/thrift/orgs/${orgUuid}/members/${memberId}/`, { action });
       return;
     }
-    const { data } = await api.patch(`/api/thrift/orgs/${orgId}/members/${memberId}/`, { action });
+    const { data } = await api.patch(`/api/thrift/orgs/${orgUuid}/members/${memberId}/`, { action });
     return data;
   },
 
-  getOrgDashboard: async (orgId: number): Promise<{
+  getOrgDashboard: async (orgUuid: string): Promise<{
     organization: ThriftOrganization;
     collectors: ThriftOrgMember[];
     pending_collectors: ThriftOrgMember[];
@@ -414,18 +414,18 @@ export const thriftService = {
     payment_stats: PaymentStats;
     collector_stats: Record<number, CollectorStats>;
   }> => {
-    const { data } = await api.get(`/api/thrift/orgs/${orgId}/dashboard/`);
+    const { data } = await api.get(`/api/thrift/orgs/${orgUuid}/dashboard/`);
     return data;
   },
 
-  getOrgReports: async (orgId: number, statusFilter?: string): Promise<CollectorReport[]> => {
+  getOrgReports: async (orgUuid: string, statusFilter?: string): Promise<CollectorReport[]> => {
     const params = statusFilter ? { status: statusFilter } : {};
-    const { data } = await api.get(`/api/thrift/orgs/${orgId}/reports/`, { params });
+    const { data } = await api.get(`/api/thrift/orgs/${orgUuid}/reports/`, { params });
     return data;
   },
 
-  resolveReport: async (orgId: number, reportId: number, action: 'resolve' | 'dismiss' | 'review', resolution_notes?: string): Promise<CollectorReport> => {
-    const { data } = await api.patch(`/api/thrift/orgs/${orgId}/reports/${reportId}/`, { action, resolution_notes });
+  resolveReport: async (orgUuid: string, reportId: number, action: 'resolve' | 'dismiss' | 'review', resolution_notes?: string): Promise<CollectorReport> => {
+    const { data } = await api.patch(`/api/thrift/orgs/${orgUuid}/reports/${reportId}/`, { action, resolution_notes });
     return data;
   },
 };

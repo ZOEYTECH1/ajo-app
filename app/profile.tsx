@@ -116,8 +116,8 @@ export default function ProfileRoute() {
   const firstOrg   = myOrgs?.[0] ?? null;
 
   const { data: orgDashboard, isLoading: orgLoading } = useQuery({
-    queryKey: ['thrift-org', firstOrg?.id],
-    queryFn: () => thriftService.getOrgDashboard(firstOrg!.id),
+    queryKey: ['thrift-org', firstOrg?.uuid],
+    queryFn: () => thriftService.getOrgDashboard(firstOrg!.uuid),
     enabled: isOrgAdmin && !!firstOrg,
     staleTime: 2 * 60 * 1000,
   });

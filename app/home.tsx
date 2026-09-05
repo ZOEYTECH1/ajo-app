@@ -414,8 +414,8 @@ export default function HomeRoute() {
           <SectionTitle label={(myOrgs ?? []).length === 1 ? 'My Organisation' : 'My Organisations'} />
           {(myOrgs ?? []).map((org) => (
             <TouchableOpacity
-              key={org.id}
-              onPress={() => router.push(`/thrift/org/${org.id}` as any)}
+              key={org.uuid}
+              onPress={() => router.push(`/thrift/org/${org.uuid}` as any)}
               style={[s.card, { backgroundColor: colors.surface, ...Shadow.card(colors.black) }]}
               activeOpacity={0.82}
               accessibilityRole="button"

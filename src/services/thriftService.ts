@@ -3,7 +3,7 @@ import type { AjoUser } from '../store/useAppStore';
 
 // â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-export type ThriftFrequency      = 'daily' | 'weekly' | 'monthly';
+export type ThriftFrequency      = 'monthly' | 'yearly';
 export type ThriftMemberStatus   = 'pending' | 'approved' | 'rejected' | 'amount_pending';
 export type ThriftCycleType      = 'rolling' | 'fixed';
 export type ThriftCycleStatus    = 'active' | 'completed';

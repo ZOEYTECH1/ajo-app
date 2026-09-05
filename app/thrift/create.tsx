@@ -13,9 +13,8 @@ import { FontSize, Radius, Shadow } from '../../src/theme';
 import { Button, Input, LoadingOverlay, feedback } from '../../src/components';
 
 const FREQUENCIES: { value: ThriftFrequency; label: string; desc: string }[] = [
-  { value: 'daily',   label: 'Daily',   desc: 'Payers contribute every day' },
-  { value: 'weekly',  label: 'Weekly',  desc: 'Payers contribute every week' },
-  { value: 'monthly', label: 'Monthly', desc: 'Payers contribute every month' },
+  { value: 'monthly', label: 'Monthly', desc: 'Payers contribute daily; the pot pays out monthly and a new cycle starts' },
+  { value: 'yearly',  label: 'Yearly',  desc: 'Payers contribute daily; the pot pays out yearly and a new cycle starts' },
 ];
 
 const CYCLE_TYPES: { value: ThriftCycleType; label: string; desc: string; icon: string }[] = [
@@ -31,7 +30,7 @@ export default function CreateThriftRoute() {
 
   const [name, setName]               = useState('');
   const [description, setDesc]        = useState('');
-  const [frequency, setFrequency]     = useState<ThriftFrequency>('daily');
+  const [frequency, setFrequency]     = useState<ThriftFrequency>('monthly');
   const [cycleType, setCycleType]     = useState<ThriftCycleType>('rolling');
   const [startDate, setStartDate]     = useState('');
   const [endDate, setEndDate]         = useState('');
@@ -151,7 +150,7 @@ export default function CreateThriftRoute() {
         />
 
         {/* Frequency */}
-        <Text style={[s.label, { color: colors.textPrimary, marginTop: 24 }]}>Collection frequency</Text>
+        <Text style={[s.label, { color: colors.textPrimary, marginTop: 24 }]}>Payout cycle</Text>
         {FREQUENCIES.map((f) => {
           const active = frequency === f.value;
           return (

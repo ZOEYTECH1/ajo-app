@@ -216,7 +216,7 @@ function CollectorGroupsModal({
                   <View style={{ flex: 1, marginLeft: 12 }}>
                     <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }}>{g.name}</Text>
                     <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
-                      {g.frequency} · {g.member_count} payer{g.member_count !== 1 ? 's' : ''}
+                      {g.frequency} circle · {g.member_count} payer{g.member_count !== 1 ? 's' : ''}
                     </Text>
                     <View style={[s.pill, { backgroundColor: g.active_cycle ? colors.successLight : colors.background, marginTop: 6, borderWidth: g.active_cycle ? 0 : 1, borderColor: colors.border }]}>
                       <Text style={{ fontSize: 10, fontWeight: '700', color: g.active_cycle ? colors.success : colors.textTertiary }}>
@@ -311,7 +311,7 @@ export default function OrgDashboardRoute() {
       }),
       '',
       '=== GROUPS ===',
-      'Name,Frequency,Cycle Type,Members,Collector',
+      'Name,Payout Cycle,Cycle Type,Members,Collector',
       ...(data.groups).map((g) => `"${g.name}","${g.frequency}","${g.cycle_type}","${g.member_count}","${g.collector.first_name} ${g.collector.last_name}"`),
     ];
     await Share.share({ message: lines.join('\n'), title: `${org?.name ?? 'Org'} Report` });

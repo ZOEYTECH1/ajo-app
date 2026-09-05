@@ -18,7 +18,7 @@ import { FontSize, Radius, Shadow } from '../src/theme';
 import { Skeleton, Pill } from '../src/components';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-const FREQ: Record<string, string> = { daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly' };
+const FREQ: Record<string, string> = { daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', yearly: 'Yearly' };
 
 // ─── Ajo Group Card ───────────────────────────────────────────────────────────
 const GroupCard: React.FC<{ group: Group; isAdmin: boolean; onPress: () => void }> = ({ group, isAdmin, onPress }) => {

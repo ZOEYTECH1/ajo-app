@@ -11,6 +11,7 @@ import { useThriftGroupSocket } from '../../src/hooks/useThriftGroupSocket';
 import { useAuthStore } from '../../src/store/useAppStore';
 import {
   thriftService,
+  type ThriftGroup,
   type ThriftMember,
   type ThriftPayment,
 } from '../../src/services/thriftService';
@@ -455,6 +456,137 @@ function ReportCollectorModal({
   );
 }
 
+// ─── Group Settings Modal (collector only) ────────────────────────────────────
+function SettingsModal({
+  visible, group, onClose,
+}: { visible: boolean; group: ThriftGroup; onClose: () => void }) {
+  const { colors } = useTheme();
+  const queryClient = useQueryClient();
+  const [name, setName]               = useState(group.name);
+  const [description, setDescription] = useState(group.description ?? '');
+  const [err, setErr]                 = useState('');
+
+  const mutation = useMutation({
+    mutationFn: () => thriftService.updateGroup(group.uuid, { name: name.trim(), description: description.trim() }),
+    onSuccess: () => {
+      feedback('success');
+      queryClient.invalidateQueries({ queryKey: ['thrift-group', group.uuid] });
+      onClose();
+    },
+    onError: (e: any) => {
+      feedback('error');
+      setErr(e.response?.data?.detail ?? e.response?.data?.name?.[0] ?? 'Update failed.');
+    },
+  });
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={m.overlay}>
+        <View style={[m.sheet, { backgroundColor: colors.surface }]}>
+          <View style={m.handle} />
+          <Text style={[m.title, { color: colors.textPrimary }]} accessibilityRole="header">Group Settings</Text>
+          <Text style={[m.lbl, { color: colors.textSecondary }]}>Group Name</Text>
+          <TextInput
+            value={name}
+            onChangeText={(v) => { setName(v); setErr(''); }}
+            style={[m.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border }]}
+            placeholderTextColor={colors.textTertiary}
+            accessibilityLabel="Group name"
+          />
+          <Text style={[m.lbl, { color: colors.textSecondary, marginTop: 12 }]}>Description</Text>
+          <TextInput
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            style={[m.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border, height: 80 }]}
+            placeholderTextColor={colors.textTertiary}
+            accessibilityLabel="Group description"
+          />
+          {!!err && <Text style={{ color: colors.error, fontSize: FontSize.xs, marginTop: 6 }}>{err}</Text>}
+          <TouchableOpacity
+            onPress={() => mutation.mutate()}
+            disabled={mutation.isPending || !name.trim()}
+            style={[m.btn, { backgroundColor: colors.primary, marginTop: 20 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Save group settings"
+          >
+            <Text style={m.btnText}>{mutation.isPending ? 'Saving…' : 'Save'}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]} accessibilityRole="button" accessibilityLabel="Cancel">
+            <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm }}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+// ─── Request Removal Modal (payer only, org-linked groups) ────────────────────
+function RequestRemovalModal({
+  visible, groupUuid, memberId, onClose, onSuccess,
+}: { visible: boolean; groupUuid: string; memberId: number; onClose: () => void; onSuccess: () => void }) {
+  const { colors } = useTheme();
+  const [reason, setReason] = useState('');
+  const [err, setErr]       = useState('');
+
+  const mutation = useMutation({
+    mutationFn: () => thriftService.requestRemoval(groupUuid, memberId, reason.trim()),
+    onSuccess: () => {
+      feedback('success');
+      setReason(''); setErr('');
+      onSuccess();
+      onClose();
+    },
+    onError: (e: any) => {
+      feedback('error');
+      setErr(e.response?.data?.reason?.[0] ?? e.response?.data?.detail ?? 'Request failed.');
+    },
+  });
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={m.overlay}>
+        <View style={[m.sheet, { backgroundColor: colors.surface }]}>
+          <View style={m.handle} />
+          <Text style={[m.title, { color: colors.textPrimary }]} accessibilityRole="header">Request to Leave Group</Text>
+          <View style={[s.alertBox, { backgroundColor: WARNING_LIGHT, marginTop: 8 }]}>
+            <Ionicons name="information-circle-outline" size={16} color={WARNING} />
+            <Text style={{ flex: 1, fontSize: FontSize.xs, color: WARNING, marginLeft: 8, lineHeight: 18 }}>
+              Your removal must be reviewed and settled by the organisation admin. Your payment records will remain on file. You will be notified of the decision.
+            </Text>
+          </View>
+          <Text style={[m.lbl, { color: colors.textSecondary, marginTop: 12 }]}>Reason for leaving</Text>
+          <TextInput
+            value={reason}
+            onChangeText={(v) => { setReason(v); setErr(''); }}
+            placeholder="Describe why you want to leave this group…"
+            multiline
+            style={[m.input, { backgroundColor: colors.background, color: colors.textPrimary, borderColor: colors.border, height: 90 }]}
+            placeholderTextColor={colors.textTertiary}
+            accessibilityLabel="Reason for leaving"
+          />
+          {!!err && <Text style={{ color: colors.error, fontSize: FontSize.xs, marginTop: 6 }}>{err}</Text>}
+          <TouchableOpacity
+            onPress={() => {
+              if (reason.trim().length < 5) { setErr('Please provide a reason (at least 5 characters).'); return; }
+              mutation.mutate();
+            }}
+            disabled={mutation.isPending}
+            style={[m.btn, { backgroundColor: colors.error, marginTop: 20 }]}
+            accessibilityRole="button"
+            accessibilityLabel="Submit removal request"
+          >
+            <Text style={m.btnText}>{mutation.isPending ? 'Submitting…' : 'Submit Request'}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onClose} style={[m.btn, { backgroundColor: colors.background, marginTop: 8 }]} accessibilityRole="button" accessibilityLabel="Cancel">
+            <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm }}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 // ─── End Cycle Modal ──────────────────────────────────────────────────────────
 function EndCycleModal({
   visible, groupUuid, onClose,
@@ -732,6 +864,8 @@ export default function ThriftGroupDetail() {
   const [endCycleOpen, setEndCycleOpen]   = useState(false);
   const [restartOpen, setRestartOpen]     = useState(false);
   const [kebabOpen, setKebabOpen]         = useState(false);
+  const [showSettings, setShowSettings]   = useState(false);
+  const [showRequestRemoval, setShowRequestRemoval] = useState(false);
   const [disputeTarget, setDisputeTarget]           = useState<ThriftPayment | null>(null);
   const [viewDisputeTarget, setViewDisputeTarget]   = useState<ThriftPayment | null>(null);
   const [expandedMembers, setExpandedMembers]       = useState<Set<number>>(new Set());
@@ -915,9 +1049,14 @@ export default function ThriftGroupDetail() {
           {group.name}
         </Text>
         {isCollector ? (
-          <TouchableOpacity onPress={shareInvite} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Share invite code">
-            <Ionicons name="share-outline" size={22} color={colors.primary} />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+            <TouchableOpacity onPress={shareInvite} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Share invite code">
+              <Ionicons name="share-outline" size={22} color={colors.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setShowSettings(true)} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Group settings">
+              <Ionicons name="settings-outline" size={22} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
         ) : (
           <TouchableOpacity onPress={() => setKebabOpen(true)} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="More options">
             <Ionicons name="ellipsis-vertical" size={22} color={colors.textPrimary} />
@@ -1365,6 +1504,31 @@ export default function ThriftGroupDetail() {
                     </Text>
                   </View>
                 )}
+
+                {/* Request removal — only for org-linked groups; org admin handles the settlement */}
+                {!!group.organization && ownMember.status === 'approved' && (
+                  <View style={{ marginTop: 12 }}>
+                    {group.my_removal_request?.status === 'pending' ? (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', backgroundColor: WARNING_LIGHT, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 }}>
+                        <Ionicons name="alert-circle-outline" size={14} color={WARNING} />
+                        <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: WARNING, marginLeft: 6 }}>
+                          Removal request pending review
+                        </Text>
+                      </View>
+                    ) : (
+                      <TouchableOpacity
+                        onPress={() => setShowRequestRemoval(true)}
+                        style={{ alignSelf: 'flex-start', backgroundColor: colors.errorLight, borderWidth: 1, borderColor: colors.error, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 }}
+                        accessibilityRole="button"
+                        accessibilityLabel="Request to leave group"
+                      >
+                        <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.error }}>
+                          Request to Leave Group
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
               </View>
             )}
 
@@ -1500,6 +1664,20 @@ export default function ThriftGroupDetail() {
         isFixed={group.cycle_type === 'fixed'}
         onClose={() => setRestartOpen(false)}
       />
+      <SettingsModal
+        visible={showSettings}
+        group={group}
+        onClose={() => setShowSettings(false)}
+      />
+      {ownMember && (
+        <RequestRemovalModal
+          visible={showRequestRemoval}
+          groupUuid={groupUuid}
+          memberId={ownMember.id}
+          onClose={() => setShowRequestRemoval(false)}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['thrift-group', groupUuid] })}
+        />
+      )}
     </View>
   );
 }

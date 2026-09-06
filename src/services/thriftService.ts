@@ -47,6 +47,12 @@ export interface ThriftCycle {
   created_at: string;
 }
 
+export interface RemovalRequest {
+  id: number;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+}
+
 export interface ThriftGroup {
   id: number;
   uuid: string;
@@ -67,6 +73,7 @@ export interface ThriftGroup {
   created_at: string;
   is_org_admin?: boolean;
   is_collector?: boolean;
+  my_removal_request?: RemovalRequest | null;
 }
 
 export interface ThriftMember {
@@ -242,6 +249,16 @@ export const thriftService = {
 
   regenerateInvite: async (uuid: string): Promise<{ invite_code: string }> => {
     const { data } = await api.post(`/api/thrift/${uuid}/invite/regenerate/`);
+    return data;
+  },
+
+  updateGroup: async (uuid: string, payload: { name: string; description: string }): Promise<ThriftGroup> => {
+    const { data } = await api.patch(`/api/thrift/${uuid}/`, payload);
+    return data;
+  },
+
+  requestRemoval: async (groupUuid: string, memberId: number, reason: string): Promise<{ id: number; status: string; created_at: string }> => {
+    const { data } = await api.post(`/api/thrift/${groupUuid}/members/${memberId}/request-removal/`, { reason });
     return data;
   },
 

@@ -4,23 +4,18 @@ import {
   RefreshControl, StatusBar, StyleSheet, ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useInfiniteQuery, useQuery, useQueries } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../src/hooks/useTheme';
 import { groupService, type Payment, type PaymentStatus } from '../src/services/groupService';
-import {
-  thriftService,
-  type CollectorReport, type ThriftOrgMember, type ThriftHistoryPayment,
-} from '../src/services/thriftService';
+import { thriftService, type ThriftHistoryPayment } from '../src/services/thriftService';
 import { FontSize, Radius, Shadow } from '../src/theme';
 import { Skeleton } from '../src/components';
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 const fmtDate = (d: string) =>
   new Date(d).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
-const fmtDateTime = (d: string) =>
-  new Date(d).toLocaleString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 const fmtAmt = (v: string | number) => `₦${Number(v).toLocaleString()}`;
 
 // ─── Top tab bar (Ajo / Thrift) ───────────────────────────────────────────────
@@ -237,59 +232,6 @@ function ThriftPaymentCard({ payment, role }: { payment: ThriftHistoryPayment; r
   );
 }
 
-// ─── Org admin timeline ───────────────────────────────────────────────────────
-type OrgEvent = {
-  id: string; date: string; icon: string;
-  title: string; subtitle: string;
-  variant: 'info' | 'success' | 'warning' | 'error' | 'muted';
-};
-
-function buildOrgTimeline(members: ThriftOrgMember[], reports: CollectorReport[]): OrgEvent[] {
-  const events: OrgEvent[] = [];
-  for (const m of members) {
-    events.push({ id: `invite-${m.id}`, date: m.created_at, icon: 'mail-outline', title: `Invite sent to ${m.user.first_name} ${m.user.last_name}`, subtitle: '', variant: 'info' });
-    if (m.joined_at) {
-      events.push({ id: `joined-${m.id}`, date: m.joined_at, icon: 'checkmark-circle-outline', title: `${m.user.first_name} ${m.user.last_name} joined as collector`, subtitle: m.status === 'suspended' ? 'Currently suspended' : 'Active collector', variant: m.status === 'suspended' ? 'warning' : 'success' });
-    }
-    if (m.status === 'suspended') {
-      events.push({ id: `suspend-${m.id}`, date: m.joined_at ?? m.created_at, icon: 'pause-circle-outline', title: `${m.user.first_name} ${m.user.last_name} suspended`, subtitle: 'Collector access revoked', variant: 'error' });
-    }
-  }
-  for (const r of reports) {
-    events.push({ id: `report-${r.id}`, date: r.created_at, icon: 'flag-outline', title: `Report filed against ${r.collector.first_name} ${r.collector.last_name}`, subtitle: r.reason.slice(0, 80) + (r.reason.length > 80 ? '…' : ''), variant: 'warning' });
-    if (r.reviewed_at && r.status !== 'pending') {
-      const label = r.status === 'resolved' ? 'Resolved' : r.status === 'dismissed' ? 'Dismissed' : 'Marked as reviewed';
-      events.push({ id: `report-reviewed-${r.id}`, date: r.reviewed_at, icon: r.status === 'resolved' ? 'shield-checkmark-outline' : r.status === 'dismissed' ? 'close-circle-outline' : 'eye-outline', title: `Report ${label.toLowerCase()}`, subtitle: r.resolution_notes || `Against ${r.collector.first_name} ${r.collector.last_name}`, variant: r.status === 'resolved' ? 'success' : r.status === 'dismissed' ? 'muted' : 'info' });
-    }
-  }
-  return events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-}
-
-function OrgEventCard({ event }: { event: OrgEvent }) {
-  const { colors } = useTheme();
-  const palette = {
-    info:    { bg: colors.primaryTint,  icon: colors.primary },
-    success: { bg: colors.successLight, icon: colors.success },
-    warning: { bg: '#FEF3C7',           icon: '#D97706' },
-    error:   { bg: colors.errorLight,   icon: colors.error },
-    muted:   { bg: colors.background,   icon: colors.textTertiary },
-  }[event.variant];
-  return (
-    <View style={[ts.card, { backgroundColor: colors.surface, ...Shadow.soft(colors.black), flexDirection: 'row', alignItems: 'flex-start' }]}>
-      <View style={[ts.eventIcon, { backgroundColor: palette.bg }]}>
-        <Ionicons name={event.icon as any} size={18} color={palette.icon} />
-      </View>
-      <View style={{ flex: 1, marginLeft: 12 }}>
-        <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary, lineHeight: 20 }}>{event.title}</Text>
-        {!!event.subtitle && (
-          <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 3, lineHeight: 17 }} numberOfLines={2}>{event.subtitle}</Text>
-        )}
-        <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary, marginTop: 5 }}>{fmtDateTime(event.date)}</Text>
-      </View>
-    </View>
-  );
-}
-
 // ─── Empty state ──────────────────────────────────────────────────────────────
 function Empty({ icon, title, body }: { icon: string; title: string; body: string }) {
   const { colors } = useTheme();
@@ -313,22 +255,6 @@ export default function HistoryRoute() {
   const [ajoFilter,  setAjoFilter]  = useState<AjoFilter>('all');
 
   // ── Data fetching ──────────────────────────────────────────────────────────
-  const { data: myOrgs } = useQuery({
-    queryKey: ['my-orgs'],
-    queryFn:  thriftService.getOrgs,
-    staleTime: 5 * 60 * 1000,
-  });
-  const isOrgAdmin = (myOrgs ?? []).length > 0;
-
-  const orgDashboardResults = useQueries({
-    queries: (myOrgs ?? []).map((org) => ({
-      queryKey: ['thrift-org-dash', org.uuid] as const,
-      queryFn:  () => thriftService.getOrgDashboard(org.uuid),
-      enabled:  isOrgAdmin,
-      staleTime: 2 * 60 * 1000,
-    })),
-  });
-
   const {
     data: ajoData, isLoading: ajoLoading, isError: ajoError,
     refetch: refetchAjo, isFetching: ajoFetching,
@@ -338,7 +264,6 @@ export default function HistoryRoute() {
     queryFn: ({ pageParam }) => groupService.getPaymentHistoryPage(pageParam as string | null, ajoFilter),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.next ?? undefined,
-    enabled: !isOrgAdmin,
   });
 
   const {
@@ -350,7 +275,6 @@ export default function HistoryRoute() {
     queryFn: ({ pageParam }) => thriftService.getMyPaymentHistoryPage('collector', pageParam as string | null),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.next ?? undefined,
-    enabled: !isOrgAdmin,
   });
 
   const {
@@ -362,37 +286,7 @@ export default function HistoryRoute() {
     queryFn: ({ pageParam }) => thriftService.getMyPaymentHistoryPage('payer', pageParam as string | null),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.next ?? undefined,
-    enabled: !isOrgAdmin,
   });
-
-  // ── Org admin view ─────────────────────────────────────────────────────────
-  if (isOrgAdmin) {
-    const loading     = orgDashboardResults.some((r) => r.isLoading);
-    const allMembers  = orgDashboardResults.flatMap((r) => [...(r.data?.collectors ?? []), ...(r.data?.pending_collectors ?? [])]);
-    const allReports  = orgDashboardResults.flatMap((r) => r.data?.recent_reports ?? []);
-    const timeline    = buildOrgTimeline(allMembers, allReports);
-    const refetchAll  = () => orgDashboardResults.forEach((r) => r.refetch());
-    const refreshing  = orgDashboardResults.some((r) => r.isFetching && !r.isLoading);
-
-    return (
-      <View style={[ts.root, { backgroundColor: colors.background }]}>
-        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
-        <View style={[ts.header, { backgroundColor: colors.surface, borderBottomColor: colors.border, paddingTop: insets.top + 12 }]}>
-          <Text accessibilityRole="header" style={[ts.title, { color: colors.textPrimary }]}>History</Text>
-          <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 2 }}>Organisation activity — invites, approvals and reports</Text>
-        </View>
-        {loading ? (
-          <ScrollView contentContainerStyle={ts.body}>{[1,2,3,4].map((i) => <Skeleton key={i} width="100%" height={80} radius={Radius.lg} style={{ marginBottom: 12 }} />)}</ScrollView>
-        ) : timeline.length === 0 ? (
-          <Empty icon="time-outline" title="No activity yet" body="Actions like inviting collectors and resolving reports will appear here." />
-        ) : (
-          <ScrollView contentContainerStyle={ts.body} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refetchAll} tintColor={colors.primary} />} showsVerticalScrollIndicator={false}>
-            {timeline.map((e) => <OrgEventCard key={e.id} event={e} />)}
-          </ScrollView>
-        )}
-      </View>
-    );
-  }
 
   // ── Determine which top tabs to show ──────────────────────────────────────
   const ajoPayments       = ajoData?.pages.flatMap(p => p.results) ?? [];

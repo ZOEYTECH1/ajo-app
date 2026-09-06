@@ -13,7 +13,6 @@ import { authService } from '../src/services/authService';
 import { userService } from '../src/services/userService';
 import { cloudinaryUrl } from '../src/lib/cloudinary';
 import { groupService } from '../src/services/groupService';
-import { thriftService } from '../src/services/thriftService';
 import { FontSize, Radius, Shadow } from '../src/theme';
 import { LoadingOverlay, Skeleton } from '../src/components';
 
@@ -105,28 +104,10 @@ export default function ProfileRoute() {
     changePwMutation.mutate();
   }
 
-  // Org admin detection
-  const { data: myOrgs } = useQuery({
-    queryKey: ['my-orgs'],
-    queryFn: thriftService.getOrgs,
-    enabled: !!user,
-    staleTime: 5 * 60 * 1000,
-  });
-  const isOrgAdmin = (myOrgs ?? []).length > 0;
-  const firstOrg   = myOrgs?.[0] ?? null;
-
-  const { data: orgDashboard, isLoading: orgLoading } = useQuery({
-    queryKey: ['thrift-org', firstOrg?.uuid],
-    queryFn: () => thriftService.getOrgDashboard(firstOrg!.uuid),
-    enabled: isOrgAdmin && !!firstOrg,
-    staleTime: 2 * 60 * 1000,
-  });
-
-  // Ajo payment history — only relevant for non-org-admin
   const { data: history = [], isLoading: historyLoading } = useQuery({
     queryKey: ['payment-history'],
     queryFn: groupService.getPaymentHistory,
-    enabled: !!user && !isOrgAdmin,
+    enabled: !!user,
     initialData: [],
   });
 
@@ -140,12 +121,6 @@ export default function ProfileRoute() {
 
   const approvedCount = history.filter((p) => p.status === 'approved').length;
   const pendingCount  = history.filter((p) => p.status === 'pending').length;
-
-  // Org stats
-  const activeCollectors  = (orgDashboard?.collectors ?? []).filter((c) => c.status === 'active').length;
-  const totalGroups       = orgDashboard?.groups.length ?? 0;
-  const pendingReports    = (orgDashboard?.recent_reports ?? []).filter((r) => r.status === 'pending').length;
-  const totalPayers       = (orgDashboard?.groups ?? []).reduce((sum, g) => sum + g.member_count, 0);
 
   const fmtAmount = (n: number) =>
     `₦${n.toLocaleString('en-NG', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -370,81 +345,42 @@ export default function ProfileRoute() {
         )}
 
         {/* Balance / overview card */}
-        {isOrgAdmin ? (
-          <>
-            <View style={[s.balanceCard, { backgroundColor: colors.primary }]}>
-              <Text style={{ fontSize: FontSize.xs, color: 'rgba(255,255,255,0.7)', fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' }}>
-                Organisation
-              </Text>
-              {orgLoading ? (
-                <Skeleton width={180} height={28} radius={8} style={{ marginTop: 8, backgroundColor: 'rgba(255,255,255,0.2)' }} />
-              ) : (
-                <Text style={{ fontSize: FontSize.xl, fontWeight: '900', color: '#fff', marginTop: 4, letterSpacing: -0.3 }} numberOfLines={1}>
-                  {firstOrg?.name ?? '—'}
-                </Text>
-              )}
-              <Text style={{ fontSize: FontSize.xs, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
-                {activeCollectors} active collector{activeCollectors !== 1 ? 's' : ''} · {totalGroups} group{totalGroups !== 1 ? 's' : ''}
-              </Text>
-            </View>
+        <View style={[s.balanceCard, { backgroundColor: colors.primary }]}>
+          <Text style={{ fontSize: FontSize.xs, color: 'rgba(255,255,255,0.7)', fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' }}>
+            Total Contributions
+          </Text>
+          {historyLoading ? (
+            <Skeleton width={160} height={36} radius={8} style={{ marginTop: 8, backgroundColor: 'rgba(255,255,255,0.2)' }} />
+          ) : (
+            <Text style={{ fontSize: 32, fontWeight: '900', color: '#fff', marginTop: 4, letterSpacing: -0.5 }}>
+              {fmtAmount(totalApproved)}
+            </Text>
+          )}
+          <Text style={{ fontSize: FontSize.xs, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+            {approvedCount} approved payment{approvedCount !== 1 ? 's' : ''} across all groups
+          </Text>
+        </View>
 
-            <View style={s.statsRow}>
-              <View style={[s.statCard, { backgroundColor: colors.surface, ...Shadow.soft(colors.black) }]}>
-                <Ionicons name="people-outline" size={20} color={colors.primary} />
-                <Text style={{ fontSize: FontSize.xl, fontWeight: '800', color: colors.textPrimary, marginTop: 6 }}>
-                  {orgLoading ? '—' : totalPayers}
-                </Text>
-                <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>Total payers</Text>
-              </View>
-              <View style={[s.statCard, { backgroundColor: colors.surface, ...Shadow.soft(colors.black) }]}>
-                <Ionicons name="flag-outline" size={20} color={pendingReports > 0 ? colors.warning : colors.textTertiary} />
-                <Text style={{ fontSize: FontSize.xl, fontWeight: '800', color: pendingReports > 0 ? colors.warning : colors.textPrimary, marginTop: 6 }}>
-                  {orgLoading ? '—' : pendingReports}
-                </Text>
-                <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>Pending reports</Text>
-              </View>
-            </View>
-          </>
-        ) : (
-          <>
-            <View style={[s.balanceCard, { backgroundColor: colors.primary }]}>
-              <Text style={{ fontSize: FontSize.xs, color: 'rgba(255,255,255,0.7)', fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' }}>
-                Total Contributions
-              </Text>
-              {historyLoading ? (
-                <Skeleton width={160} height={36} radius={8} style={{ marginTop: 8, backgroundColor: 'rgba(255,255,255,0.2)' }} />
-              ) : (
-                <Text style={{ fontSize: 32, fontWeight: '900', color: '#fff', marginTop: 4, letterSpacing: -0.5 }}>
-                  {fmtAmount(totalApproved)}
-                </Text>
-              )}
-              <Text style={{ fontSize: FontSize.xs, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
-                {approvedCount} approved payment{approvedCount !== 1 ? 's' : ''} across all groups
-              </Text>
-            </View>
-
-            <View style={s.statsRow}>
-              <View style={[s.statCard, { backgroundColor: colors.surface, ...Shadow.soft(colors.black) }]}>
-                <Ionicons name="time-outline" size={20} color={colors.warning} />
-                <Text style={{ fontSize: FontSize.xl, fontWeight: '800', color: colors.textPrimary, marginTop: 6 }}>
-                  {historyLoading ? '—' : fmtAmount(totalPending)}
-                </Text>
-                <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
-                  Pending ({pendingCount})
-                </Text>
-              </View>
-              <View style={[s.statCard, { backgroundColor: colors.surface, ...Shadow.soft(colors.black) }]}>
-                <Ionicons name="receipt-outline" size={20} color={colors.primary} />
-                <Text style={{ fontSize: FontSize.xl, fontWeight: '800', color: colors.textPrimary, marginTop: 6 }}>
-                  {historyLoading ? '—' : (history?.length ?? 0)}
-                </Text>
-                <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
-                  Total payments
-                </Text>
-              </View>
-            </View>
-          </>
-        )}
+        <View style={s.statsRow}>
+          <View style={[s.statCard, { backgroundColor: colors.surface, ...Shadow.soft(colors.black) }]}>
+            <Ionicons name="time-outline" size={20} color={colors.warning} />
+            <Text style={{ fontSize: FontSize.xl, fontWeight: '800', color: colors.textPrimary, marginTop: 6 }}>
+              {historyLoading ? '—' : fmtAmount(totalPending)}
+            </Text>
+            <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
+              Pending ({pendingCount})
+            </Text>
+          </View>
+          <View style={[s.statCard, { backgroundColor: colors.surface, ...Shadow.soft(colors.black) }]}>
+            <Ionicons name="receipt-outline" size={20} color={colors.primary} />
+            <Text style={{ fontSize: FontSize.xl, fontWeight: '800', color: colors.textPrimary, marginTop: 6 }}>
+              {historyLoading ? '—' : (history?.length ?? 0)}
+            </Text>
+            <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
+              Total payments
+            </Text>
+          </View>
+        </View>
 
         {/* Account actions */}
         <View style={[s.actionsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>

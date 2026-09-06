@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StatusBar,
   StyleSheet, RefreshControl, Modal, TextInput, Share, Image, Alert,
@@ -50,25 +50,6 @@ const pill = StyleSheet.create({
   wrap: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: Radius.full },
   label: { fontSize: FontSize.xs, fontWeight: '700' },
 });
-
-/** Monday–Sunday range (as YYYY-MM-DD strings) containing the given date. */
-function weekRangeOf(dateStr: string): [string, string] {
-  const d = new Date(`${dateStr}T00:00:00`);
-  const day = d.getDay(); // 0 = Sun .. 6 = Sat
-  const diffToMonday = (day === 0 ? -6 : 1) - day;
-  const monday = new Date(d);
-  monday.setDate(d.getDate() + diffToMonday);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  const toISO = (x: Date) => x.toISOString().slice(0, 10);
-  return [toISO(monday), toISO(sunday)];
-}
-
-function shiftDate(dateStr: string, days: number): string {
-  const d = new Date(`${dateStr}T00:00:00`);
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
-}
 
 // ─── Flag Amount Modal ────────────────────────────────────────────────────────
 function FlagAmountModal({
@@ -843,24 +824,9 @@ export default function ThriftGroupDetail() {
     onError: () => feedback('error'),
   });
 
-  // ── Org admin audit: real-time updates, day/week/circle breakdown ─────────
-  const [auditMode, setAuditMode]   = useState<'day' | 'week' | 'circle' | 'all'>('day');
-  const [auditDate, setAuditDate]   = useState(() => new Date().toISOString().slice(0, 10));
-  const [auditCycleId, setAuditCycleId] = useState<number | null>(null);
-  const [isLive, setIsLive]         = useState(false);
-  const [earlyEndAlert, setEarlyEndAlert] = useState<string | null>(null);
-
-  const { data: cycles } = useQuery({
-    queryKey: ['thrift-cycles', groupUuid],
-    queryFn: () => thriftService.getCycles(groupUuid),
-    enabled: !!group,
-  });
-
+  // Real-time updates keep the collector's/payer's own payment and cycle data
+  // fresh without a manual pull-to-refresh.
   useThriftGroupSocket(groupUuid, (e) => {
-    setIsLive(true);
-    if (e.event === 'cycle_end_blocked') {
-      setEarlyEndAlert(`${e.collector_name} tried to end Cycle #${e.cycle_number} early — it runs until ${e.scheduled_end_date}.`);
-    }
     if (e.event === 'cycle_ended' || e.event === 'cycle_end_blocked') {
       queryClient.invalidateQueries({ queryKey: ['thrift-group', groupUuid] });
       queryClient.invalidateQueries({ queryKey: ['thrift-cycles', groupUuid] });
@@ -868,35 +834,6 @@ export default function ThriftGroupDetail() {
       queryClient.invalidateQueries({ queryKey: ['thrift-payments', groupUuid] });
     }
   });
-
-  const periodPayments = useMemo(() => {
-    const all = payments ?? [];
-    if (auditMode === 'day') return all.filter((p) => p.period_date === auditDate);
-    if (auditMode === 'week') {
-      const [start, end] = weekRangeOf(auditDate);
-      return all.filter((p) => p.period_date >= start && p.period_date <= end);
-    }
-    if (auditMode === 'circle') {
-      return auditCycleId == null ? [] : all.filter((p) => p.cycle_id === auditCycleId);
-    }
-    return all;
-  }, [payments, auditMode, auditDate, auditCycleId]);
-
-  const auditTotals = useMemo(() => {
-    let expected = 0, actual = 0, disputedAmount = 0, disputedCount = 0, pendingCount = 0;
-    for (const p of periodPayments) {
-      const amt = Number(p.amount);
-      if (p.status === 'confirmed') { actual += amt; expected += amt; }
-      else if (p.status === 'disputed') { disputedAmount += amt; expected += amt; disputedCount++; }
-      else pendingCount++;
-    }
-    return { expected, actual, disputedAmount, disputedCount, pendingCount };
-  }, [periodPayments]);
-
-  const lifetimeCollected = useMemo(
-    () => (payments ?? []).filter((p) => p.status === 'confirmed').reduce((sum, p) => sum + Number(p.amount), 0),
-    [payments],
-  );
 
   const toggleKyc = (mem: ThriftMember) => {
     const nextValue = !mem.user.is_kyc_verified;
@@ -948,7 +885,6 @@ export default function ThriftGroupDetail() {
 
   if (!group) return null;
 
-  const isOrgAdmin     = !!group.is_org_admin;
   const ownMember      = members?.find((m) => m.user.id === user?.id) ?? null;
   const pendingMembers = members?.filter((m) => m.status === 'pending' || m.status === 'amount_pending') ?? [];
   const approvedMembers = members?.filter((m) => m.status === 'approved') ?? [];
@@ -978,9 +914,7 @@ export default function ThriftGroupDetail() {
         >
           {group.name}
         </Text>
-        {isOrgAdmin ? (
-          <View style={{ width: 22 }} />
-        ) : isCollector ? (
+        {isCollector ? (
           <TouchableOpacity onPress={shareInvite} hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }} accessibilityRole="button" accessibilityLabel="Share invite code">
             <Ionicons name="share-outline" size={22} color={colors.primary} />
           </TouchableOpacity>
@@ -1136,304 +1070,7 @@ export default function ThriftGroupDetail() {
           )}
         </View>
 
-        {/* ── ORG ADMIN VIEW (read-only oversight) ── */}
-        {isOrgAdmin ? (
-          <>
-            <View style={[s.tabBar, { backgroundColor: colors.surface, borderColor: colors.border, marginBottom: 12 }]}>
-              <View style={{ flex: 1, paddingVertical: 12, alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
-                <Ionicons name="shield-checkmark-outline" size={15} color={colors.primary} />
-                <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.primary, marginLeft: 6 }}>
-                  Organisation Oversight
-                </Text>
-                {isLive && (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8 }}>
-                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success, marginRight: 4 }} />
-                    <Text style={{ fontSize: 10, fontWeight: '700', color: colors.success }}>LIVE</Text>
-                  </View>
-                )}
-              </View>
-            </View>
-
-            {earlyEndAlert && (
-              <View style={{ flexDirection: 'row', alignItems: 'flex-start', backgroundColor: WARNING_LIGHT, borderRadius: Radius.md, padding: 12, marginBottom: 12 }}>
-                <Ionicons name="warning-outline" size={16} color={WARNING} style={{ marginTop: 1 }} />
-                <Text style={{ flex: 1, fontSize: FontSize.xs, color: WARNING, marginLeft: 8, lineHeight: 17 }}>
-                  {earlyEndAlert}
-                </Text>
-                <TouchableOpacity onPress={() => setEarlyEndAlert(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }} accessibilityRole="button" accessibilityLabel="Dismiss">
-                  <Ionicons name="close" size={16} color={WARNING} />
-                </TouchableOpacity>
-              </View>
-            )}
-
-            <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, textAlign: 'center', marginBottom: 12 }}>
-              Lifetime collected: <Text style={{ fontWeight: '800', color: colors.textPrimary }}>₦{lifetimeCollected.toLocaleString()}</Text>
-            </Text>
-
-            {/* Period selector */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
-              {(['day', 'week', 'circle', 'all'] as const).map((mode) => (
-                <TouchableOpacity
-                  key={mode}
-                  onPress={() => setAuditMode(mode)}
-                  style={{
-                    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 99,
-                    backgroundColor: auditMode === mode ? colors.primary : colors.surface,
-                    borderWidth: 1, borderColor: auditMode === mode ? colors.primary : colors.border,
-                  }}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: auditMode === mode }}
-                  accessibilityLabel={mode === 'all' ? 'All Circles' : mode}
-                >
-                  <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: auditMode === mode ? '#fff' : colors.textSecondary, textTransform: 'capitalize' }}>
-                    {mode === 'all' ? 'All Circles' : mode}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {(auditMode === 'day' || auditMode === 'week') && (
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 12 }}>
-                <TouchableOpacity
-                  onPress={() => setAuditDate((d) => shiftDate(d, auditMode === 'day' ? -1 : -7))}
-                  accessibilityRole="button"
-                  accessibilityLabel="Previous period"
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <Ionicons name="chevron-back-circle-outline" size={22} color={colors.primary} />
-                </TouchableOpacity>
-                <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }}>
-                  {auditMode === 'day' ? auditDate : weekRangeOf(auditDate).join(' → ')}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => setAuditDate((d) => shiftDate(d, auditMode === 'day' ? 1 : 7))}
-                  accessibilityRole="button"
-                  accessibilityLabel="Next period"
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <Ionicons name="chevron-forward-circle-outline" size={22} color={colors.primary} />
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {auditMode === 'circle' && (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={{ marginBottom: 12 }}
-                contentContainerStyle={{ gap: 8 }}
-              >
-                {(cycles ?? []).slice().sort((a, b) => b.cycle_number - a.cycle_number).map((c) => (
-                  <TouchableOpacity
-                    key={c.id}
-                    onPress={() => setAuditCycleId(c.id)}
-                    style={{
-                      paddingHorizontal: 12, paddingVertical: 6, borderRadius: 99,
-                      backgroundColor: auditCycleId === c.id ? colors.primary : colors.surface,
-                      borderWidth: 1, borderColor: auditCycleId === c.id ? colors.primary : colors.border,
-                    }}
-                    accessibilityRole="button"
-                  >
-                    <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: auditCycleId === c.id ? '#fff' : colors.textSecondary }}>
-                      Circle #{c.cycle_number}{c.status === 'active' ? ' (active)' : ''}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            )}
-
-            {/* Expected vs Actual */}
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
-              <View style={{ flex: 1, minWidth: '45%', backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 12, padding: 12 }}>
-                <Text style={{ fontSize: 10, fontWeight: '700', color: colors.textTertiary, letterSpacing: 0.5 }}>EXPECTED</Text>
-                <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.textPrimary, marginTop: 2 }}>
-                  ₦{auditTotals.expected.toLocaleString()}
-                </Text>
-                <Text style={{ fontSize: 10, color: colors.textTertiary, marginTop: 1 }}>Confirmed + disputed</Text>
-              </View>
-              <View style={{ flex: 1, minWidth: '45%', backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 12, padding: 12 }}>
-                <Text style={{ fontSize: 10, fontWeight: '700', color: colors.success, letterSpacing: 0.5 }}>ACTUAL COLLECTED</Text>
-                <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.textPrimary, marginTop: 2 }}>
-                  ₦{auditTotals.actual.toLocaleString()}
-                </Text>
-                <Text style={{ fontSize: 10, color: colors.textTertiary, marginTop: 1 }}>Confirmed by payer</Text>
-              </View>
-              <View style={{ flex: 1, minWidth: '45%', backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 12, padding: 12 }}>
-                <Text style={{ fontSize: 10, fontWeight: '700', color: WARNING, letterSpacing: 0.5 }}>DISPUTED</Text>
-                <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.textPrimary, marginTop: 2 }}>
-                  ₦{auditTotals.disputedAmount.toLocaleString()}
-                </Text>
-                <Text style={{ fontSize: 10, color: colors.textTertiary, marginTop: 1 }}>{auditTotals.disputedCount} to resolve</Text>
-              </View>
-              <View style={{ flex: 1, minWidth: '45%', backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 12, padding: 12 }}>
-                <Text style={{ fontSize: 10, fontWeight: '700', color: colors.textTertiary, letterSpacing: 0.5 }}>PENDING</Text>
-                <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.textPrimary, marginTop: 2 }}>
-                  {auditTotals.pendingCount}
-                </Text>
-                <Text style={{ fontSize: 10, color: colors.textTertiary, marginTop: 1 }}>Awaiting payer</Text>
-              </View>
-            </View>
-
-            {membersLoading || paymentsLoading ? (
-              <>
-                <Skeleton width="100%" height={110} radius={12} style={{ marginBottom: 10 }} />
-                <Skeleton width="100%" height={110} radius={12} />
-              </>
-            ) : approvedMembers.length === 0 ? (
-              <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-                <Ionicons name="people-outline" size={48} color={colors.border} />
-                <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 12, textAlign: 'center' }}>
-                  No approved payers yet.
-                </Text>
-              </View>
-            ) : (
-              approvedMembers.map((mem) => {
-                const memberPayments = periodPayments.filter((p) => p.member === mem.id);
-                const isExpanded     = expandedMembers.has(mem.id);
-                const visiblePayments = isExpanded ? memberPayments : memberPayments.slice(0, 1);
-                const toggleExpand   = () => setExpandedMembers((prev) => {
-                  const next = new Set(prev);
-                  next.has(mem.id) ? next.delete(mem.id) : next.add(mem.id);
-                  return next;
-                });
-
-                return (
-                  <View key={mem.id} style={[s.memberCard, { backgroundColor: colors.surface, ...Shadow.card(colors.black) }]}>
-                    {/* Payer header */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                      <View style={[s.avatar, { backgroundColor: colors.successLight }]}>
-                        <Text style={{ fontWeight: '800', color: colors.success, fontSize: FontSize.sm }}>
-                          {mem.user.first_name?.[0]}{mem.user.last_name?.[0]}
-                        </Text>
-                      </View>
-                      <View style={{ flex: 1, marginLeft: 12 }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                          <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }}>
-                            {mem.user.first_name} {mem.user.last_name}
-                          </Text>
-                          <TouchableOpacity
-                            onPress={() => toggleKyc(mem)}
-                            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                            style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 5, paddingVertical: 2, borderRadius: 99,
-                              backgroundColor: mem.user.is_kyc_verified ? colors.successLight : colors.border }}
-                            accessibilityRole="button"
-                            accessibilityLabel={mem.user.is_kyc_verified ? `Remove KYC verification for ${mem.user.first_name} ${mem.user.last_name}` : `Mark ${mem.user.first_name} ${mem.user.last_name} as KYC verified`}
-                          >
-                            <Ionicons
-                              name={mem.user.is_kyc_verified ? 'shield-checkmark' : 'shield-outline'}
-                              size={9}
-                              color={mem.user.is_kyc_verified ? colors.success : colors.textTertiary}
-                            />
-                            <Text style={{ fontSize: 9, fontWeight: '700', marginLeft: 2,
-                              color: mem.user.is_kyc_verified ? colors.success : colors.textTertiary }}>
-                              KYC
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
-                        <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
-                          ₦{Number(mem.personal_amount).toLocaleString()}/period · saved ₦{Number(mem.total_saved).toLocaleString()}
-                        </Text>
-                      </View>
-                      <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99, backgroundColor: colors.primaryTint }}>
-                        <Text style={{ fontSize: 10, fontWeight: '700', color: colors.primary }}>
-                          {memberPayments.length} payment{memberPayments.length !== 1 ? 's' : ''}
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* Payment rows with dual confirmation */}
-                    {memberPayments.length === 0 ? (
-                      <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary, paddingTop: 2 }}>
-                        {auditMode === 'all' ? 'No payments recorded yet.' : 'No collections for this period.'}
-                      </Text>
-                    ) : (
-                      <>
-                        {visiblePayments.map((p, idx) => {
-                          const payerConfirmed = p.payer_confirmed || p.status === 'confirmed';
-                          const isDisputed     = p.status === 'disputed';
-                          return (
-                            <View
-                              key={p.id}
-                              style={[
-                                s.paymentRow,
-                                { borderTopColor: colors.border, flexDirection: 'column', alignItems: 'flex-start', paddingTop: 10, marginTop: idx === 0 ? 0 : 4 },
-                                idx === 0 && { borderTopWidth: 1 },
-                              ]}
-                            >
-                              {/* Date + amount */}
-                              <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginBottom: 7 }}>
-                                <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.textPrimary }}>
-                                  {p.period_date}
-                                </Text>
-                                <Text style={{ fontSize: FontSize.xs, fontWeight: '800', color: colors.success }}>
-                                  ₦{Number(p.amount).toLocaleString()}
-                                </Text>
-                              </View>
-
-                              {/* Dual confirmation chips */}
-                              <View style={{ flexDirection: 'row', gap: 8 }}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.successLight, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 }}>
-                                  <Ionicons name="checkmark-circle" size={11} color={colors.success} />
-                                  <Text style={{ fontSize: 10, fontWeight: '700', color: colors.success, marginLeft: 4 }}>Collector marked</Text>
-                                </View>
-
-                                {payerConfirmed ? (
-                                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.successLight, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 }}>
-                                    <Ionicons name="checkmark-done-circle" size={11} color={colors.success} />
-                                    <Text style={{ fontSize: 10, fontWeight: '700', color: colors.success, marginLeft: 4 }}>Payer confirmed</Text>
-                                  </View>
-                                ) : isDisputed ? (
-                                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: WARNING_LIGHT, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 }}>
-                                    <Ionicons name="alert-circle" size={11} color={WARNING} />
-                                    <Text style={{ fontSize: 10, fontWeight: '700', color: WARNING, marginLeft: 4 }}>Payer disputed</Text>
-                                  </View>
-                                ) : (
-                                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.background, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99, borderWidth: 1, borderColor: colors.border }}>
-                                    <Ionicons name="time-outline" size={11} color={colors.textTertiary} />
-                                    <Text style={{ fontSize: 10, fontWeight: '600', color: colors.textTertiary, marginLeft: 4 }}>Awaiting payer</Text>
-                                  </View>
-                                )}
-                              </View>
-
-                              {isDisputed && (
-                                <TouchableOpacity
-                                  onPress={() => setViewDisputeTarget(p)}
-                                  hitSlop={{ top: 8, left: 8, bottom: 8, right: 8 }}
-                                  accessibilityRole="button"
-                                  accessibilityLabel="View dispute details"
-                                >
-                                  <Text style={{ fontSize: FontSize.xs, color: WARNING, marginTop: 5, lineHeight: 16 }} numberOfLines={2}>
-                                    {p.dispute_reason ? `"${p.dispute_reason}"` : 'Disputed'}{' '}
-                                    <Text style={{ textDecorationLine: 'underline' }}>View</Text>
-                                  </Text>
-                                </TouchableOpacity>
-                              )}
-                            </View>
-                          );
-                        })}
-
-                        {/* Expand / collapse toggle */}
-                        {memberPayments.length > 1 && (
-                          <TouchableOpacity
-                            onPress={toggleExpand}
-                            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 10, paddingVertical: 6, borderRadius: Radius.md, backgroundColor: colors.background }}
-                            accessibilityRole="button"
-                            accessibilityLabel={isExpanded ? 'Show fewer payments' : `View all ${memberPayments.length} payments`}
-                          >
-                            <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.primary }}>
-                              {isExpanded ? 'Show less' : `View all ${memberPayments.length} payments`}
-                            </Text>
-                            <Ionicons name={isExpanded ? 'chevron-up' : 'chevron-down'} size={13} color={colors.primary} style={{ marginLeft: 4 }} />
-                          </TouchableOpacity>
-                        )}
-                      </>
-                    )}
-                  </View>
-                );
-              })
-            )}
-          </>
-        ) : isCollector ? (
+        {isCollector ? (
           <>
             {/* Tabs */}
             <View style={[s.tabBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>

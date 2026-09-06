@@ -262,11 +262,6 @@ export default function HomeRoute() {
     queryFn: thriftService.getGroups,
   });
 
-  const { data: myOrgs } = useQuery({
-    queryKey: ['thrift-orgs'],
-    queryFn: thriftService.getOrgs,
-  });
-
   const { data: collectorQueue } = useQuery({
     queryKey: ['thrift-collector-queue'],
     queryFn:  thriftService.getCollectorQueue,
@@ -350,7 +345,6 @@ export default function HomeRoute() {
   // Thrift
   const myThriftGroups    = thriftGroups?.filter((g) => g.collector.id === user?.id) ?? [];
   const joinedThriftGroups = thriftGroups?.filter((g) => g.collector.id !== user?.id) ?? [];
-  const isOrgAdmin = (myOrgs ?? []).length > 0;
   // Users with any thrift involvement (collector or payer) only see Contributions — no Ajo tab
 
   const isLoading    = tab === 'ajo' ? ajoLoading    : tab === 'thrift' ? thriftLoading : invLoading;
@@ -390,66 +384,6 @@ export default function HomeRoute() {
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
-      </View>
-    );
-  }
-
-  // ── Org admin home ─────────────────────────────────────────────────────────
-  if (isOrgAdmin) {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.background }}>
-        <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
-        <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-          <View>
-            <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginBottom: 2 }}>Welcome back</Text>
-            <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>
-              {user?.first_name ?? 'there'} {user?.last_name ?? ''}
-            </Text>
-          </View>
-          <TouchableOpacity onPress={handleLogout} style={s.headerIcon} hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }} accessibilityRole="button" accessibilityLabel="Log out">
-            <Ionicons name="log-out-outline" size={22} color={colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
-        <ScrollView contentContainerStyle={[s.body, { paddingBottom: 40 }]} showsVerticalScrollIndicator={false}>
-          <SectionTitle label={(myOrgs ?? []).length === 1 ? 'My Organisation' : 'My Organisations'} />
-          {(myOrgs ?? []).map((org) => (
-            <TouchableOpacity
-              key={org.uuid}
-              onPress={() => router.push(`/thrift/org/${org.uuid}` as any)}
-              style={[s.card, { backgroundColor: colors.surface, ...Shadow.card(colors.black) }]}
-              activeOpacity={0.82}
-              accessibilityRole="button"
-              accessibilityLabel={`${org.name} organisation`}
-              accessibilityHint="Opens organisation dashboard"
-            >
-              <View style={s.cardTop}>
-                <View style={[s.thriftBadge, { backgroundColor: colors.primaryTint }]}>
-                  <Ionicons name="business-outline" size={18} color={colors.primary} />
-                </View>
-                <View style={{ flex: 1, marginHorizontal: 12 }}>
-                  <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary }} numberOfLines={1}>
-                    {org.name}
-                  </Text>
-                  <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 2 }}>
-                    {org.org_type.toUpperCase()}{org.is_verified ? ' · Verified' : ''}
-                  </Text>
-                </View>
-                {org.is_verified && (
-                  <Ionicons name="shield-checkmark" size={16} color={colors.primary} style={{ marginRight: 6 }} />
-                )}
-                <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
-              </View>
-              <View style={s.cardMeta}>
-                <View style={s.metaItem}>
-                  <Ionicons name="people-outline" size={14} color={colors.textSecondary} />
-                  <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginLeft: 4 }}>
-                    {org.member_count} {org.member_count === 1 ? 'collector' : 'collectors'}
-                  </Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
       </View>
     );
   }

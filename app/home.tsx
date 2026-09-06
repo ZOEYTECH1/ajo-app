@@ -521,7 +521,7 @@ export default function HomeRoute() {
               <>
                 <SectionTitle label="My Groups" />
                 {adminGroups.map((g) => (
-                  <GroupCard key={g.uuid} group={g} isAdmin onPress={() => router.push(`/group/${g.id}` as any)} />
+                  <GroupCard key={g.id} group={g} isAdmin onPress={() => router.push(`/group/${g.id}` as any)} />
                 ))}
               </>
             )}
@@ -530,7 +530,7 @@ export default function HomeRoute() {
                 {adminGroups.length > 0 && <View style={s.sectionDivider} />}
                 <SectionTitle label="Groups I've Joined" />
                 {joinedGroups.map((g) => (
-                  <GroupCard key={g.uuid} group={g} isAdmin={false} onPress={() => router.push(`/group/${g.id}` as any)} />
+                  <GroupCard key={g.id} group={g} isAdmin={false} onPress={() => router.push(`/group/${g.id}` as any)} />
                 ))}
               </>
             )}

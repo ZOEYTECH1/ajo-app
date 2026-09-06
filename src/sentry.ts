@@ -39,8 +39,8 @@ if (SentryMod && dsn) {
     // Scrub PII / secrets from outbound events before they reach Sentry servers.
     // Configure Sentry alert rules in: https://sentry.io → [project] → Alerts → Create Alert Rule
     // Recommended: error rate spike alert (>10 new issues/hour) and p95 latency alert.
-    beforeSend(event: { request?: { data?: unknown }; [key: string]: unknown }) {
-      const data = (event.request as { data?: Record<string, unknown> } | undefined)?.data;
+    beforeSend(event) {
+      const data = event.request?.data as Record<string, unknown> | undefined;
       if (data && typeof data === 'object') {
         SENSITIVE_FIELDS.forEach((field) => {
           if (field in data) data[field] = '[Filtered]';

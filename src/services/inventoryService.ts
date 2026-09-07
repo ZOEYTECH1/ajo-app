@@ -542,3 +542,92 @@ export const closeStock = (prodId: number): Promise<{ closing_stock: number; mes
 
 export const setOpeningStock = (prodId: number, opening_stock: number): Promise<{ date: string; opening_stock: number }> =>
   api.post(`/api/inventory/products/${prodId}/set-opening-stock/`, { opening_stock }).then(r => r.data);
+
+// ─── Historical Inventory Audit (self-reported past-period records) ───────────
+// Businesses that used Excel/paper before adopting the app can log summary
+// totals for periods before they started real tracking. Kept entirely separate
+// from live sales/stock — combined only at display time via lifetime-totals/trend.
+
+export interface PastPeriodRecord {
+  id: number;
+  period_start: string;
+  period_end: string;
+  total_revenue: string;
+  total_expenses: string;
+  closing_stock_value: string | null;
+  notes: string;
+  attachment: string | null;
+  created_by_name: string;
+  created_at: string;
+}
+
+export interface LifetimeTotals {
+  reported_revenue: string;
+  reported_expenses: string;
+  tracked_revenue: string;
+  tracked_expenses: string;
+  combined_revenue: string;
+  combined_expenses: string;
+  has_reported_data: boolean;
+}
+
+export interface LifetimeTrendEntry {
+  source: 'reported' | 'tracked';
+  label: string;
+  period_start: string;
+  period_end: string;
+  revenue: string;
+  expenses: string;
+}
+
+export interface PastPeriodRecordPayload {
+  period_start: string;
+  period_end: string;
+  total_revenue: number | string;
+  total_expenses: number | string;
+  closing_stock_value?: number | string | null;
+  notes?: string;
+  attachment?: { uri: string; name: string; type: string } | null;
+}
+
+function pastPeriodBody(data: Partial<PastPeriodRecordPayload>): FormData | Record<string, unknown> {
+  if (!data.attachment) {
+    const { attachment, ...rest } = data;
+    return rest;
+  }
+  const form = new FormData();
+  Object.entries(data).forEach(([key, value]) => {
+    if (key === 'attachment' || value === undefined || value === null) return;
+    form.append(key, String(value));
+  });
+  form.append('attachment', data.attachment as any);
+  return form;
+}
+
+export const getPastPeriodRecords = (): Promise<PastPeriodRecord[]> =>
+  api.get('/api/inventory/past-periods/', bizP()).then(r => r.data);
+
+export const createPastPeriodRecord = (data: PastPeriodRecordPayload): Promise<PastPeriodRecord> => {
+  const body = pastPeriodBody(data);
+  return api.post('/api/inventory/past-periods/', body, {
+    ...bizP(),
+    headers: body instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined,
+  }).then(r => r.data);
+};
+
+export const updatePastPeriodRecord = (id: number, data: Partial<PastPeriodRecordPayload>): Promise<PastPeriodRecord> => {
+  const body = pastPeriodBody(data);
+  return api.patch(`/api/inventory/past-periods/${id}/`, body, {
+    ...bizP(),
+    headers: body instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : undefined,
+  }).then(r => r.data);
+};
+
+export const deletePastPeriodRecord = (id: number): Promise<void> =>
+  api.delete(`/api/inventory/past-periods/${id}/`, bizP()).then(() => undefined);
+
+export const getLifetimeTotals = (): Promise<LifetimeTotals> =>
+  api.get('/api/inventory/lifetime-totals/', bizP()).then(r => r.data);
+
+export const getLifetimeTrend = (): Promise<LifetimeTrendEntry[]> =>
+  api.get('/api/inventory/lifetime-trend/', bizP()).then(r => r.data);

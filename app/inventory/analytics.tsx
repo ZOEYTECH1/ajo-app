@@ -10,9 +10,11 @@ import { useTheme } from '../../src/hooks/useTheme';
 import { FontSize, Radius } from '../../src/theme';
 import {
   getAnalytics,
+  getLifetimeTrend,
   type AnalyticsPeriod,
   type AnalyticsPoint,
   type AnalyticsResponse,
+  type LifetimeTrendEntry,
 } from '../../src/services/inventoryService';
 
 const INV = '#E65100';
@@ -73,6 +75,39 @@ function BarChart({ data, mode, colors }: BarChartProps) {
   );
 }
 
+interface TrendPoint { label: string; source: 'reported' | 'tracked'; value: number; }
+
+function LifetimeTrendChart({ data, colors }: { data: TrendPoint[]; colors: any }) {
+  if (data.length === 0) return null;
+  const maxVal = Math.max(...data.map(d => d.value), 1);
+  const barW = Math.max(Math.floor((SCREEN_W - 64) / data.length) - 4, 14);
+
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <View style={{ paddingHorizontal: 8, paddingTop: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: CHART_H, gap: 4 }}>
+          {data.map((point, i) => {
+            const h = Math.max((point.value / maxVal) * CHART_H, point.value > 0 ? 2 : 0);
+            const color = point.source === 'reported' ? '#9CA3AF' : '#1565C0';
+            return (
+              <View key={i} style={{ alignItems: 'center', width: barW + 4 }}>
+                <View style={{ width: barW, height: h, backgroundColor: color, borderRadius: 3 }} />
+              </View>
+            );
+          })}
+        </View>
+        <View style={{ flexDirection: 'row', marginTop: 6, gap: 4 }}>
+          {data.map((point, i) => (
+            <Text key={i} style={{ width: barW + 4, fontSize: 9, color: colors.textTertiary, textAlign: 'center' }} numberOfLines={1}>
+              {point.label}
+            </Text>
+          ))}
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
 function Legend({ aLabel, bLabel, aColor, bColor }: { aLabel: string; bLabel: string; aColor: string; bColor: string }) {
   return (
     <View style={{ flexDirection: 'row', gap: 16, marginBottom: 12 }}>
@@ -99,6 +134,14 @@ export default function AnalyticsScreen() {
     queryKey: ['inventory-analytics', period, days],
     queryFn: () => getAnalytics(period, days),
   });
+
+  const { data: lifetimeTrend } = useQuery<LifetimeTrendEntry[]>({
+    queryKey: ['inventory-lifetime-trend'],
+    queryFn: getLifetimeTrend,
+  });
+  const trendEntries = lifetimeTrend ?? [];
+  const hasReportedData = trendEntries.some(e => e.source === 'reported');
+  const trendPoints: TrendPoint[] = trendEntries.map(e => ({ label: e.label, source: e.source, value: Number(e.revenue) }));
 
   const chart        = data?.chart ?? [];
   const summary      = data?.summary;
@@ -202,6 +245,20 @@ export default function AnalyticsScreen() {
               <Legend aLabel="Revenue" bLabel="Expenses" aColor="#2E7D32" bColor="#C62828" />
               <BarChart data={chart} mode="financial" colors={colors} />
             </View>
+          )}
+
+          {/* Lifetime Revenue Trend — reported (pre-app) vs tracked (in-app), by month */}
+          {hasReportedData && (
+            <>
+              <Text style={[s.sectionTitle, { marginTop: 24 }]}>Lifetime Revenue Trend</Text>
+              <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginBottom: 10 }}>
+                Full business history, independent of the period filter above.
+              </Text>
+              <View style={[s.chartBox, { backgroundColor: colors.surface }]}>
+                <Legend aLabel="Reported (pre-app)" bLabel="Tracked (in-app)" aColor="#9CA3AF" bColor="#1565C0" />
+                <LifetimeTrendChart data={trendPoints} colors={colors} />
+              </View>
+            </>
           )}
 
           {/* Stock movement summary cards */}

@@ -189,7 +189,7 @@ export default function InventoryDashboardScreen() {
           </View>
           <View style={[s.row, { marginTop: 0 }]}>
             <QuickLink icon="business-outline" label="Business Profile" onPress={() => router.push('/inventory/business' as any)} colors={colors} />
-            <View style={{ flex: 1 }} />
+            <QuickLink icon="archive-outline" label="Business History" onPress={() => router.push('/inventory/history' as any)} colors={colors} />
           </View>
         </ScrollView>
       )}

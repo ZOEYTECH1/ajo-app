@@ -144,7 +144,8 @@ export const authService = {
    * @returns JWT access/refresh tokens and the full user profile.
    */
   googleSignIn: async (idToken: string): Promise<{ access: string; refresh: string; user: AjoUser }> => {
-    const res = await api.post('/api/auth/google/', { id_token: idToken });
+    const time_zone = detectTimeZone();
+    const res = await api.post('/api/auth/google/', { id_token: idToken, ...(time_zone ? { time_zone } : {}) });
     const { access, refresh, user } = res.data;
     useAuthStore.getState().setAuth(user, access, refresh);
     return res.data;

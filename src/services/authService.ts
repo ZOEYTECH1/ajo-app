@@ -28,6 +28,20 @@ export interface LoginPayload {
   password: string;
 }
 
+/**
+ * Best-effort device-detected IANA timezone (e.g. "Africa/Lagos"). The
+ * backend resolves each user's "today" (cycle close eligibility, etc.)
+ * against their own timezone rather than one global clock, so this is sent
+ * on every login/register to keep it in sync — never blocks auth if it fails.
+ */
+function detectTimeZone(): string | undefined {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return undefined;
+  }
+}
+
 // ─── Auth service ─────────────────────────────────────────────────────────────
 
 export const authService = {
@@ -39,7 +53,8 @@ export const authService = {
    * @returns A message confirming the OTP was sent.
    */
   register: async (data: RegisterPayload): Promise<{ message: string }> => {
-    const res = await api.post('/api/auth/register/', data);
+    const time_zone = detectTimeZone();
+    const res = await api.post('/api/auth/register/', { ...data, ...(time_zone ? { time_zone } : {}) });
     return res.data;
   },
 
@@ -114,7 +129,8 @@ export const authService = {
    * @returns JWT access/refresh tokens and the full user profile.
    */
   login: async (data: LoginPayload): Promise<{ access: string; refresh: string; user: AjoUser }> => {
-    const res = await api.post('/api/auth/login/', data);
+    const time_zone = detectTimeZone();
+    const res = await api.post('/api/auth/login/', { ...data, ...(time_zone ? { time_zone } : {}) });
     const { access, refresh, user } = res.data;
     useAuthStore.getState().setAuth(user, access, refresh);
     return res.data;

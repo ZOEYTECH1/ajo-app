@@ -4,8 +4,8 @@
 
 ## Stack
 
-- React Native + Expo SDK 56 (managed workflow)
-- Expo Router v4 (file-based routing under `app/`)
+- React Native + Expo SDK 57 (managed workflow)
+- Expo Router (file-based routing under `app/`)
 - TypeScript (strict mode)
 - TanStack Query v5 for server state
 - Zustand v5 for client state (persisted in expo-secure-store)
@@ -38,7 +38,7 @@ Never put secrets in `EXPO_PUBLIC_` vars — they are bundled into the client.
 
 ## Before writing any code
 
-Read the exact versioned Expo docs: https://docs.expo.dev/versions/v56.0.0/
+Read the exact versioned Expo docs: https://docs.expo.dev/versions/v57.0.0/
 
 Never install a package with `npm install` alone for Expo projects — use
 `npx expo install <package>` so Expo picks the compatible version.

@@ -7,11 +7,6 @@
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ajo.app"
@@ -38,6 +33,16 @@
       "expo-router",
       "expo-status-bar",
       "expo-secure-store",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      "@sentry/react-native",
       "@react-native-community/datetimepicker",
       "expo-web-browser",
       [

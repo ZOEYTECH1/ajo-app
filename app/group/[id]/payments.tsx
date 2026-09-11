@@ -217,7 +217,7 @@ const PaymentCard: React.FC<{
       ) : null}
 
       <View style={{ flexDirection: 'row', gap: 10, marginTop: 4 }}>
-        {payment.receipt_image && (
+        {payment.receipt_image ? (
           <TouchableOpacity
             onPress={() => onViewReceipt(payment.receipt_image!)}
             style={[lay.chip, { backgroundColor: colors.primaryTint }]}
@@ -229,6 +229,13 @@ const PaymentCard: React.FC<{
               Receipt
             </Text>
           </TouchableOpacity>
+        ) : (
+          <View style={[lay.chip, { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border }]}>
+            <Ionicons name="image-outline" size={14} color={colors.textTertiary} />
+            <Text style={{ fontSize: FontSize.xs, fontWeight: '600', color: colors.textTertiary, marginLeft: 4 }}>
+              No receipt
+            </Text>
+          </View>
         )}
         {isAdmin && payment.status === 'pending' && (
           <>

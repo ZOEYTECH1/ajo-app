@@ -77,6 +77,11 @@ export default function SubmitPaymentRoute() {
       feedback('error');
       return;
     }
+    if (!receipt) {
+      setError('Attach a receipt photo before submitting.');
+      feedback('error');
+      return;
+    }
     mutation.mutate();
   };
 
@@ -134,7 +139,7 @@ export default function SubmitPaymentRoute() {
 
           {/* Receipt attachment */}
           <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textPrimary, marginBottom: 8, marginTop: 8 }}>
-            Receipt (optional)
+            Receipt (required)
           </Text>
 
           {receipt ? (
@@ -175,7 +180,7 @@ export default function SubmitPaymentRoute() {
               label="Submit Payment"
               onPress={handleSubmit}
               loading={mutation.isPending}
-              disabled={amount.trim().length === 0}
+              disabled={amount.trim().length === 0 || !receipt}
             />
           </View>
         </ScrollView>

@@ -97,26 +97,22 @@ const ConfirmModal: React.FC<{
 // ─── Start Cycle modal (admin) ────────────────────────────────────────────────
 const StartCycleModal: React.FC<{
   visible: boolean;
-  onConfirm: (start: string, end: string) => void;
+  onConfirm: (start: string) => void;
   onCancel: () => void;
 }> = ({ visible, onConfirm, onCancel }) => {
   const { colors } = useTheme();
   const today = new Date();
-  const defaultEnd = new Date(today);
-  defaultEnd.setMonth(defaultEnd.getMonth() + 1);
 
   const [startDate, setStartDate] = useState(today);
-  const [endDate, setEndDate]     = useState(defaultEnd);
-  const [picking, setPicking]     = useState<'start' | 'end' | null>(null);
+  const [picking, setPicking]     = useState(false);
 
   const handleConfirm = () => {
-    if (endDate <= startDate) return;
-    onConfirm(toISODate(startDate), toISODate(endDate));
-    setPicking(null);
+    onConfirm(toISODate(startDate));
+    setPicking(false);
   };
 
   const handleCancel = () => {
-    setPicking(null);
+    setPicking(false);
     onCancel();
   };
 
@@ -133,7 +129,7 @@ const StartCycleModal: React.FC<{
             Start Date
           </Text>
           <TouchableOpacity
-            onPress={() => setPicking('start')}
+            onPress={() => setPicking(true)}
             style={[lay.datePicker, { backgroundColor: colors.background, borderColor: colors.border }]}
             accessibilityRole="button"
             accessibilityLabel={`Start Date: ${fmt(toISODate(startDate))}`}
@@ -144,46 +140,24 @@ const StartCycleModal: React.FC<{
             </Text>
           </TouchableOpacity>
 
-          {/* End date */}
-          <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textSecondary, marginBottom: 6, marginTop: 14 }}>
-            End Date
+          <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary, marginTop: 10 }}>
+            The cycle's end date is set automatically based on the group's contribution frequency and collection day.
           </Text>
-          <TouchableOpacity
-            onPress={() => setPicking('end')}
-            style={[lay.datePicker, { backgroundColor: colors.background, borderColor: colors.border }]}
-            accessibilityRole="button"
-            accessibilityLabel={`End Date: ${fmt(toISODate(endDate))}`}
-          >
-            <Ionicons name="calendar-outline" size={16} color={colors.primary} />
-            <Text style={{ fontSize: FontSize.sm, color: colors.textPrimary, marginLeft: 8 }}>
-              {fmt(toISODate(endDate))}
-            </Text>
-          </TouchableOpacity>
 
-          {endDate <= startDate && (
-            <Text style={{ fontSize: FontSize.xs, color: colors.error, marginTop: 6 }}>
-              End date must be after start date.
-            </Text>
-          )}
-
-          {/* Native date pickers */}
-          {picking !== null && (
+          {/* Native date picker */}
+          {picking && (
             <DateTimePicker
-              value={picking === 'start' ? startDate : endDate}
+              value={startDate}
               mode="date"
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              minimumDate={picking === 'end' ? startDate : undefined}
               onChange={(_, selected) => {
-                if (selected) {
-                  if (picking === 'start') setStartDate(selected);
-                  else setEndDate(selected);
-                }
-                if (Platform.OS !== 'ios') setPicking(null);
+                if (selected) setStartDate(selected);
+                if (Platform.OS !== 'ios') setPicking(false);
               }}
             />
           )}
-          {Platform.OS === 'ios' && picking !== null && (
-            <TouchableOpacity onPress={() => setPicking(null)} style={{ alignItems: 'center', marginTop: 8 }} accessibilityRole="button" accessibilityLabel="Done">
+          {Platform.OS === 'ios' && picking && (
+            <TouchableOpacity onPress={() => setPicking(false)} style={{ alignItems: 'center', marginTop: 8 }} accessibilityRole="button" accessibilityLabel="Done">
               <Text style={{ color: colors.primary, fontWeight: '700' }}>Done</Text>
             </TouchableOpacity>
           )}
@@ -199,8 +173,7 @@ const StartCycleModal: React.FC<{
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleConfirm}
-              disabled={endDate <= startDate}
-              style={[lay.modalBtn, { backgroundColor: endDate > startDate ? colors.primary : colors.border }]}
+              style={[lay.modalBtn, { backgroundColor: colors.primary }]}
               accessibilityRole="button"
               accessibilityLabel="Start Cycle"
             >
@@ -360,8 +333,7 @@ export default function CyclesRoute() {
   };
 
   const startMutation = useMutation({
-    mutationFn: ({ start, end }: { start: string; end: string }) =>
-      groupService.startCycle(groupId, start, end),
+    mutationFn: (start: string) => groupService.startCycle(groupId, start),
     onSuccess: () => { feedback('success'); invalidate(); },
     onError:   () => feedback('error'),
   });
@@ -443,9 +415,9 @@ export default function CyclesRoute() {
 
       <StartCycleModal
         visible={startModalVisible}
-        onConfirm={(start, end) => {
+        onConfirm={(start) => {
           setStartModalVisible(false);
-          startMutation.mutate({ start, end });
+          startMutation.mutate(start);
         }}
         onCancel={() => setStartModalVisible(false)}
       />

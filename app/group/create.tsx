@@ -158,8 +158,6 @@ export default function CreateGroupRoute() {
   const queryClient = useQueryClient();
 
   const today = new Date();
-  const defaultEnd = new Date(today);
-  defaultEnd.setMonth(defaultEnd.getMonth() + 3);
 
   const [name, setName]               = useState('');
   const [description, setDescription] = useState('');
@@ -168,7 +166,6 @@ export default function CreateGroupRoute() {
   const [collectionDay, setCollectionDay] = useState<number | null>(null);
   const [gracePeriod, setGracePeriod]     = useState('7');
   const [startDate, setStartDate]     = useState<Date>(today);
-  const [endDate, setEndDate]         = useState<Date>(defaultEnd);
   const [monthDayOpen, setMonthDayOpen] = useState(false);
   const [errors, setErrors]           = useState<Record<string, string>>({});
 
@@ -178,7 +175,6 @@ export default function CreateGroupRoute() {
     if (name.trim().length > 100)          e.name   = 'Group name must be 100 characters or fewer';
     const amt = Number(amount);
     if (!amount || isNaN(amt) || amt <= 0) e.amount = 'Enter a valid contribution amount';
-    if (endDate <= startDate)              e.endDate = 'End date must be after start date';
     if (frequency !== 'daily' && collectionDay === null)
       e.collectionDay = 'Select a collection day';
     setErrors(e);
@@ -213,7 +209,6 @@ export default function CreateGroupRoute() {
       contribution_amount: amount.trim(),
       contribution_frequency: frequency,
       start_date: toISO(startDate),
-      end_date: toISO(endDate),
     };
     if (description.trim()) payload.description = description.trim();
     if (frequency !== 'daily' && collectionDay !== null) {
@@ -407,24 +402,11 @@ export default function CreateGroupRoute() {
           <DateField
             label="Start Date"
             value={startDate}
-            onChange={(d) => {
-              setStartDate(d);
-              if (d >= endDate) {
-                const newEnd = new Date(d);
-                newEnd.setMonth(newEnd.getMonth() + 1);
-                setEndDate(newEnd);
-              }
-              setErrors((e) => ({ ...e, endDate: '' }));
-            }}
+            onChange={(d) => setStartDate(d)}
           />
-
-          <DateField
-            label="End Date"
-            value={endDate}
-            minDate={startDate}
-            onChange={(d) => { setEndDate(d); setErrors((e) => ({ ...e, endDate: '' })); }}
-            error={errors.endDate}
-          />
+          <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary, marginTop: -4 }}>
+            The first cycle's end date is set automatically based on the contribution frequency and collection day.
+          </Text>
 
           <View style={{ marginTop: 16 }}>
             <Button label="Create Group" onPress={handleSubmit} loading={mutation.isPending} />

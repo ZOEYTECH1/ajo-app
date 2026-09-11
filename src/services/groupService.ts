@@ -126,8 +126,9 @@ export interface CreateGroupPayload {
   contribution_frequency: 'daily' | 'weekly' | 'monthly';
   collection_day?: number;
   grace_period_days?: number;
-  start_date?: string;  // ISO date YYYY-MM-DD — auto-creates first cycle
-  end_date?: string;
+  // ISO date YYYY-MM-DD — auto-creates first cycle. end_date isn't accepted
+  // here — the backend computes it from contribution_frequency/collection_day.
+  start_date?: string;
 }
 
 export interface SubmitPaymentPayload {
@@ -265,8 +266,8 @@ export const groupService = {
     return res.data;
   },
 
-  startCycle: async (groupId: number, start_date: string, end_date: string): Promise<Cycle> => {
-    const res = await api.post(`/api/groups/${groupId}/cycles/`, { start_date, end_date });
+  startCycle: async (groupId: number, start_date: string): Promise<Cycle> => {
+    const res = await api.post(`/api/groups/${groupId}/cycles/`, { start_date });
     return res.data;
   },
 

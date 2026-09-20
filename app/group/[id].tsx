@@ -177,7 +177,9 @@ const CycleCard: React.FC<{ cycle: Cycle | undefined; roundJustCompleted?: boole
   }
 
   const sc = statusColor(cycle.status, colors);
-  const end = new Date(cycle.end_date).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+  const dateOpts = { day: 'numeric', month: 'short', year: 'numeric' } as const;
+  const start = new Date(cycle.start_date).toLocaleDateString('en-NG', dateOpts);
+  const end = new Date(cycle.end_date).toLocaleDateString('en-NG', dateOpts);
   const periodLabel = computePeriodLabel(cycle);
   const overdue = cycle.is_over;
 
@@ -220,11 +222,11 @@ const CycleCard: React.FC<{ cycle: Cycle | undefined; roundJustCompleted?: boole
         </View>
       </View>
 
-      {/* Footer: end date / early-close info */}
+      {/* Footer: start/end date / early-close info */}
       <View style={[s.roundFooter, { borderTopColor: colors.border }]}>
         <Ionicons name="calendar-outline" size={13} color={colors.textTertiary} />
         <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginLeft: 6 }}>
-          Ends {end}
+          {start} – {end}
           {cycle.force_close_requested
             ? ` · ${cycle.force_close_acceptor_count}/${cycle.total_member_count} accepted early close`
             : ''}

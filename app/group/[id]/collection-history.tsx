@@ -88,12 +88,15 @@ export default function CollectionHistoryRoute() {
               No cycles yet
             </Text>
             <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 6, textAlign: 'center' }}>
-              Cycles will appear here once the group admin starts the first round.
+              Cycles will appear here once the group admin starts the first cycle.
             </Text>
           </View>
         ) : (
           sortedCycles.map((cycle) => {
-            const slot = collectionOrder?.find((s) => s.collection_slot === cycle.cycle_number);
+            // cycle.slot_number (server-computed) tells us whose turn this
+            // cycle was — comparing against cycle_number directly breaks
+            // once a Round completes, since cycle_number never resets.
+            const slot = collectionOrder?.find((s) => s.collection_slot === cycle.slot_number);
             const isActive = cycle.status === 'active';
 
             const cyclePayments = (payments ?? []).filter(
@@ -129,7 +132,7 @@ export default function CollectionHistoryRoute() {
                     </Text>
                   </View>
                   <Text style={{ fontSize: FontSize.base, fontWeight: '700', color: colors.textPrimary, flex: 1, marginLeft: 10 }}>
-                    Cycle {cycle.cycle_number}
+                    Cycle {cycle.cycle_number} <Text style={{ fontWeight: '500', color: colors.textSecondary, fontSize: FontSize.xs }}>(Round {cycle.round_number})</Text>
                   </Text>
                   {isActive
                     ? <Pill label="Active" bg={colors.primaryTint} color={colors.primary} />

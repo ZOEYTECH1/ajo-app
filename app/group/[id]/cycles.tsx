@@ -212,7 +212,7 @@ const CycleCard: React.FC<{
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
         <View style={{ flex: 1 }}>
           <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary }}>
-            Cycle {cycle.cycle_number}
+            Cycle {cycle.cycle_number} <Text style={{ fontWeight: '500', color: colors.textSecondary }}>(Round {cycle.round_number})</Text>
           </Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
             {fmt(cycle.start_date)} → {fmt(cycle.end_date)}

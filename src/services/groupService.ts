@@ -81,6 +81,8 @@ export interface Payment {
 export interface Cycle {
   id: number;
   cycle_number: number;
+  round_number: number;
+  slot_number: number;
   start_date: string;
   end_date: string;
   status: CycleStatus;

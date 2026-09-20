@@ -133,14 +133,23 @@ const PaymentRow: React.FC<{ payment: Payment }> = ({ payment }) => {
 };
 
 // ─── Cycle status card ────────────────────────────────────────────────────────
-const CycleCard: React.FC<{ cycle: Cycle | undefined; colors: any }> = ({ cycle, colors }) => {
+const CycleCard: React.FC<{ cycle: Cycle | undefined; roundJustCompleted?: boolean; completedRoundNumber?: number; colors: any }> = ({
+  cycle, roundJustCompleted, completedRoundNumber, colors,
+}) => {
   if (!cycle) {
     return (
-      <View style={[s.cycleCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Ionicons name="time-outline" size={20} color={colors.textTertiary} />
-        <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginLeft: 8 }}>
-          No active cycle
-        </Text>
+      <View style={[s.cycleCard, { backgroundColor: colors.surface, borderColor: colors.border, flexDirection: 'column', alignItems: 'flex-start' }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Ionicons name={roundJustCompleted ? 'trophy-outline' : 'time-outline'} size={20} color={roundJustCompleted ? colors.primary : colors.textTertiary} />
+          <Text style={{ fontSize: FontSize.sm, color: roundJustCompleted ? colors.textPrimary : colors.textSecondary, marginLeft: 8, fontWeight: roundJustCompleted ? '700' : '400' }}>
+            {roundJustCompleted ? `🎉 Round ${completedRoundNumber} complete` : 'No active cycle'}
+          </Text>
+        </View>
+        {roundJustCompleted && (
+          <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 6, marginLeft: 28 }}>
+            Every member has collected once. Start the next round from the Cycles screen whenever you're ready.
+          </Text>
+        )}
       </View>
     );
   }
@@ -154,7 +163,7 @@ const CycleCard: React.FC<{ cycle: Cycle | undefined; colors: any }> = ({ cycle,
       <View style={{ flex: 1 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
           <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }}>
-            Cycle {cycle.cycle_number}
+            Cycle {cycle.cycle_number} (Round {cycle.round_number})
           </Text>
           {periodLabel && <Pill label={periodLabel} bg={colors.primaryTint} color={colors.primary} />}
           <Pill label={cycle.status} bg={sc.bg} color={sc.fg} />
@@ -245,6 +254,16 @@ export default function GroupDetailRoute() {
   const isGroupAdmin = group?.admin.id === user?.id;
   const activeCycle  = cycles?.find((c) => c.status === 'active');
 
+  // A Round is a full rotation — every member has collected once. If the
+  // last closed cycle was the round's last slot and no new cycle has
+  // started yet, nudge the admin — they can also just start one anytime
+  // from the Cycles screen regardless, this isn't a hard gate.
+  const lastClosedCycle = cycles
+    ? [...cycles].filter((c) => c.status === 'closed').sort((a, b) => b.cycle_number - a.cycle_number)[0]
+    : undefined;
+  const roundJustCompleted = !activeCycle && !!lastClosedCycle
+    && lastClosedCycle.slot_number >= lastClosedCycle.total_member_count;
+
   // Pending items count (admin only)
   const pendingPayments = payments?.filter((p) => p.status === 'pending').length ?? 0;
 
@@ -260,12 +279,12 @@ export default function GroupDetailRoute() {
     return true;
   });
 
-  // Effective slot wraps around after a full round: cycle 1→slot 1, cycle N+1→slot 1 again
+  // The cycle's own slot_number (server-computed, wraps back to 1 once a
+  // full Round completes) — not re-derived from cycle_number here, since
+  // that would need the member count *at the time the cycle was created*,
+  // not the current count.
   const activeCycleNumber = activeCycle?.cycle_number ?? null;
-  const totalMembers = collectionOrder?.length ?? 1;
-  const effectiveSlot = activeCycleNumber != null
-    ? ((activeCycleNumber - 1) % totalMembers) + 1
-    : null;
+  const effectiveSlot = activeCycle?.slot_number ?? null;
 
   const currentCollector: CollectionSlot | undefined = effectiveSlot != null
     ? collectionOrder?.find((s) => s.collection_slot === effectiveSlot)
@@ -438,7 +457,12 @@ export default function GroupDetailRoute() {
             <Skeleton width="100%" height={64} radius={Radius.lg} style={{ marginBottom: 20 }} />
           ) : (
             <View style={{ marginBottom: 20 }}>
-              <CycleCard cycle={activeCycle} colors={colors} />
+              <CycleCard
+                cycle={activeCycle}
+                roundJustCompleted={roundJustCompleted}
+                completedRoundNumber={lastClosedCycle?.round_number}
+                colors={colors}
+              />
             </View>
           )}
 

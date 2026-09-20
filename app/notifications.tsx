@@ -124,14 +124,19 @@ export default function NotificationsRoute() {
   const notifications = data?.pages.flatMap(p => p.results) ?? [];
   const unreadCount = data?.pages[0]?.unread_count ?? 0;
 
+  const invalidateNotifications = () => {
+    queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    queryClient.invalidateQueries({ queryKey: ['notifications-badge'] });
+  };
+
   const markReadMutation = useMutation({
     mutationFn: (id: number) => notificationService.markRead(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
+    onSuccess: invalidateNotifications,
   });
 
   const markAllMutation = useMutation({
     mutationFn: notificationService.markAllRead,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
+    onSuccess: invalidateNotifications,
   });
 
   const handlePress = (notif: AppNotification) => {

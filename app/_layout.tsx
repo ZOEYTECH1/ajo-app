@@ -116,7 +116,12 @@ function BottomTabBar() {
   const current = segments[0] as string | undefined;
 
   const { data: notifData } = useQuery({
-    queryKey: ['notifications'],
+    // Distinct from notifications.tsx's ['notifications'] useInfiniteQuery —
+    // sharing that key caused a real crash: this plain useQuery's flat
+    // {data, unreadCount} shape and the infinite query's {pages, pageParams}
+    // shape kept overwriting each other in the cache, and TanStack Query's
+    // internal pagination bookkeeping threw when it found the wrong shape.
+    queryKey: ['notifications-badge'],
     queryFn: notificationService.getNotifications,
     enabled: !!user && !!current && !PUBLIC_ROUTES.has(current),
     refetchInterval: 30000,

@@ -18,6 +18,7 @@ function typeIcon(type: string, colors: any): { name: any; color: string; bg: st
     case 'payment_approved':  return { name: 'checkmark-circle', color: colors.successDark,   bg: colors.successLight };
     case 'payment_rejected':  return { name: 'close-circle',     color: colors.errorDark,     bg: colors.errorLight   };
     case 'payment_submitted': return { name: 'receipt',          color: colors.primary,       bg: colors.primaryTint  };
+    case 'join_request':      return { name: 'person-add-outline', color: colors.primary,     bg: colors.primaryTint  };
     case 'join_approved':     return { name: 'person-add',       color: colors.successDark,   bg: colors.successLight };
     case 'join_rejected':     return { name: 'person-remove',    color: colors.errorDark,     bg: colors.errorLight   };
     case 'member_joined':     return { name: 'people',           color: colors.primary,       bg: colors.primaryTint  };
@@ -143,7 +144,12 @@ export default function NotificationsRoute() {
     if (!notif.is_read) markReadMutation.mutate(notif.id);
     const d = notif.action_data ?? {};
 
-    // Ajo groups
+    // Ajo groups — a join request goes straight to the member list so the
+    // admin can act on it immediately, not just the group overview.
+    if (notif.notif_type === 'join_request' && d.group_id) {
+      router.push(`/group/${d.group_id}/members` as any);
+      return;
+    }
     if (d.group_id)       { router.push(`/group/${d.group_id}` as any); return; }
     // Thrift groups
     if (d.group_uuid) { router.push(`/thrift/${d.group_uuid}` as any); return; }

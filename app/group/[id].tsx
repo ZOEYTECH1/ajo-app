@@ -4,6 +4,7 @@ import {
   RefreshControl, StatusBar, StyleSheet, Alert,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
@@ -132,24 +133,45 @@ const PaymentRow: React.FC<{ payment: Payment }> = ({ payment }) => {
   );
 };
 
-// ─── Cycle status card ────────────────────────────────────────────────────────
+// ─── Round progress bar ─────────────────────────────────────────────────────
+const RoundProgressBar: React.FC<{ slot: number; total: number; colors: any; tint: string; track: string }> = ({
+  slot, total, colors, tint, track,
+}) => {
+  const pct = total > 0 ? Math.min(100, Math.max(0, (slot / total) * 100)) : 0;
+  return (
+    <View style={{ height: 8, borderRadius: Radius.full, backgroundColor: track, overflow: 'hidden' }}>
+      <LinearGradient
+        colors={[colors.primaryLight, colors.primary]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={{ width: `${pct}%`, height: '100%', borderRadius: Radius.full }}
+      />
+    </View>
+  );
+};
+
+// ─── Round & Cycle status card ─────────────────────────────────────────────────
 const CycleCard: React.FC<{ cycle: Cycle | undefined; roundJustCompleted?: boolean; completedRoundNumber?: number; colors: any }> = ({
   cycle, roundJustCompleted, completedRoundNumber, colors,
 }) => {
   if (!cycle) {
     return (
-      <View style={[s.cycleCard, { backgroundColor: colors.surface, borderColor: colors.border, flexDirection: 'column', alignItems: 'flex-start' }]}>
+      <View style={[s.roundCard, { backgroundColor: colors.surface, ...Shadow.card(colors.black) }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Ionicons name={roundJustCompleted ? 'trophy-outline' : 'time-outline'} size={20} color={roundJustCompleted ? colors.primary : colors.textTertiary} />
-          <Text style={{ fontSize: FontSize.sm, color: roundJustCompleted ? colors.textPrimary : colors.textSecondary, marginLeft: 8, fontWeight: roundJustCompleted ? '700' : '400' }}>
-            {roundJustCompleted ? `🎉 Round ${completedRoundNumber} complete` : 'No active cycle'}
-          </Text>
+          <View style={[s.roundIcon, { backgroundColor: roundJustCompleted ? colors.primaryTint : colors.background }]}>
+            <Ionicons name={roundJustCompleted ? 'trophy' : 'time-outline'} size={20} color={roundJustCompleted ? colors.primary : colors.textTertiary} />
+          </View>
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={{ fontSize: FontSize.base, fontWeight: '800', color: colors.textPrimary }}>
+              {roundJustCompleted ? `Round ${completedRoundNumber} complete 🎉` : 'No active cycle'}
+            </Text>
+            <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
+              {roundJustCompleted
+                ? 'Every member has collected once'
+                : 'Start one from the Cycles screen'}
+            </Text>
+          </View>
         </View>
-        {roundJustCompleted && (
-          <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 6, marginLeft: 28 }}>
-            Every member has collected once. Start the next round from the Cycles screen whenever you're ready.
-          </Text>
-        )}
       </View>
     );
   }
@@ -157,18 +179,51 @@ const CycleCard: React.FC<{ cycle: Cycle | undefined; roundJustCompleted?: boole
   const sc = statusColor(cycle.status, colors);
   const end = new Date(cycle.end_date).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
   const periodLabel = computePeriodLabel(cycle);
+  const overdue = cycle.is_over;
 
   return (
-    <View style={[s.cycleCard, { backgroundColor: colors.surface, borderColor: colors.primaryBorder }]}>
-      <View style={{ flex: 1 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
-          <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }}>
-            Cycle {cycle.cycle_number} (Round {cycle.round_number})
-          </Text>
-          {periodLabel && <Pill label={periodLabel} bg={colors.primaryTint} color={colors.primary} />}
-          <Pill label={cycle.status} bg={sc.bg} color={sc.fg} />
+    <View style={[s.roundCard, { backgroundColor: colors.surface, ...Shadow.card(colors.black) }]}>
+      {/* Top row: round identity + status */}
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={[s.roundIcon, { backgroundColor: colors.primaryTint }]}>
+          <Ionicons name="sync" size={18} color={colors.primary} />
         </View>
-        <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary }}>
+        <View style={{ flex: 1, marginLeft: 12 }}>
+          <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>
+            Round {cycle.round_number}
+          </Text>
+          <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 1 }}>
+            Cycle {cycle.cycle_number} of {cycle.total_member_count}
+          </Text>
+        </View>
+        <Pill label={cycle.status} bg={sc.bg} color={sc.fg} />
+      </View>
+
+      {/* Progress bar — how far through this round's rotation */}
+      <View style={{ marginTop: 16 }}>
+        <RoundProgressBar
+          slot={cycle.slot_number}
+          total={cycle.total_member_count}
+          colors={colors}
+          tint={colors.primaryTint}
+          track={colors.background}
+        />
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 }}>
+          <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary }}>
+            Member {cycle.slot_number} of {cycle.total_member_count} collecting
+          </Text>
+          {periodLabel && (
+            <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: overdue ? colors.error : colors.primary }}>
+              {periodLabel}
+            </Text>
+          )}
+        </View>
+      </View>
+
+      {/* Footer: end date / early-close info */}
+      <View style={[s.roundFooter, { borderTopColor: colors.border }]}>
+        <Ionicons name="calendar-outline" size={13} color={colors.textTertiary} />
+        <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginLeft: 6 }}>
           Ends {end}
           {cycle.force_close_requested
             ? ` · ${cycle.force_close_acceptor_count}/${cycle.total_member_count} accepted early close`
@@ -368,6 +423,16 @@ export default function GroupDetailRoute() {
               <Text style={{ fontSize: FontSize.xs, color: 'rgba(255,255,255,0.65)', marginTop: 6 }}>
                 Admin: {group.admin.first_name} {group.admin.last_name}
               </Text>
+              {(activeCycle || roundJustCompleted) && (
+                <View style={[s.roundHeaderPill, { backgroundColor: 'rgba(255,255,255,0.18)' }]}>
+                  <Ionicons name={roundJustCompleted ? 'trophy' : 'sync'} size={12} color="#FFF" />
+                  <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: '#FFF', marginLeft: 5 }}>
+                    {activeCycle
+                      ? `Round ${activeCycle.round_number} · Cycle ${activeCycle.cycle_number}`
+                      : `Round ${lastClosedCycle?.round_number} complete`}
+                  </Text>
+                </View>
+              )}
             </View>
             {isGroupAdmin && (
               <View style={[s.adminBadge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
@@ -449,9 +514,9 @@ export default function GroupDetailRoute() {
             <InviteCard groupId={groupId} inviteCode={group.invite_code} colors={colors} />
           )}
 
-          {/* ── Cycle Status ── */}
+          {/* ── Round & Cycle Status ── */}
           <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginBottom: 10 }}>
-            Current Cycle
+            Round Progress
           </Text>
           {cyclesLoading ? (
             <Skeleton width="100%" height={64} radius={Radius.lg} style={{ marginBottom: 20 }} />
@@ -714,12 +779,32 @@ const s = StyleSheet.create({
     width: 1,
     backgroundColor: 'rgba(255,255,255,0.2)',
   },
-  cycleCard: {
+  roundCard: {
+    padding: 16,
+    borderRadius: Radius.xl,
+  },
+  roundIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: Radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  roundFooter: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 14,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: 1,
+  },
+  roundHeaderPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: Radius.full,
+    marginTop: 10,
+    alignSelf: 'flex-start',
   },
   alertBanner: {
     flexDirection: 'row',

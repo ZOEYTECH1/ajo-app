@@ -343,7 +343,22 @@ export default function MembersRoute() {
       queryClient.invalidateQueries({ queryKey: ['groups'] });
       router.replace('/home' as any);
     },
-    onError: () => feedback('error'),
+    onError: (err: any) => {
+      feedback('error');
+      const msg = err.response?.data?.detail ?? 'Could not leave group.';
+      setConfirmModal((prev) => ({ ...prev, visible: false }));
+      // Show error briefly via alert — modal is already closed
+      setTimeout(() => {
+        setConfirmModal({
+          visible: true,
+          title: 'Cannot leave group',
+          message: msg,
+          confirmLabel: 'OK',
+          destructive: false,
+          onConfirm: closeModal,
+        });
+      }, 100);
+    },
   });
 
   const closeModal = () => setConfirmModal((prev) => ({ ...prev, visible: false }));

@@ -231,64 +231,64 @@ const CycleCard: React.FC<{
       )}
 
       {/* Actions */}
-      {cycle.status === 'active' && (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
-          {isAdmin && cycle.can_normal_close && (
-            <TouchableOpacity
-              onPress={() => onClose(cycle)}
-              style={[lay.actionChip, { backgroundColor: colors.primaryTint }]}
-              accessibilityRole="button"
-              accessibilityLabel={`Close Cycle ${cycle.cycle_number}`}
-            >
-              <Ionicons name="checkmark-done-outline" size={14} color={colors.primary} />
-              <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.primary, marginLeft: 4 }}>
-                Close Cycle
-              </Text>
-            </TouchableOpacity>
-          )}
-          {!cycle.force_close_requested && (
-            <TouchableOpacity
-              onPress={() => onRequestEarly(cycle)}
-              style={[lay.actionChip, { backgroundColor: colors.warningLight }]}
-              accessibilityRole="button"
-              accessibilityLabel={`Request early close for Cycle ${cycle.cycle_number}`}
-            >
-              <Ionicons name="hourglass-outline" size={14} color={colors.warningDark} />
-              <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.warningDark, marginLeft: 4 }}>
-                Request Early Close
-              </Text>
-            </TouchableOpacity>
-          )}
-          {cycle.force_close_requested && (
-            <TouchableOpacity
-              onPress={() => onAcceptEarly(cycle)}
-              style={[lay.actionChip, { backgroundColor: colors.successLight }]}
-              accessibilityRole="button"
-              accessibilityLabel={`Accept early close for Cycle ${cycle.cycle_number}`}
-            >
-              <Ionicons name="thumbs-up-outline" size={14} color={colors.successDark} />
-              <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.successDark, marginLeft: 4 }}>
-                Accept Early Close
-              </Text>
-            </TouchableOpacity>
-          )}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+        {cycle.status === 'active' && isAdmin && cycle.can_normal_close && (
           <TouchableOpacity
-            onPress={() => onViewDefaulters(cycle)}
-            style={[lay.actionChip, { backgroundColor: graceActive ? colors.border : colors.errorLight }]}
+            onPress={() => onClose(cycle)}
+            style={[lay.actionChip, { backgroundColor: colors.primaryTint }]}
             accessibilityRole="button"
-            accessibilityLabel={`View defaulters for Cycle ${cycle.cycle_number}`}
+            accessibilityLabel={`Close Cycle ${cycle.cycle_number}`}
           >
-            <Ionicons
-              name={graceActive ? 'time-outline' : 'warning-outline'}
-              size={14}
-              color={graceActive ? colors.textSecondary : colors.errorDark}
-            />
-            <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: graceActive ? colors.textSecondary : colors.errorDark, marginLeft: 4 }}>
-              {defaulterLabel}
+            <Ionicons name="checkmark-done-outline" size={14} color={colors.primary} />
+            <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.primary, marginLeft: 4 }}>
+              Close Cycle
             </Text>
           </TouchableOpacity>
-        </View>
-      )}
+        )}
+        {cycle.status === 'active' && isAdmin && !cycle.force_close_requested && (
+          <TouchableOpacity
+            onPress={() => onRequestEarly(cycle)}
+            style={[lay.actionChip, { backgroundColor: colors.warningLight }]}
+            accessibilityRole="button"
+            accessibilityLabel={`Request early close for Cycle ${cycle.cycle_number}`}
+          >
+            <Ionicons name="hourglass-outline" size={14} color={colors.warningDark} />
+            <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.warningDark, marginLeft: 4 }}>
+              Request Early Close
+            </Text>
+          </TouchableOpacity>
+        )}
+        {cycle.status === 'active' && cycle.force_close_requested && (
+          <TouchableOpacity
+            onPress={() => onAcceptEarly(cycle)}
+            style={[lay.actionChip, { backgroundColor: colors.successLight }]}
+            accessibilityRole="button"
+            accessibilityLabel={`Accept early close for Cycle ${cycle.cycle_number}`}
+          >
+            <Ionicons name="thumbs-up-outline" size={14} color={colors.successDark} />
+            <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.successDark, marginLeft: 4 }}>
+              Accept Early Close
+            </Text>
+          </TouchableOpacity>
+        )}
+        {/* Available regardless of cycle status — defaulters for a closed
+            cycle still matter (streak tracking, audit), same as web. */}
+        <TouchableOpacity
+          onPress={() => onViewDefaulters(cycle)}
+          style={[lay.actionChip, { backgroundColor: graceActive ? colors.border : colors.errorLight }]}
+          accessibilityRole="button"
+          accessibilityLabel={`View defaulters for Cycle ${cycle.cycle_number}`}
+        >
+          <Ionicons
+            name={graceActive ? 'time-outline' : 'warning-outline'}
+            size={14}
+            color={graceActive ? colors.textSecondary : colors.errorDark}
+          />
+          <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: graceActive ? colors.textSecondary : colors.errorDark, marginLeft: 4 }}>
+            {defaulterLabel}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

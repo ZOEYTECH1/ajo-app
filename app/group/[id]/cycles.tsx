@@ -332,31 +332,48 @@ export default function CyclesRoute() {
     queryClient.invalidateQueries({ queryKey: ['group', groupId] });
   };
 
+  const closeModal = () => setConfirmModal((p) => ({ ...p, visible: false }));
+
+  const showError = (title: string, err: any) => {
+    feedback('error');
+    const msg = err.response?.data?.detail ?? 'Something went wrong.';
+    setConfirmModal((prev) => ({ ...prev, visible: false }));
+    // Show error briefly via alert — modal is already closed
+    setTimeout(() => {
+      setConfirmModal({
+        visible: true,
+        title,
+        message: msg,
+        confirmLabel: 'OK',
+        destructive: false,
+        onConfirm: closeModal,
+      });
+    }, 100);
+  };
+
   const startMutation = useMutation({
     mutationFn: (start: string) => groupService.startCycle(groupId, start),
     onSuccess: () => { feedback('success'); invalidate(); },
-    onError:   () => feedback('error'),
+    onError:   (err: any) => showError('Could not start cycle', err),
   });
 
   const closeMutation = useMutation({
     mutationFn: (cycleId: number) => groupService.closeCycle(groupId, cycleId),
     onSuccess: () => { feedback('success'); invalidate(); },
-    onError:   () => feedback('error'),
+    onError:   (err: any) => showError('Could not close cycle', err),
   });
 
   const requestEarlyMutation = useMutation({
     mutationFn: (cycleId: number) => groupService.requestEarlyClose(groupId, cycleId),
     onSuccess: () => { feedback('success'); invalidate(); },
-    onError:   () => feedback('error'),
+    onError:   (err: any) => showError('Could not request early close', err),
   });
 
   const acceptEarlyMutation = useMutation({
     mutationFn: (cycleId: number) => groupService.acceptEarlyClose(groupId, cycleId),
     onSuccess: () => { feedback('success'); invalidate(); },
-    onError:   () => feedback('error'),
+    onError:   (err: any) => showError('Could not accept early close', err),
   });
-
-  const closeModal = () => setConfirmModal((p) => ({ ...p, visible: false }));
 
   const handleClose = (cycle: Cycle) => {
     setConfirmModal({

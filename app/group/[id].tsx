@@ -86,13 +86,19 @@ const InviteCard: React.FC<{ groupId: number; inviteCode: string; colors: any }>
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const freqLabel = (f: string) => ({ daily: 'Daily contribution', weekly: 'Weekly contribution', monthly: 'Monthly contribution' }[f] ?? f);
 
-const computePeriodLabel = (cycle: Cycle, group: Group): string => {
-  const diffDays = Math.max(0, Math.floor((Date.now() - new Date(cycle.start_date).getTime()) / 86_400_000));
-  switch (group.contribution_frequency) {
-    case 'monthly': return `Month ${Math.floor(diffDays / 30) + 1}`;
-    case 'weekly':  return `Week ${Math.floor(diffDays / 7) + 1}`;
-    default:        return `Day ${diffDays + 1}`;
+// Derived from the cycle's own end_date/is_over (server-authoritative) rather
+// than reconstructing an independent day-count from start_date — a cycle IS
+// one period now (see Group.compute_cycle_end_date on the backend), so
+// showing "Month 2" for an overdue monthly cycle was actively misleading:
+// it implied normal ongoing progress rather than "this should have closed already."
+const computePeriodLabel = (cycle: Cycle): string => {
+  const diffDays = Math.round((new Date(cycle.end_date).getTime() - Date.now()) / 86_400_000);
+  if (cycle.is_over) {
+    const overdue = Math.abs(diffDays);
+    return `Overdue ${overdue} day${overdue === 1 ? '' : 's'}`;
   }
+  if (diffDays === 0) return 'Ends today';
+  return `${diffDays} day${diffDays === 1 ? '' : 's'} left`;
 };
 
 const formatAmt = (v: string | number) => `₦${Number(v).toLocaleString()}`;
@@ -127,7 +133,7 @@ const PaymentRow: React.FC<{ payment: Payment }> = ({ payment }) => {
 };
 
 // ─── Cycle status card ────────────────────────────────────────────────────────
-const CycleCard: React.FC<{ cycle: Cycle | undefined; group: Group | undefined; colors: any }> = ({ cycle, group, colors }) => {
+const CycleCard: React.FC<{ cycle: Cycle | undefined; colors: any }> = ({ cycle, colors }) => {
   if (!cycle) {
     return (
       <View style={[s.cycleCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -141,7 +147,7 @@ const CycleCard: React.FC<{ cycle: Cycle | undefined; group: Group | undefined; 
 
   const sc = statusColor(cycle.status, colors);
   const end = new Date(cycle.end_date).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
-  const periodLabel = group ? computePeriodLabel(cycle, group) : null;
+  const periodLabel = computePeriodLabel(cycle);
 
   return (
     <View style={[s.cycleCard, { backgroundColor: colors.surface, borderColor: colors.primaryBorder }]}>
@@ -432,7 +438,7 @@ export default function GroupDetailRoute() {
             <Skeleton width="100%" height={64} radius={Radius.lg} style={{ marginBottom: 20 }} />
           ) : (
             <View style={{ marginBottom: 20 }}>
-              <CycleCard cycle={activeCycle} group={group} colors={colors} />
+              <CycleCard cycle={activeCycle} colors={colors} />
             </View>
           )}
 

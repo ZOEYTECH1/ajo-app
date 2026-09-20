@@ -168,11 +168,6 @@ export const groupService = {
     return res.data;
   },
 
-  joinGroup: async (groupId: number): Promise<Membership> => {
-    const res = await api.post(`/api/groups/${groupId}/join/`);
-    return res.data;
-  },
-
   // ── Members ─────────────────────────────────────────────────────────────────
 
   getMembers: async (groupId: number, status?: MembershipStatus): Promise<Membership[]> => {

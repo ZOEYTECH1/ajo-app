@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  RefreshControl, StatusBar, StyleSheet, Alert,
+  RefreshControl, StatusBar, StyleSheet,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,7 +12,7 @@ import { useTheme } from '../../src/hooks/useTheme';
 import { useAuthStore } from '../../src/store/useAppStore';
 import { groupService, type Payment, type Cycle, type Group, type CollectionSlot } from '../../src/services/groupService';
 import { FontSize, Radius, Shadow } from '../../src/theme';
-import { Skeleton, Pill, LoadingOverlay } from '../../src/components';
+import { Skeleton, Pill } from '../../src/components';
 
 // ─── Invite Code card ─────────────────────────────────────────────────────────
 const InviteCard: React.FC<{ groupId: number; inviteCode: string; colors: any }> = ({
@@ -285,29 +285,6 @@ export default function GroupDetailRoute() {
 
   const [showRules, setShowRules] = useState(false);
 
-  const joinMutation = useMutation({
-    mutationFn: () => groupService.joinGroup(groupId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['group', groupId] });
-      queryClient.invalidateQueries({ queryKey: ['groups'] });
-    },
-  });
-
-  const handleJoinPress = () => {
-    if (!user?.profile_photo) {
-      Alert.alert(
-        'Profile Photo Required',
-        'Upload a profile photo before joining a group.',
-        [
-          { text: 'Go to Profile', onPress: () => router.push('/profile' as any) },
-          { text: 'Cancel', style: 'cancel' },
-        ],
-      );
-      return;
-    }
-    joinMutation.mutate();
-  };
-
   const isGroupAdmin = group?.admin.id === user?.id;
   const activeCycle  = cycles?.find((c) => c.status === 'active');
 
@@ -379,7 +356,6 @@ export default function GroupDetailRoute() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
-      <LoadingOverlay visible={joinMutation.isPending} message="Sending join request…" />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -731,23 +707,6 @@ export default function GroupDetailRoute() {
               ))
             )}
           </View>
-
-          {/* ── Join button (non-member) ── */}
-          {!isGroupAdmin && (
-            <TouchableOpacity
-              onPress={handleJoinPress}
-              disabled={joinMutation.isPending}
-              style={[s.joinBtn, { backgroundColor: colors.primary }]}
-              activeOpacity={0.85}
-              accessibilityRole="button"
-              accessibilityLabel="Request to Join"
-            >
-              <Ionicons name="person-add-outline" size={18} color={colors.white} />
-              <Text style={{ color: colors.white, fontSize: FontSize.md, fontWeight: '700', marginLeft: 8 }}>
-                Request to Join
-              </Text>
-            </TouchableOpacity>
-          )}
         </View>
       </ScrollView>
     </View>
@@ -846,14 +805,6 @@ const s = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  joinBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: Radius.full,
-    marginTop: 8,
   },
   inviteCard: {
     borderRadius: Radius.lg,

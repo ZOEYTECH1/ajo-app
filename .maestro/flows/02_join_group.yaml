@@ -1,12 +1,13 @@
-# E2E — Join a group via invite link
-# Verifies that a user can search for a group and send a join request.
+# E2E — Join a group via invite code
+# Verifies that a user can enter a group admin's invite code and send a join request.
 #
 # Usage:
 #   maestro test .maestro/flows/02_join_group.yaml
 #
 # Prerequisites:
 #   - Logged-in session (run 01_login.yaml first or use a persistent app state)
-#   - At least one publicly listed test group exists with a known name
+#   - A known invite code for an existing test group (groups are private —
+#     there is no public search/discovery; invite code is the only way in)
 
 appId: com.ajo.app
 ---
@@ -14,38 +15,22 @@ appId: com.ajo.app
 
 - waitForAnimationToEnd
 
-# Navigate to Groups tab
+# Home screen — tap the "Join an Ajo Group" entry point
 - tapOn:
-    text: "Groups"
-
-# Open group search / discovery
-- tapOn:
-    text: "Find a Group"
-    optional: true
+    text: "Join an Ajo Group"
 
 - assertVisible:
-    text: "Search"
+    text: "Enter invite code"
 
 - tapOn:
-    text: "Search"
-- inputText: "Test Savings Circle"
-
-- waitForAnimationToEnd
-
-# Tap the first result
-- tapOn:
-    index: 0
-    text: "Test Savings Circle"
-
-- assertVisible:
-    text: "Join"
+    text: "e.g. AJO4X7K2"
+- inputText: "AJO4X7K2"
 
 - tapOn:
-    text: "Join"
+    text: "Request to Join"
 
 - waitForAnimationToEnd
 
 # Confirm the pending state message
 - assertVisible:
-    text: "Request sent"
-    optional: true
+    text: "Request sent!"

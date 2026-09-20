@@ -294,6 +294,10 @@ export default function MembersRoute() {
       feedback('success');
       queryClient.invalidateQueries({ queryKey: ['members', groupId] });
       queryClient.invalidateQueries({ queryKey: ['group', groupId] });
+      // Approving assigns a new collection_slot — the Collection Schedule
+      // shown on the group detail page reads a separate cached query and
+      // was going stale silently until a manual refresh.
+      queryClient.invalidateQueries({ queryKey: ['collection-order', groupId] });
     },
     onError: () => feedback('error'),
   });
@@ -331,6 +335,7 @@ export default function MembersRoute() {
       if (updatedProposal.status === 'passed') {
         queryClient.invalidateQueries({ queryKey: ['members', groupId] });
         queryClient.invalidateQueries({ queryKey: ['group', groupId] });
+        queryClient.invalidateQueries({ queryKey: ['collection-order', groupId] });
       }
     },
     onError: () => feedback('error'),
@@ -341,6 +346,11 @@ export default function MembersRoute() {
     onSuccess: () => {
       feedback('success');
       queryClient.invalidateQueries({ queryKey: ['groups'] });
+      // Also refresh this group's own cached views — e.g. if navigation is
+      // interrupted, or the cache is later revisited via back-navigation.
+      queryClient.invalidateQueries({ queryKey: ['group', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['members', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['collection-order', groupId] });
       router.replace('/home' as any);
     },
     onError: (err: any) => {

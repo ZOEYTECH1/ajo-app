@@ -91,6 +91,8 @@ export interface Cycle {
   force_close_requested: boolean;
   force_close_acceptor_count: number;
   total_member_count: number;
+  collector_id: number | null;
+  collector_name: string | null;
 }
 
 export interface Defaulter {

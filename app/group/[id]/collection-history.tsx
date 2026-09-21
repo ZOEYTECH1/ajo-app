@@ -93,10 +93,15 @@ export default function CollectionHistoryRoute() {
           </View>
         ) : (
           sortedCycles.map((cycle) => {
-            // cycle.slot_number (server-computed) tells us whose turn this
-            // cycle was — comparing against cycle_number directly breaks
-            // once a Round completes, since cycle_number never resets.
-            const slot = collectionOrder?.find((s) => s.collection_slot === cycle.slot_number);
+            // Prefer the collector snapshotted server-side when the cycle
+            // was created — the live collection order can be reordered/
+            // shuffled after the fact, which would otherwise silently
+            // rewrite history to show whoever holds that slot *now*. Only
+            // cycles created before this snapshot existed (collector_name
+            // null) fall back to matching slot_number against the current
+            // order.
+            const collectorName = cycle.collector_name
+              ?? collectionOrder?.find((s) => s.collection_slot === cycle.slot_number)?.full_name;
             const isActive = cycle.status === 'active';
 
             const cyclePayments = (payments ?? []).filter(
@@ -151,7 +156,7 @@ export default function CollectionHistoryRoute() {
                       {isActive ? 'Collecting this cycle' : 'Collected by'}
                     </Text>
                     <Text style={{ fontSize: FontSize.sm, fontWeight: '800', color: isActive ? colors.primary : colors.success, marginTop: 2 }}>
-                      {slot?.full_name ?? '—'}
+                      {collectorName ?? '—'}
                     </Text>
                   </View>
                   {pot > 0 && (

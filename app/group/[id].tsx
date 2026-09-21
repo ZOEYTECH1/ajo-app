@@ -102,6 +102,17 @@ const computePeriodLabel = (cycle: Cycle): string => {
   return `${diffDays} day${diffDays === 1 ? '' : 's'} left`;
 };
 
+// A cycle is already fully live (collecting, payable) from the moment it's
+// created, regardless of start_date — this label is purely so a cycle
+// dated for the future doesn't show a misleading end-date countdown before
+// it's actually begun. It does not affect payment/collection behavior.
+const computeStartLabel = (cycle: Cycle): string | null => {
+  const diffDays = Math.round((new Date(cycle.start_date).getTime() - Date.now()) / 86_400_000);
+  if (diffDays <= 0) return null;
+  if (diffDays === 1) return 'Starts tomorrow';
+  return `Starts in ${diffDays} days`;
+};
+
 const formatAmt = (v: string | number) => `₦${Number(v).toLocaleString()}`;
 
 const statusColor = (status: string, colors: any) => ({
@@ -181,6 +192,7 @@ const CycleCard: React.FC<{ cycle: Cycle | undefined; roundJustCompleted?: boole
   const start = new Date(cycle.start_date).toLocaleDateString('en-NG', dateOpts);
   const end = new Date(cycle.end_date).toLocaleDateString('en-NG', dateOpts);
   const periodLabel = computePeriodLabel(cycle);
+  const startLabel = computeStartLabel(cycle);
   const overdue = cycle.is_over;
 
   return (
@@ -204,20 +216,28 @@ const CycleCard: React.FC<{ cycle: Cycle | undefined; roundJustCompleted?: boole
       {/* Progress bar — how far through this round's rotation */}
       <View style={{ marginTop: 16 }}>
         <RoundProgressBar
-          slot={cycle.slot_number}
+          slot={startLabel ? 0 : cycle.slot_number}
           total={cycle.total_member_count}
           colors={colors}
           tint={colors.primaryTint}
           track={colors.background}
         />
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 }}>
-          <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary }}>
-            Member {cycle.slot_number} of {cycle.total_member_count} collecting
-          </Text>
-          {periodLabel && (
-            <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: overdue ? colors.error : colors.primary }}>
-              {periodLabel}
+          {startLabel ? (
+            <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: colors.textTertiary }}>
+              {startLabel}
             </Text>
+          ) : (
+            <>
+              <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary }}>
+                Member {cycle.slot_number} of {cycle.total_member_count} collecting
+              </Text>
+              {periodLabel && (
+                <Text style={{ fontSize: FontSize.xs, fontWeight: '700', color: overdue ? colors.error : colors.primary }}>
+                  {periodLabel}
+                </Text>
+              )}
+            </>
           )}
         </View>
       </View>

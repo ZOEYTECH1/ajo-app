@@ -149,6 +149,7 @@ const StartCycleModal: React.FC<{
             <DateTimePicker
               value={startDate}
               mode="date"
+              minimumDate={today}
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
               onChange={(_, selected) => {
                 if (selected) setStartDate(selected);

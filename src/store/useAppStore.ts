@@ -23,7 +23,6 @@ export interface AjoUser {
   is_phone_verified: boolean;
   is_kyc_verified: boolean;
   profile_photo: string | null;
-  fcm_token: string | null;
   date_joined: string;
 }
 

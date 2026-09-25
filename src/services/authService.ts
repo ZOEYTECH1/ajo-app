@@ -175,18 +175,6 @@ export const authService = {
   },
 
   /**
-   * Updates the Firebase Cloud Messaging token on the user's server profile
-   * so push notifications can be delivered to the current device.
-   *
-   * @param fcm_token - The FCM token string from expo-notifications.
-   * @returns The updated user profile.
-   */
-  updateFcmToken: async (fcm_token: string): Promise<AjoUser> => {
-    const res = await api.patch('/api/auth/me/', { fcm_token });
-    return res.data;
-  },
-
-  /**
    * Logs the current user out.
    * Clears local tokens immediately, then fire-and-forgets a backend call to
    * blacklist the refresh token so it cannot be reused on other devices.

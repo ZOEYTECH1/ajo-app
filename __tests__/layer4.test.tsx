@@ -119,7 +119,7 @@ describe('Layer 4.3 — Session management: logout clears state', () => {
     const store = useAuthStore.getState();
     // Seed state
     store.setAuth(
-      { id: 1, email: 'a@b.com', first_name: 'A', last_name: 'B', phone_number: null, role: 'member', is_email_verified: true, is_phone_verified: false, is_kyc_verified: false, profile_photo: null, fcm_token: null, date_joined: '' },
+      { id: 1, email: 'a@b.com', first_name: 'A', last_name: 'B', phone_number: null, role: 'member', is_email_verified: true, is_phone_verified: false, is_kyc_verified: false, profile_photo: null, date_joined: '' },
       'access_tok',
       'refresh_tok',
     );

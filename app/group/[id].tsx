@@ -658,6 +658,14 @@ export default function GroupDetailRoute() {
                 onPress={() => router.push(`/group/${groupId}/settings` as any)}
               />
             )}
+            {isGroupAdmin && (
+              <ActionBtn
+                icon="document-text-outline"
+                label="Audit Log"
+                colors={colors}
+                onPress={() => router.push(`/group/${groupId}/audit-log` as any)}
+              />
+            )}
           </View>
 
           {/* ── Paid Members ── */}

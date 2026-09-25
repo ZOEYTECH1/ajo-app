@@ -61,6 +61,15 @@ export interface RemovalProposal {
   resolved_at: string | null;
 }
 
+export interface AuditLogEntry {
+  id: number;
+  action: string;
+  action_display: string;
+  actor: AjoUser | null;
+  extra_data: Record<string, unknown>;
+  timestamp: string;
+}
+
 export interface Payment {
   id: number;
   member_name: string;
@@ -306,6 +315,13 @@ export const groupService = {
 
   getCollectionOrder: async (groupId: number): Promise<CollectionSlot[]> => {
     const res = await api.get(`/api/groups/${groupId}/collection-order/`);
+    return res.data;
+  },
+
+  // ── Audit log (admin-only) ───────────────────────────────────────────────────
+
+  getAuditLogPage: async (groupId: number, pageOrUrl: string | null): Promise<PaginatedResult<AuditLogEntry>> => {
+    const res = await api.get(pageOrUrl ?? `/api/groups/${groupId}/audit-log/`);
     return res.data;
   },
 

@@ -238,6 +238,14 @@ export default function CustomersScreen() {
                         <Text style={{ fontSize: 11, fontWeight: '700', color: '#2E7D32', marginLeft: 4 }}>Record payment</Text>
                       </TouchableOpacity>
                     )}
+                    <TouchableOpacity
+                      onPress={() => router.push(`/inventory/customer-credit-history?id=${c.id}&name=${encodeURIComponent(c.name)}` as any)}
+                      style={[s.creditBtn, { backgroundColor: colors.background }]}
+                      accessibilityRole="button" accessibilityLabel={`View credit history for ${c.name}`}
+                    >
+                      <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
+                      <Text style={{ fontSize: 11, fontWeight: '700', color: colors.textSecondary, marginLeft: 4 }}>History</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
               );
@@ -382,7 +390,7 @@ const s = StyleSheet.create({
     borderRadius: 6, marginTop: 4,
   },
   creditActions: {
-    flexDirection: 'row', gap: 8, padding: 10,
+    flexDirection: 'row', flexWrap: 'wrap', gap: 8, padding: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   creditBtn: {

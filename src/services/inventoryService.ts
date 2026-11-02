@@ -333,6 +333,23 @@ export const adjustCredit = (
 ): Promise<InventoryCustomer> =>
   api.post(`/api/inventory/customers/${id}/credit/`, { direction, amount, ...(note ? { note } : {}) }).then(r => r.data);
 
+export interface InventoryCreditEntry {
+  id: number;
+  direction: 'charge' | 'payment';
+  amount: string;
+  balance_after: string;
+  note: string;
+  recorded_at: string;
+}
+
+export const getCreditHistoryPage = (
+  custId: number,
+  pageOrUrl: string | null,
+): Promise<PaginatedResult<InventoryCreditEntry>> => {
+  if (pageOrUrl) return api.get(pageOrUrl).then(r => r.data);
+  return api.get(`/api/inventory/customers/${custId}/credit/`, { params: { page: 1, ...bizP().params } }).then(r => r.data);
+};
+
 // ─── Sales ────────────────────────────────────────────────────────────────────
 
 export interface InventorySaleItem {

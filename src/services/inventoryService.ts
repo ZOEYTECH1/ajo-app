@@ -223,8 +223,12 @@ export const getBranchProductRequestsPage = (
   pageOrUrl: string | null,
 ): Promise<PaginatedResult<BranchProductRequest>> => {
   if (pageOrUrl) return api.get(pageOrUrl).then(r => r.data);
+  // page: 1 must be explicit -- the backend only returns the paginated
+  // {count,next,previous,results} envelope when a page param is present,
+  // otherwise it returns a bare array, which breaks useInfiniteQuery's
+  // lastPage.next / lastPage.results access on the very first load.
   return api.get(`/api/inventory/businesses/${bizId}/product-requests/`, {
-    params: statusFilter ? { status: statusFilter } : undefined,
+    params: { page: 1, ...(statusFilter ? { status: statusFilter } : {}) },
   }).then(r => r.data);
 };
 
@@ -299,7 +303,12 @@ export const getTransfers = (): Promise<InventoryTransfer[]> =>
 
 export const getTransfersPage = (pageOrUrl: string | null): Promise<PaginatedResult<InventoryTransfer>> => {
   if (pageOrUrl) return api.get(pageOrUrl).then(r => r.data);
-  return api.get('/api/inventory/transfers/', bizP()).then(r => r.data);
+  // page: 1 must be explicit -- the backend only returns the paginated
+  // {count,next,previous,results} envelope when a page param is present,
+  // otherwise it returns a bare array, which breaks useInfiniteQuery's
+  // lastPage.next / lastPage.results access on the very first load.
+  const { params } = bizP();
+  return api.get('/api/inventory/transfers/', { params: { page: 1, ...params } }).then(r => r.data);
 };
 
 // ─── Customers ────────────────────────────────────────────────────────────────
@@ -382,7 +391,9 @@ export const getSales = (): Promise<InventorySale[]> =>
 
 export const getSalesPage = (pageOrUrl: string | null): Promise<PaginatedResult<InventorySale>> => {
   if (pageOrUrl) return api.get(pageOrUrl).then(r => r.data);
-  return api.get('/api/inventory/sales/', bizP()).then(r => r.data);
+  // page: 1 must be explicit -- see getTransfersPage's comment for why.
+  const { params } = bizP();
+  return api.get('/api/inventory/sales/', { params: { page: 1, ...params } }).then(r => r.data);
 };
 
 export const recordSale = (data: {

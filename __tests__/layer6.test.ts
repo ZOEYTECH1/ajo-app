@@ -86,6 +86,34 @@ describe('Layer 6.2 — Pagination: list screens pass page params', () => {
     const content = fs.readFileSync(customersPath, 'utf8');
     expect(content).toMatch(/useQuery|page|results/);
   });
+
+  // Regression guard: the backend only returns the paginated
+  // {count,next,previous,results} envelope when a `page` query param is
+  // present -- without it, it returns a bare array, which breaks
+  // useInfiniteQuery's `lastPage.next`/`lastPage.results` access on the
+  // very first load. getTransfersPage/getSalesPage/
+  // getBranchProductRequestsPage all used to omit `page` on their first
+  // (pageOrUrl === null) call; each must now pass `page: 1` explicitly.
+  it('getTransfersPage sends page: 1 on its first (non-URL) call', () => {
+    const content = fs.readFileSync(path.join(SRC, 'services', 'inventoryService.ts'), 'utf8');
+    const fn = content.slice(content.indexOf('export const getTransfersPage'), content.indexOf('export const getTransfersPage') + 400);
+    expect(fn).toMatch(/page:\s*1/);
+  });
+
+  it('getSalesPage sends page: 1 on its first (non-URL) call', () => {
+    const content = fs.readFileSync(path.join(SRC, 'services', 'inventoryService.ts'), 'utf8');
+    const fn = content.slice(content.indexOf('export const getSalesPage'), content.indexOf('export const getSalesPage') + 400);
+    expect(fn).toMatch(/page:\s*1/);
+  });
+
+  it('getBranchProductRequestsPage sends page: 1 on its first (non-URL) call', () => {
+    const content = fs.readFileSync(path.join(SRC, 'services', 'inventoryService.ts'), 'utf8');
+    const fn = content.slice(
+      content.indexOf('export const getBranchProductRequestsPage'),
+      content.indexOf('export const getBranchProductRequestsPage') + 500,
+    );
+    expect(fn).toMatch(/page:\s*1/);
+  });
 });
 
 

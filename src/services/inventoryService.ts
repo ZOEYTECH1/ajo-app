@@ -167,13 +167,6 @@ export interface InventorySubscription {
   verified_at: string | null;
 }
 
-/** Legacy single-business endpoint (backwards-compat, solo users only). */
-export const getBusiness = (): Promise<InventoryBusiness | null> =>
-  api.get('/api/inventory/business/').then(r => r.data);
-
-export const saveBusiness = (data: Partial<Omit<InventoryBusiness, 'id' | 'created_at' | 'updated_at'>>): Promise<InventoryBusiness> =>
-  api.put('/api/inventory/business/', data).then(r => r.data);
-
 /** Multi-business API — returns all locations the current user belongs to, with their role. */
 export const getBusinesses = (): Promise<InventoryBusinessFull[]> =>
   api.get('/api/inventory/businesses/').then(r => r.data);

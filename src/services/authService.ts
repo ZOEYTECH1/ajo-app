@@ -8,7 +8,7 @@
  */
 
 import api from './api';
-import { useAuthStore, type AjoUser } from '../store/useAppStore';
+import { useAuthStore, useModuleStore, type AjoUser, type ModuleKey } from '../store/useAppStore';
 
 // ─── Payload types ────────────────────────────────────────────────────────────
 
@@ -133,6 +133,7 @@ export const authService = {
     const res = await api.post('/api/auth/login/', { ...data, ...(time_zone ? { time_zone } : {}) });
     const { access, refresh, user } = res.data;
     useAuthStore.getState().setAuth(user, access, refresh);
+    useModuleStore.getState().syncFromAccount(user.selected_modules ?? []);
     return res.data;
   },
 
@@ -148,6 +149,7 @@ export const authService = {
     const res = await api.post('/api/auth/google/', { id_token: idToken, ...(time_zone ? { time_zone } : {}) });
     const { access, refresh, user } = res.data;
     useAuthStore.getState().setAuth(user, access, refresh);
+    useModuleStore.getState().syncFromAccount(user.selected_modules ?? []);
     return res.data;
   },
 
@@ -170,6 +172,22 @@ export const authService = {
    */
   getMe: async (): Promise<AjoUser> => {
     const res = await api.get('/api/auth/me/');
+    useAuthStore.getState().updateUser(res.data);
+    useModuleStore.getState().syncFromAccount(res.data.selected_modules ?? []);
+    return res.data;
+  },
+
+  /**
+   * Adds one or more modules to the account's selected_modules -- append-
+   * only on the backend (never removes), shared with ajo-web. Updates the
+   * auth store's user object with the server's response so UI reading
+   * `user.selected_modules` directly stays in sync too.
+   *
+   * @param modules - Module keys to add ("ajo" | "thrift" | "inventory").
+   * @returns The updated user profile.
+   */
+  updateSelectedModules: async (modules: ModuleKey[]): Promise<AjoUser> => {
+    const res = await api.patch('/api/auth/me/', { selected_modules: modules });
     useAuthStore.getState().updateUser(res.data);
     return res.data;
   },

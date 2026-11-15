@@ -123,18 +123,18 @@ const JoinIllustration = ({ primary, tint, size = 260 }: { primary: string; tint
 const SLIDES = [
   {
     id: '1',
-    title: 'Welcome to\nAjo',
+    title: 'Welcome to\nScribe',
     subtitle: 'Your circle. Your money. Your record. A trusted digital ledger for your savings group.',
   },
   {
     id: '2',
     title: 'We only\nkeep records',
-    subtitle: 'Ajo never holds or moves a single naira. Members pay each other directly — we document every contribution with permanent proof.',
+    subtitle: 'Scribe never holds or moves a single naira. Members pay each other directly — we document every contribution with permanent proof.',
   },
   {
     id: '3',
     title: 'Built on\ntrust',
-    subtitle: 'Every record is permanent and tamper-proof. No member, no admin can alter what Ajo has sealed. Your group\'s truth, forever.',
+    subtitle: 'Every record is permanent and tamper-proof. No member, no admin can alter what Scribe has sealed. Your group\'s truth, forever.',
   },
   {
     id: '4',

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Ajo",
+    "name": "Scribe",
     "slug": "ajo-app",
     "version": "1.0.0",
     "scheme": "ajo",
@@ -48,20 +48,20 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Ajo needs access to your photos so you can upload a profile picture and attach payment receipts."
+          "photosPermission": "Scribe needs access to your photos so you can upload a profile picture and attach payment receipts."
         }
       ],
       [
         "expo-av",
         {
-          "microphonePermission": "Ajo needs microphone access to record voice notes when disputing a payment."
+          "microphonePermission": "Scribe needs microphone access to record voice notes when disputing a payment."
         }
       ],
       "expo-sharing",
       [
         "expo-camera",
         {
-          "cameraPermission": "Ajo needs camera access to scan product barcodes."
+          "cameraPermission": "Scribe needs camera access to scan product barcodes."
         }
       ]
     ],

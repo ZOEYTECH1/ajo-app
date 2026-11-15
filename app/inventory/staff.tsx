@@ -62,7 +62,7 @@ export default function StaffScreen() {
     onError: (err: any) => {
       const msg = err?.response?.data?.email
         || err?.response?.data?.detail
-        || 'Could not invite. Make sure the email is registered on Ajo.';
+        || 'Could not invite. Make sure the email is registered on Scribe.';
       Alert.alert('Error', msg);
     },
   });
@@ -175,7 +175,7 @@ export default function StaffScreen() {
           <View style={[s.infoBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <Ionicons name="information-circle-outline" size={16} color={colors.textSecondary} />
             <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginLeft: 8, flex: 1, lineHeight: 17 }}>
-              Team members must already have an Ajo account. Invite them by the email they registered with.
+              Team members must already have a Scribe account. Invite them by the email they registered with.
             </Text>
           </View>
         </ScrollView>

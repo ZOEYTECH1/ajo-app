@@ -988,7 +988,7 @@ export default function ThriftGroupDetail() {
   const shareInvite = async () => {
     if (!group) return;
     await Share.share({
-      message: `Join my thrift group "${group.name}" on Ajo!\nInvite code: ${group.invite_code}`,
+      message: `Join my thrift group "${group.name}" on Scribe!\nInvite code: ${group.invite_code}`,
     });
   };
 

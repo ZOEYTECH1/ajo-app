@@ -429,7 +429,7 @@ export default function HomeRoute() {
           <View style={{ alignItems: 'center', paddingVertical: 40, paddingHorizontal: 8 }}>
             <Ionicons name="apps-outline" size={64} color={colors.primaryTint} />
             <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginTop: 16, textAlign: 'center' }}>
-              Welcome to Ajo
+              Welcome to Scribe
             </Text>
             <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 6, textAlign: 'center', lineHeight: 20 }}>
               Choose a feature below to get started.

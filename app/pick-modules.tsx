@@ -88,7 +88,7 @@ export default function PickModulesScreen() {
           Welcome{user?.first_name ? `, ${user.first_name}` : ''}
         </Text>
         <Text style={[s.title, { color: colors.textPrimary }]}>
-          What will you use{'\n'}Ajo for?
+          What will you use{'\n'}Scribe for?
         </Text>
         <Text style={[s.subtitle, { color: colors.textSecondary }]}>
           Select everything that applies — you can always add more later.

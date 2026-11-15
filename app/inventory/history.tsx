@@ -154,7 +154,7 @@ export default function BusinessHistoryScreen() {
         </TouchableOpacity>
         <View style={{ flex: 1, marginLeft: 16 }}>
           <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">Business History</Text>
-          <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>Records from before you joined Ajo</Text>
+          <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>Records from before you joined Scribe</Text>
         </View>
         <TouchableOpacity onPress={openAdd} style={[s.addBtn, { backgroundColor: INV }]} accessibilityRole="button" accessibilityLabel="Add historical record">
           <Ionicons name="add" size={22} color="#fff" />
@@ -215,7 +215,7 @@ export default function BusinessHistoryScreen() {
                 No historical records yet
               </Text>
               <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 6, textAlign: 'center' }}>
-                Used Excel or paper before Ajo? Add a summary of your old sales and expenses here.
+                Used Excel or paper before Scribe? Add a summary of your old sales and expenses here.
               </Text>
             </View>
           )}
@@ -278,7 +278,7 @@ export default function BusinessHistoryScreen() {
               {editing ? 'Edit Historical Record' : 'Add Historical Record'}
             </Text>
             <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginBottom: 20 }}>
-              A summary total for a period before you started using Ajo — not day-by-day detail.
+              A summary total for a period before you started using Scribe — not day-by-day detail.
             </Text>
 
             <Text style={[s.label, { color: colors.textSecondary }]}>Period Start (YYYY-MM-DD) *</Text>

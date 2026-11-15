@@ -242,7 +242,7 @@ export default function SubscriptionRoute() {
                   <Row label="Each member pays you" value={fmtNGN(contribution * rate)}                         colors={colors} />
                   <Row label="Cycles selected"      value={`${cycles} ${cycleUnit}${cycles !== 1 ? 's' : ''}`}  colors={colors} />
                   <View style={[s.divider, { backgroundColor: colors.border }]} />
-                  <Row label="Total due to Ajo"     value={fmtNGN(total)} bold                                  colors={colors} />
+                  <Row label="Total due to Scribe"  value={fmtNGN(total)} bold                                  colors={colors} />
                 </View>
 
                 {/* Cycle selector */}

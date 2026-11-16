@@ -11,7 +11,7 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import { exchangeCodeAsync, makeRedirectUri } from 'expo-auth-session';
 import { FontSize, Radius } from './theme';
-import { Button, Input, Divider, OTPBox, LoadingOverlay, Bouncy, feedback } from './components';
+import { Button, Input, PhoneNumberInput, Divider, OTPBox, LoadingOverlay, Bouncy, feedback } from './components';
 import Svg, { Path } from 'react-native-svg';
 import { authService } from './services/authService';
 import { useAuthStore } from './store/useAppStore';
@@ -233,11 +233,12 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
           leftIcon={<Ionicons name="mail-outline" size={18} color={colors.primary} />}
           accessibilityLabel="Email address"
         />
-        <Input
-          label="Phone Number" placeholder="+234 800 000 0000" value={form.phone}
-          onChangeText={(v) => setForm({ ...form, phone: v })} error={errors.phone}
-          keyboardType="phone-pad" leftIcon={<Ionicons name="call-outline" size={18} color={colors.primary} />}
-          accessibilityLabel="Phone number" accessibilityHint="Enter your 11-digit Nigerian phone number"
+        <PhoneNumberInput
+          label="Phone Number"
+          defaultValue={form.phone}
+          onChangeFormattedText={(v) => setForm((prev) => ({ ...prev, phone: v }))}
+          error={errors.phone}
+          accessibilityLabel="Phone number"
         />
         <Input
           label="Password" placeholder="Minimum 8 characters" value={form.password}

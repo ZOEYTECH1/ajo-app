@@ -18,6 +18,7 @@ import {
   Pressable,
   Image,
 } from 'react-native';
+import PhoneInput from 'react-native-phone-number-input';
 import { FontSize, Radius, Shadow } from './theme';
 import { useTheme } from './hooks/useTheme';
 import { AjoLoader } from './AjoLoader';
@@ -278,6 +279,65 @@ export const Input: React.FC<InputProps> = ({
         />
         {rightIcon && <View style={s.inputIconRight}>{rightIcon}</View>}
       </View>
+      {error && (
+        <Text style={{ color: colors.error, fontSize: FontSize.xs, marginTop: 5, marginLeft: 4 }}>
+          {error}
+        </Text>
+      )}
+    </View>
+  );
+};
+
+// ─── Phone Number Input (with +country code picker) ─────────────────────────
+interface PhoneNumberInputProps {
+  label?: string;
+  error?: string;
+  defaultValue?: string;
+  onChangeFormattedText: (text: string) => void;
+  accessibilityLabel?: string;
+}
+
+export const PhoneNumberInput: React.FC<PhoneNumberInputProps> = ({
+  label, error, defaultValue, onChangeFormattedText, accessibilityLabel,
+}) => {
+  const { colors, isDark } = useTheme();
+  return (
+    <View style={{ marginBottom: 16 }}>
+      {label && (
+        <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textPrimary, marginBottom: 6 }}>
+          {label}
+        </Text>
+      )}
+      <PhoneInput
+        defaultValue={defaultValue}
+        defaultCode="NG"
+        layout="first"
+        onChangeFormattedText={onChangeFormattedText}
+        withDarkTheme={isDark}
+        containerStyle={{
+          width: '100%',
+          borderRadius: Radius.md,
+          borderWidth: 1.5,
+          borderColor: error ? colors.error : colors.border,
+          backgroundColor: colors.surfaceInput,
+        }}
+        textContainerStyle={{
+          backgroundColor: colors.surfaceInput,
+          borderRadius: Radius.md,
+          paddingVertical: 0,
+        }}
+        textInputStyle={{
+          color: colors.textPrimary,
+          fontSize: FontSize.base,
+          height: 50,
+        }}
+        codeTextStyle={{ color: colors.textPrimary, fontSize: FontSize.base }}
+        flagButtonStyle={{ backgroundColor: colors.surfaceInput }}
+        textInputProps={{
+          placeholderTextColor: colors.textPlaceholder,
+          accessibilityLabel: accessibilityLabel ?? label,
+        }}
+      />
       {error && (
         <Text style={{ color: colors.error, fontSize: FontSize.xs, marginTop: 5, marginLeft: 4 }}>
           {error}

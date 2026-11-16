@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../src/hooks/useTheme';
 import { useAuthStore } from '../src/store/useAppStore';
 import { authService } from '../src/services/authService';
-import { Button, Input, OTPBox, Bouncy, feedback, LoadingOverlay } from '../src/components';
+import { Button, Input, PhoneNumberInput, OTPBox, Bouncy, feedback, LoadingOverlay } from '../src/components';
 import { FontSize, Radius } from '../src/theme';
 
 export default function CompleteProfileRoute() {
@@ -119,15 +119,11 @@ export default function CompleteProfileRoute() {
 
         {step === 'phone' ? (
           <>
-            <Input
+            <PhoneNumberInput
               label="Phone Number"
-              placeholder="+234 800 000 0000"
-              value={phone}
-              onChangeText={(v) => { setPhone(v); setError(''); }}
-              keyboardType="phone-pad"
-              leftIcon={<Ionicons name="call-outline" size={18} color={colors.primary} />}
+              defaultValue={phone}
+              onChangeFormattedText={(v) => { setPhone(v); setError(''); }}
               accessibilityLabel="Phone number"
-              accessibilityHint="Enter your 11-digit Nigerian phone number"
             />
             <Button label="Send Verification Code" onPress={handleSetPhone} loading={loading} style={{ marginTop: 8 }} accessibilityHint="Double tap to send a verification code" />
           </>

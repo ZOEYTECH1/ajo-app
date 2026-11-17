@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, TextInput,
-  StyleSheet, Alert, ActivityIndicator, Linking, Modal, KeyboardAvoidingView, Platform,
+  View, Text, ScrollView, TouchableOpacity,
+  StyleSheet, Alert, ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import * as WebBrowser from 'expo-web-browser';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../src/hooks/useTheme';
 import { FontSize, Radius, Shadow } from '../../../src/theme';
@@ -13,29 +14,54 @@ import {
   type ThriftInvoice,
 } from '../../../src/services/billingService';
 
+// Same deep link the backend's SUBSCRIPTION_REDIRECT_URL defaults to, and
+// the one the Ajo Group subscription screen already uses.
+const REDIRECT_URL = 'ajo://payment/verify';
+
 const STATUS_META = {
   pending: { label: 'Unpaid',  color: '#E65100', bg: '#FFF3E0', icon: 'time-outline' },
   paid:    { label: 'Paid',    color: '#2E7D32', bg: '#E8F5E9', icon: 'checkmark-circle-outline' },
   overdue: { label: 'Overdue', color: '#C62828', bg: '#FFEBEE', icon: 'alert-circle-outline' },
 };
 
-function InvoiceCard({ invoice, onPay, onVerified }: {
+function InvoiceCard({ invoice, onVerified }: {
   invoice: ThriftInvoice;
-  onPay: (setShowVerify: (v: boolean) => void) => void;
   onVerified: () => void;
 }) {
   const { colors } = useTheme();
   const meta = STATUS_META[invoice.status];
   const totalFee = parseFloat(invoice.total_fee);
-  const [showVerify, setShowVerify] = useState(false);
-  const [txId, setTxId] = useState('');
   const [verifyError, setVerifyError] = useState('');
   const [verified, setVerified] = useState(false);
 
+  // Previously opened the payment link in an external browser (Linking.openURL)
+  // and made the user manually copy-paste the transaction id. Switched to the
+  // same pattern the Ajo Group subscription screen already uses: an in-app
+  // auth session that captures Flutterwave's redirect itself and verifies
+  // automatically, no manual step needed.
   const { mutate: verify, isPending: verifying } = useMutation({
-    mutationFn: () => verifyInvoice(invoice.id, txId.trim()),
-    onSuccess: () => { setVerified(true); setShowVerify(false); onVerified(); },
-    onError: (e: any) => setVerifyError(e?.response?.data?.detail ?? 'Verification failed. Check your transaction ID.'),
+    mutationFn: (txId: string) => verifyInvoice(invoice.id, txId.trim()),
+    onSuccess: () => { setVerified(true); setVerifyError(''); onVerified(); },
+    onError: (e: any) => setVerifyError(e?.response?.data?.detail ?? 'Verification failed. Please try again.'),
+  });
+
+  const { mutate: pay, isPending: paying } = useMutation({
+    mutationFn: () => payInvoice(invoice.id),
+    onSuccess: async (data) => {
+      const browserResult = await WebBrowser.openAuthSessionAsync(data.payment_link, REDIRECT_URL);
+      if (browserResult.type !== 'success') return;
+
+      const params = new URL(browserResult.url).searchParams;
+      const transactionId = params.get('transaction_id');
+      const payStatus = params.get('status');
+
+      if (!transactionId || payStatus !== 'successful') {
+        Alert.alert('Payment not completed', 'The payment was not completed successfully.');
+        return;
+      }
+      verify(transactionId);
+    },
+    onError: () => Alert.alert('Error', 'Could not initiate payment. Please try again.'),
   });
 
   return (
@@ -82,49 +108,33 @@ function InvoiceCard({ invoice, onPay, onVerified }: {
       {invoice.status !== 'paid' && !verified && (
         <>
           <TouchableOpacity
-            onPress={() => onPay(setShowVerify)}
-            style={[s.payBtn, { backgroundColor: colors.primary }]}
+            onPress={() => pay()}
+            disabled={paying || verifying}
+            style={[s.payBtn, { backgroundColor: colors.primary, opacity: (paying || verifying) ? 0.6 : 1 }]}
             activeOpacity={0.85}
             accessibilityRole="button"
             accessibilityLabel={`Pay ₦${totalFee.toLocaleString()} for ${invoice.month_label}`}
           >
-            <Ionicons name="card-outline" size={18} color="#fff" />
-            <Text style={{ color: '#fff', fontWeight: '800', fontSize: FontSize.sm, marginLeft: 8 }}>
-              Pay ₦{totalFee.toLocaleString()}
-            </Text>
+            {paying || verifying
+              ? <ActivityIndicator size="small" color="#fff" />
+              : (
+                <>
+                  <Ionicons name="card-outline" size={18} color="#fff" />
+                  <Text style={{ color: '#fff', fontWeight: '800', fontSize: FontSize.sm, marginLeft: 8 }}>
+                    Pay ₦{totalFee.toLocaleString()}
+                  </Text>
+                </>
+              )
+            }
           </TouchableOpacity>
-
-          {/* Verify section shown after payment initiated */}
-          {showVerify && (
-            <View style={[s.verifyBox, { borderColor: colors.border, backgroundColor: colors.background }]}>
-              <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginBottom: 10, lineHeight: 18 }}>
-                After completing payment in your browser, enter your transaction ID to confirm.
-              </Text>
-              <TextInput
-                value={txId}
-                onChangeText={t => { setTxId(t); setVerifyError(''); }}
-                placeholder="e.g. FLW-123456789"
-                placeholderTextColor={colors.textTertiary}
-                style={[s.txInput, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.surface }]}
-              />
-              {verifyError ? (
-                <Text style={{ fontSize: FontSize.xs, color: colors.error, marginTop: 6 }}>{verifyError}</Text>
-              ) : null}
-              <TouchableOpacity
-                onPress={() => { if (txId.trim()) verify(); }}
-                disabled={!txId.trim() || verifying}
-                style={[s.verifyBtn, { backgroundColor: txId.trim() && !verifying ? colors.primary : colors.primaryTint, marginTop: 10 }]}
-                activeOpacity={0.8}
-                accessibilityRole="button"
-                accessibilityLabel="Verify Payment"
-              >
-                {verifying
-                  ? <ActivityIndicator size="small" color="#fff" />
-                  : <Text style={{ color: '#fff', fontWeight: '700', fontSize: FontSize.sm }}>Verify Payment</Text>
-                }
-              </TouchableOpacity>
-            </View>
+          {verifying && (
+            <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, textAlign: 'center', marginTop: 8 }}>
+              Verifying your payment…
+            </Text>
           )}
+          {verifyError ? (
+            <Text style={{ fontSize: FontSize.xs, color: colors.error, marginTop: 8, textAlign: 'center' }}>{verifyError}</Text>
+          ) : null}
         </>
       )}
 
@@ -144,7 +154,6 @@ export default function BillingScreen() {
   const { colors } = useTheme();
   const router = useRouter();
   const qc = useQueryClient();
-  const [paying, setPaying] = useState<number | null>(null);
 
   const { data: invoices, isLoading, refetch } = useQuery({
     queryKey: ['thrift-invoices'],
@@ -165,25 +174,6 @@ export default function BillingScreen() {
     },
     onError: (e: any) => Alert.alert('Error', e?.response?.data?.detail ?? 'Could not generate invoice.'),
   });
-
-  const { mutate: pay } = useMutation({
-    mutationFn: ({ invoiceId, setShowVerify }: { invoiceId: number; setShowVerify: (v: boolean) => void }) =>
-      payInvoice(invoiceId).then(data => ({ data, setShowVerify })),
-    onSuccess: ({ data, setShowVerify }) => {
-      setPaying(null);
-      Linking.openURL(data.payment_link);
-      setShowVerify(true);
-    },
-    onError: () => {
-      setPaying(null);
-      Alert.alert('Error', 'Could not initiate payment. Please try again.');
-    },
-  });
-
-  const handlePay = (invoice: ThriftInvoice, setShowVerify: (v: boolean) => void) => {
-    setPaying(invoice.id);
-    pay({ invoiceId: invoice.id, setShowVerify });
-  };
 
   const pendingCount = (invoices ?? []).filter(i => i.status !== 'paid').length;
 
@@ -241,7 +231,6 @@ export default function BillingScreen() {
             <InvoiceCard
               key={inv.id}
               invoice={inv}
-              onPay={(setShowVerify) => handlePay(inv, setShowVerify)}
               onVerified={() => qc.invalidateQueries({ queryKey: ['thrift-invoices'] })}
             />
           ))
@@ -265,7 +254,4 @@ const s = StyleSheet.create({
   totalRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTopWidth: 1, marginTop: 4 },
   payBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 14, borderRadius: Radius.lg, marginTop: 14 },
   paidRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: Radius.md, marginTop: 12 },
-  verifyBox: { marginTop: 12, padding: 14, borderRadius: Radius.lg, borderWidth: 1 },
-  txInput: { borderWidth: 1, borderRadius: Radius.md, paddingHorizontal: 12, paddingVertical: 10, fontSize: FontSize.sm },
-  verifyBtn: { paddingVertical: 12, borderRadius: Radius.lg, alignItems: 'center' },
 });

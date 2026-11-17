@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView,
-  StyleSheet, Alert, ActivityIndicator, Linking,
+  StyleSheet, Alert, ActivityIndicator,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import * as WebBrowser from 'expo-web-browser';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/hooks/useTheme';
 import { FontSize, Radius, Shadow } from '../../src/theme';
@@ -16,6 +17,10 @@ import {
 
 const INV = '#E65100';
 const MONTHLY_FEE = 2000;
+
+// Same deep link the backend's SUBSCRIPTION_REDIRECT_URL defaults to, and
+// the one the (working) Ajo Group subscription screen already uses.
+const REDIRECT_URL = 'ajo://payment/verify';
 
 const MONTH_OPTIONS = [
   { months: 1,  label: '1 Month',   saving: null },
@@ -32,7 +37,6 @@ export default function InventorySubscriptionScreen() {
   const bizIdNum = Number(bizId);
 
   const [selectedMonths, setSelectedMonths] = useState(1);
-  const [pendingTxRef, setPendingTxRef]     = useState<string | null>(null);
   const [verifying, setVerifying]           = useState(false);
 
   const { data: businesses } = useQuery({
@@ -42,43 +46,46 @@ export default function InventorySubscriptionScreen() {
 
   const biz = businesses?.find((b) => b.id === bizIdNum);
 
+  // Previously stored our own internal tx_ref (the UUID used only to look
+  // up the local pending Subscription row) and asked the user to tap a
+  // separate "Verify Payment" button -- but verification needs Flutterwave's
+  // own numeric transaction_id, which was never captured anywhere, so this
+  // could never actually succeed. Switched to the same pattern the (working)
+  // Ajo Group subscription screen already uses: an in-app auth session that
+  // captures Flutterwave's redirect itself and verifies automatically with
+  // the real transaction_id, no manual step needed.
   const { mutate: initiate, isPending: initiating } = useMutation({
     mutationFn: () => initiateInventorySubscription(bizIdNum, selectedMonths),
     onSuccess: async (res) => {
-      setPendingTxRef(res.subscription.tx_ref);
+      const browserResult = await WebBrowser.openAuthSessionAsync(res.link, REDIRECT_URL);
+      if (browserResult.type !== 'success') return;
+
+      const params = new URL(browserResult.url).searchParams;
+      const transactionId = params.get('transaction_id');
+      const payStatus = params.get('status');
+
+      if (!transactionId || payStatus !== 'successful') {
+        Alert.alert('Payment not completed', 'The payment was not completed successfully.');
+        return;
+      }
+
+      setVerifying(true);
       try {
-        await Linking.openURL(res.link);
-      } catch {
-        Alert.alert('Error', 'Could not open payment page. Copy the link and open it in your browser.');
+        await verifyInventorySubscription(bizIdNum, transactionId);
+        await qc.invalidateQueries({ queryKey: ['inventory-businesses'] });
+        Alert.alert('Success', 'Subscription activated! You can now continue using inventory.', [
+          { text: 'OK', onPress: () => router.back() },
+        ]);
+      } catch (e: any) {
+        const msg = e?.response?.data?.detail || 'Could not verify payment. Wait a moment and try again.';
+        Alert.alert('Verification failed', msg);
+      } finally {
+        setVerifying(false);
       }
     },
     onError: (e: any) =>
       Alert.alert('Error', e?.response?.data?.detail || 'Could not initialize payment. Try again.'),
   });
-
-  const handleVerify = async () => {
-    const txId = pendingTxRef;
-    if (!txId) {
-      Alert.alert(
-        'No pending payment',
-        'Tap "Pay Now" first to open the payment page, then come back and tap Verify.',
-      );
-      return;
-    }
-    setVerifying(true);
-    try {
-      await verifyInventorySubscription(bizIdNum, txId);
-      await qc.invalidateQueries({ queryKey: ['inventory-businesses'] });
-      Alert.alert('Success', 'Subscription activated! You can now continue using inventory.', [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
-    } catch (e: any) {
-      const msg = e?.response?.data?.detail || 'Could not verify payment. Wait a moment and try again.';
-      Alert.alert('Verification failed', msg);
-    } finally {
-      setVerifying(false);
-    }
-  };
 
   const total = MONTHLY_FEE * selectedMonths;
 
@@ -183,12 +190,12 @@ export default function InventorySubscriptionScreen() {
         {/* Pay button */}
         <TouchableOpacity
           onPress={() => initiate()}
-          disabled={initiating}
-          style={[s.payBtn, { backgroundColor: INV, opacity: initiating ? 0.6 : 1 }]}
+          disabled={initiating || verifying}
+          style={[s.payBtn, { backgroundColor: INV, opacity: (initiating || verifying) ? 0.6 : 1 }]}
           accessibilityRole="button"
           accessibilityLabel="Pay now"
         >
-          {initiating
+          {initiating || verifying
             ? <ActivityIndicator color="#fff" />
             : (
               <>
@@ -200,38 +207,11 @@ export default function InventorySubscriptionScreen() {
             )
           }
         </TouchableOpacity>
-
-        {/* Verify step */}
-        <View style={[s.verifyBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Ionicons name="information-circle-outline" size={18} color={colors.textSecondary} style={{ marginRight: 8, marginTop: 1 }} />
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, lineHeight: 20 }}>
-              After completing payment in the browser, come back and tap{' '}
-              <Text style={{ fontWeight: '700', color: colors.textPrimary }}>Verify Payment</Text>{' '}
-              to activate your subscription.
-            </Text>
-          </View>
-        </View>
-
-        <TouchableOpacity
-          onPress={handleVerify}
-          disabled={verifying}
-          style={[s.verifyBtn, { borderColor: INV, opacity: verifying ? 0.6 : 1 }]}
-          accessibilityRole="button"
-          accessibilityLabel="Verify payment"
-        >
-          {verifying
-            ? <ActivityIndicator color={INV} />
-            : (
-              <>
-                <Ionicons name="checkmark-done-outline" size={20} color={INV} style={{ marginRight: 8 }} />
-                <Text style={{ color: INV, fontWeight: '800', fontSize: FontSize.md }}>
-                  Verify Payment
-                </Text>
-              </>
-            )
-          }
-        </TouchableOpacity>
+        {verifying && (
+          <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, textAlign: 'center', marginBottom: 16 }}>
+            Verifying your payment…
+          </Text>
+        )}
       </ScrollView>
     </View>
   );
@@ -267,14 +247,5 @@ const s = StyleSheet.create({
   payBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     paddingVertical: 16, borderRadius: Radius.lg, marginBottom: 16,
-  },
-  verifyBox: {
-    flexDirection: 'row', alignItems: 'flex-start',
-    padding: 12, borderRadius: Radius.md,
-    borderWidth: 1, marginBottom: 12,
-  },
-  verifyBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    paddingVertical: 14, borderRadius: Radius.lg, borderWidth: 2,
   },
 });

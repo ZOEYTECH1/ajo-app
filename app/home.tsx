@@ -663,6 +663,14 @@ export default function HomeRoute() {
                     { icon: 'people-outline',          label: 'Staff',            route: '/inventory/staff' },
                     { icon: 'business-outline',        label: 'My Business',      route: '/inventory/business' },
                   ] : []),
+                  // Cross-business, unlike the same-owner Transfer above --
+                  // works for a branch too, since a branch can be the one
+                  // asking an outside partner for stock just as much as the
+                  // main business can.
+                  ...(isOwnerOrMgr ? [
+                    { icon: 'people-circle-outline',   label: 'Partners',         route: '/inventory/partners' },
+                    { icon: 'repeat-outline',           label: 'Stock Requests',   route: '/inventory/transfer-requests' },
+                  ] : []),
                   ...(isOwnerOrMgr && hasBranches ? [
                     { icon: 'git-pull-request-outline', label: 'Branch Requests', route: '/inventory/product-requests' },
                   ] : []),

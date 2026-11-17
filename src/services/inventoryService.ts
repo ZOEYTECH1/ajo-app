@@ -145,6 +145,7 @@ export interface InventoryBusinessFull extends InventoryBusiness {
   parent_business: number | null;
   parent_business_name: string | null;
   branch_count: number;
+  partner_code: string;
   is_active: boolean;
   trial_start: string | null;
   trial_end: string | null;
@@ -303,6 +304,89 @@ export const getTransfersPage = (pageOrUrl: string | null): Promise<PaginatedRes
   const { params } = bizP();
   return api.get('/api/inventory/transfers/', { params: { page: 1, ...params } }).then(r => r.data);
 };
+
+// ─── Business partner links (cross-business, unlike Transfers above which
+// only ever moves stock within one owner's own businesses) ───────────────────
+
+export interface BusinessMini {
+  id: number;
+  name: string;
+  mode: BusinessMode;
+  partner_code: string;
+}
+
+export interface BusinessPartnerLink {
+  id: number;
+  requesting_business: BusinessMini;
+  partner_business: BusinessMini;
+  status: 'pending' | 'accepted' | 'rejected';
+  invited_by_name: string | null;
+  responded_by_name: string | null;
+  created_at: string;
+  responded_at: string | null;
+}
+
+export const getPartnerLinks = (bizId: number): Promise<BusinessPartnerLink[]> =>
+  api.get(`/api/inventory/businesses/${bizId}/partners/`).then(r => r.data);
+
+export const invitePartner = (bizId: number, partnerCode: string): Promise<BusinessPartnerLink> =>
+  api.post(`/api/inventory/businesses/${bizId}/partners/`, { partner_code: partnerCode }).then(r => r.data);
+
+export const respondToPartnerInvite = (
+  linkId: number,
+  newStatus: 'accepted' | 'rejected',
+): Promise<BusinessPartnerLink> =>
+  api.patch(`/api/inventory/partners/${linkId}/`, { status: newStatus }).then(r => r.data);
+
+// ─── Cross-business stock transfer requests ──────────────────────────────────
+
+export interface StockTransferRequestItem {
+  id: number;
+  product: number | null;
+  product_name: string;
+  quantity_requested: number;
+  fulfilling_product: number | null;
+  quantity_fulfilled: number | null;
+}
+
+export interface StockTransferRequest {
+  id: number;
+  requesting_business: BusinessMini;
+  fulfilling_business: BusinessMini;
+  status: 'pending' | 'approved' | 'rejected';
+  note: string;
+  requested_by_name: string | null;
+  reviewed_by_name: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+  items: StockTransferRequestItem[];
+}
+
+export const getTransferRequests = (
+  bizId: number,
+  statusFilter?: 'pending' | 'approved' | 'rejected',
+): Promise<StockTransferRequest[]> =>
+  api.get('/api/inventory/transfer-requests/', {
+    params: { business_id: bizId, ...(statusFilter ? { status: statusFilter } : {}) },
+  }).then(r => r.data);
+
+export const createTransferRequest = (
+  bizId: number,
+  data: { fulfilling_business_id: number; note?: string; items: { product_id: number; quantity_requested: number }[] },
+): Promise<StockTransferRequest> =>
+  api.post('/api/inventory/transfer-requests/', data, { params: { business_id: bizId } }).then(r => r.data);
+
+export const rejectTransferRequest = (reqId: number): Promise<StockTransferRequest> =>
+  api.patch(`/api/inventory/transfer-requests/${reqId}/`, { status: 'rejected' }).then(r => r.data);
+
+export const approveTransferRequest = (
+  reqId: number,
+  items: { item_id: number; fulfilling_product_id: number; quantity_fulfilled: number }[],
+): Promise<StockTransferRequest> =>
+  api.patch(`/api/inventory/transfer-requests/${reqId}/`, { status: 'approved', items }).then(r => r.data);
+
+export const getProductsForBusiness = (bizId: number): Promise<InventoryProduct[]> =>
+  api.get('/api/inventory/products/', { params: { business_id: bizId } }).then(r => r.data);
 
 // ─── Customers ────────────────────────────────────────────────────────────────
 

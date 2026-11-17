@@ -134,7 +134,9 @@ const ApproveModal: React.FC<{
           </Text>
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, lineHeight: 20, marginBottom: 24 }}>
             Approve ₦{Number(payment?.amount_entered ?? 0).toLocaleString()} from{' '}
-            <Text style={{ fontWeight: '700', color: colors.textPrimary }}>{payment?.member_name}</Text>?
+            <Text style={{ fontWeight: '700', color: colors.textPrimary }}>
+              {payment?.submitted_by.first_name} {payment?.submitted_by.last_name}
+            </Text>?
           </Text>
           <View style={{ flexDirection: 'row', gap: 12 }}>
             <TouchableOpacity
@@ -164,11 +166,16 @@ const ApproveModal: React.FC<{
 // ─── Payment card ─────────────────────────────────────────────────────────────
 const PaymentCard: React.FC<{
   payment: Payment;
-  isAdmin: boolean;
+  // Shown to the admin for everyone else's payments, and separately to this
+  // round's sub-admin for the admin's own payment (self-review is never
+  // allowed -- see PaymentReviewView, core/views.py). Decided per row, not
+  // once for the whole screen, since which role can act depends on whose
+  // payment this specific row is.
+  canReview: boolean;
   onApprove: (p: Payment) => void;
   onReject:  (p: Payment) => void;
   onViewReceipt: (uri: string) => void;
-}> = ({ payment, isAdmin, onApprove, onReject, onViewReceipt }) => {
+}> = ({ payment, canReview, onApprove, onReject, onViewReceipt }) => {
   const { colors } = useTheme();
   const sc = statusColor(payment.status, colors);
   const date = new Date(payment.submitted_at).toLocaleDateString('en-NG', {
@@ -180,7 +187,7 @@ const PaymentCard: React.FC<{
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10 }}>
         <View style={{ flex: 1 }}>
           <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }}>
-            {payment.member_name}
+            {payment.submitted_by.first_name} {payment.submitted_by.last_name}
           </Text>
         </View>
         <Pill label={payment.status} bg={sc.bg} color={sc.fg} />
@@ -237,7 +244,7 @@ const PaymentCard: React.FC<{
             </Text>
           </View>
         )}
-        {isAdmin && payment.status === 'pending' && (
+        {canReview && payment.status === 'pending' && (
           <>
             <TouchableOpacity
               onPress={() => onApprove(payment)}
@@ -296,6 +303,7 @@ export default function PaymentsRoute() {
   });
 
   const isGroupAdmin = group?.admin.id === user?.id;
+  const isSubAdmin = !!group?.sub_admin && group.sub_admin.id === user?.id;
 
   const reviewMutation = useMutation({
     mutationFn: ({ paymentId, action, reason }: { paymentId: number; action: 'approve' | 'reject'; reason?: string }) =>
@@ -396,16 +404,20 @@ export default function PaymentsRoute() {
             </Text>
           </View>
         ) : (
-          payments.map((p) => (
-            <PaymentCard
-              key={p.id}
-              payment={p}
-              isAdmin={isGroupAdmin}
-              onApprove={(pay) => setApproveTarget(pay)}
-              onReject={(pay) => setRejectTarget(pay)}
-              onViewReceipt={(uri) => setReceiptUri(uri)}
-            />
-          ))
+          payments.map((p) => {
+            const isAdminsOwnPayment = p.submitted_by.id === group?.admin.id;
+            const canReview = isAdminsOwnPayment ? isSubAdmin : isGroupAdmin;
+            return (
+              <PaymentCard
+                key={p.id}
+                payment={p}
+                canReview={canReview}
+                onApprove={(pay) => setApproveTarget(pay)}
+                onReject={(pay) => setRejectTarget(pay)}
+                onViewReceipt={(uri) => setReceiptUri(uri)}
+              />
+            );
+          })
         )}
       </ScrollView>
     </View>

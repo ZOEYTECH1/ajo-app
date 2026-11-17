@@ -145,7 +145,7 @@ const PaymentRow: React.FC<{ payment: Payment }> = ({ payment }) => {
     <View style={[s.payRow, { borderBottomColor: colors.border }]}>
       <View style={{ flex: 1 }}>
         <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textPrimary }}>
-          {payment.member_name}
+          {payment.submitted_by.first_name} {payment.submitted_by.last_name}
         </Text>
         <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
           {formatAmt(payment.amount_entered)}
@@ -331,8 +331,18 @@ export default function GroupDetailRoute() {
   const roundJustCompleted = !activeCycle && !!lastClosedCycle
     && lastClosedCycle.slot_number >= lastClosedCycle.total_member_count;
 
-  // Pending items count (admin only)
-  const pendingPayments = payments?.filter((p) => p.status === 'pending').length ?? 0;
+  // Pending items count (admin only). The admin can no longer review their
+  // own payment (PaymentReviewView, core/views.py) -- counting it here would
+  // tell the admin to go act on something they're not allowed to touch. It's
+  // surfaced to the sub-admin instead, below.
+  const pendingPayments = payments
+    ?.filter((p) => p.status === 'pending' && p.submitted_by.id !== group?.admin.id)
+    .length ?? 0;
+
+  const isSubAdmin = !!group?.sub_admin && group.sub_admin.id === user?.id;
+  const adminOwnPendingPayment = payments?.find(
+    (p) => p.status === 'pending' && p.submitted_by.id === group?.admin.id,
+  );
 
   // Total approved contributions across all members in this group
   const totalGroupContributions = (payments ?? [])
@@ -520,6 +530,22 @@ export default function GroupDetailRoute() {
             </TouchableOpacity>
           )}
 
+          {/* ── Admin's own pending payment (sub-admin only) ── */}
+          {isSubAdmin && adminOwnPendingPayment && (
+            <TouchableOpacity
+              onPress={() => router.push(`/group/${groupId}/payments` as any)}
+              style={[s.alertBanner, { backgroundColor: colors.warningLight, borderColor: colors.warning }]}
+              accessibilityRole="button"
+              accessibilityLabel={`${group.admin.first_name}'s payment is awaiting your review`}
+            >
+              <Ionicons name="alert-circle-outline" size={18} color={colors.warningDark} />
+              <Text style={{ fontSize: FontSize.sm, color: colors.warningDark, flex: 1, marginLeft: 8, fontWeight: '600' }}>
+                {group.admin.first_name}'s payment is awaiting your review — you were randomly picked this round
+              </Text>
+              <Ionicons name="chevron-forward" size={16} color={colors.warningDark} />
+            </TouchableOpacity>
+          )}
+
           {/* ── Invite code card (admin only) ── */}
           {isGroupAdmin && (
             <InviteCard groupId={groupId} inviteCode={group.invite_code} colors={colors} />
@@ -695,7 +721,7 @@ export default function GroupDetailRoute() {
               </View>
             ) : (
               approvedPayments.map((p) => {
-                const name    = p.member_name || 'Unknown';
+                const name    = `${p.submitted_by.first_name} ${p.submitted_by.last_name}`.trim() || 'Unknown';
                 const initial = name.charAt(0).toUpperCase();
                 return (
                   <View key={p.id} style={[s.payRow, { borderBottomColor: colors.border }]}>

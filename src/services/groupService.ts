@@ -23,6 +23,10 @@ export interface Group {
   invite_code: string;
   member_count: number;
   admin: AjoUser;
+  // A different approved member, picked at random, re-picked once per Round --
+  // the only one who may review the admin's own pending payment, since the
+  // admin can't approve it themselves. Null until the first cycle starts.
+  sub_admin: AjoUser | null;
   trial_start: string | null;
   trial_end: string | null;
   subscription_expires: string | null;
@@ -72,8 +76,10 @@ export interface AuditLogEntry {
 
 export interface Payment {
   id: number;
-  member_name: string;
-  member_email: string;
+  // Matches PaymentSerializer.get_submitted_by (core/serializers.py) --
+  // the full submitting member, not a flat name/email pair. Needed to tell
+  // whose payment a row is for sub-admin review eligibility.
+  submitted_by: AjoUser;
   group_id: number;
   group_name: string;
   amount_entered: string;

@@ -566,8 +566,11 @@ export const getDashboard = (date?: string): Promise<InventoryDashboard> => {
 export const initiateInventorySubscription = (
   bizId: number,
   months: number,
+  redirectUrl?: string,
 ): Promise<{ message: string; link: string; subscription: InventorySubscription }> =>
-  api.post(`/api/inventory/businesses/${bizId}/subscription/initiate/`, { months }).then(r => r.data);
+  api.post(`/api/inventory/businesses/${bizId}/subscription/initiate/`, {
+    months, ...(redirectUrl ? { redirect_url: redirectUrl } : {}),
+  }).then(r => r.data);
 
 export const verifyInventorySubscription = (
   bizId: number,

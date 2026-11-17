@@ -45,8 +45,10 @@ export const getBillingStatus = (): Promise<{ can_generate_invoice: boolean }> =
 export const generateMyInvoice = (): Promise<ThriftInvoice> =>
   api.post('/api/thrift/billing/invoices/generate/').then(r => r.data);
 
-export const payInvoice = (invoiceId: number): Promise<{ payment_link: string }> =>
-  api.post(`/api/thrift/billing/invoices/${invoiceId}/pay/`).then(r => r.data);
+export const payInvoice = (invoiceId: number, redirectUrl?: string): Promise<{ payment_link: string }> =>
+  api.post(`/api/thrift/billing/invoices/${invoiceId}/pay/`, {
+    ...(redirectUrl ? { redirect_url: redirectUrl } : {}),
+  }).then(r => r.data);
 
 export const verifyInvoice = (invoiceId: number, transactionId: string): Promise<ThriftInvoice> =>
   api.post(`/api/thrift/billing/invoices/${invoiceId}/verify/`, { transaction_id: transactionId }).then(r => r.data);

@@ -14,13 +14,10 @@ import {
   initiateInventorySubscription,
   verifyInventorySubscription,
 } from '../../src/services/inventoryService';
+import { getPaymentRedirectUri } from '../../src/lib/paymentRedirect';
 
 const INV = '#E65100';
 const MONTHLY_FEE = 2000;
-
-// Same deep link the backend's SUBSCRIPTION_REDIRECT_URL defaults to, and
-// the one the (working) Ajo Group subscription screen already uses.
-const REDIRECT_URL = 'ajo://payment/verify';
 
 const MONTH_OPTIONS = [
   { months: 1,  label: '1 Month',   saving: null },
@@ -55,9 +52,12 @@ export default function InventorySubscriptionScreen() {
   // captures Flutterwave's redirect itself and verifies automatically with
   // the real transaction_id, no manual step needed.
   const { mutate: initiate, isPending: initiating } = useMutation({
-    mutationFn: () => initiateInventorySubscription(bizIdNum, selectedMonths),
+    mutationFn: () => {
+      const redirectUri = getPaymentRedirectUri();
+      return initiateInventorySubscription(bizIdNum, selectedMonths, redirectUri).then((res) => ({ ...res, redirectUri }));
+    },
     onSuccess: async (res) => {
-      const browserResult = await WebBrowser.openAuthSessionAsync(res.link, REDIRECT_URL);
+      const browserResult = await WebBrowser.openAuthSessionAsync(res.link, res.redirectUri);
       if (browserResult.type !== 'success') return;
 
       const params = new URL(browserResult.url).searchParams;

@@ -332,8 +332,10 @@ export const groupService = {
 
   // ── Subscription ─────────────────────────────────────────────────────────────
 
-  initiateSubscription: async (groupId: number, cycles: number): Promise<{ link: string; subscription: Subscription }> => {
-    const res = await api.post(`/api/groups/${groupId}/subscription/initiate/`, { cycles });
+  initiateSubscription: async (groupId: number, cycles: number, redirectUrl?: string): Promise<{ link: string; subscription: Subscription }> => {
+    const res = await api.post(`/api/groups/${groupId}/subscription/initiate/`, {
+      cycles, ...(redirectUrl ? { redirect_url: redirectUrl } : {}),
+    });
     return res.data;
   },
 

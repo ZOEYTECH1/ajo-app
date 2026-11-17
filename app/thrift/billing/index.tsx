@@ -13,10 +13,7 @@ import {
   getMyInvoices, getBillingStatus, generateMyInvoice, payInvoice, verifyInvoice,
   type ThriftInvoice,
 } from '../../../src/services/billingService';
-
-// Same deep link the backend's SUBSCRIPTION_REDIRECT_URL defaults to, and
-// the one the Ajo Group subscription screen already uses.
-const REDIRECT_URL = 'ajo://payment/verify';
+import { getPaymentRedirectUri } from '../../../src/lib/paymentRedirect';
 
 const STATUS_META = {
   pending: { label: 'Unpaid',  color: '#E65100', bg: '#FFF3E0', icon: 'time-outline' },
@@ -46,9 +43,12 @@ function InvoiceCard({ invoice, onVerified }: {
   });
 
   const { mutate: pay, isPending: paying } = useMutation({
-    mutationFn: () => payInvoice(invoice.id),
+    mutationFn: () => {
+      const redirectUri = getPaymentRedirectUri();
+      return payInvoice(invoice.id, redirectUri).then((data) => ({ ...data, redirectUri }));
+    },
     onSuccess: async (data) => {
-      const browserResult = await WebBrowser.openAuthSessionAsync(data.payment_link, REDIRECT_URL);
+      const browserResult = await WebBrowser.openAuthSessionAsync(data.payment_link, data.redirectUri);
       if (browserResult.type !== 'success') return;
 
       const params = new URL(browserResult.url).searchParams;

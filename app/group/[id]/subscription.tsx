@@ -12,6 +12,7 @@ import { groupService, type Group, type Subscription } from '../../../src/servic
 import { FontSize, Radius, Shadow } from '../../../src/theme';
 import { Button, LoadingOverlay, feedback } from '../../../src/components';
 import { useAuthStore } from '../../../src/store/useAppStore';
+import { getPaymentRedirectUri } from '../../../src/lib/paymentRedirect';
 
 // Platform fee rates — must match backend _PLATFORM_FEE_RATES
 const FEE_RATES: Record<string, number> = { daily: 0.01, weekly: 0.025, monthly: 0.05 };
@@ -26,8 +27,6 @@ const CYCLE_OPTIONS: Record<string, number[]> = {
 const CYCLE_UNIT: Record<string, string> = {
   daily: 'day', weekly: 'week', monthly: 'month',
 };
-
-const REDIRECT_URL = 'ajo://payment/verify';
 
 const fmt    = (d: string) =>
   new Date(d).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -117,9 +116,12 @@ export default function SubscriptionRoute() {
   });
 
   const initMutation = useMutation({
-    mutationFn: () => groupService.initiateSubscription(groupId, cycles),
-    onSuccess: async ({ link }) => {
-      const browserResult = await WebBrowser.openAuthSessionAsync(link, REDIRECT_URL);
+    mutationFn: () => {
+      const redirectUri = getPaymentRedirectUri();
+      return groupService.initiateSubscription(groupId, cycles, redirectUri).then((res) => ({ ...res, redirectUri }));
+    },
+    onSuccess: async ({ link, redirectUri }) => {
+      const browserResult = await WebBrowser.openAuthSessionAsync(link, redirectUri);
       if (browserResult.type !== 'success') return;
 
       const url = browserResult.url;

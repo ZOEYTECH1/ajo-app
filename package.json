@@ -62,7 +62,10 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "jest"
+    "test": "jest",
+    "typecheck": "tsc --noEmit",
+    "audit": "npm audit",
+    "verify": "npm run typecheck && npm test && npm run audit"
   },
   "jest": {
     "preset": "jest-expo",

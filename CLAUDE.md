@@ -49,6 +49,14 @@ Run tests with `npm test`. Each audit layer has a dedicated test file in
 `__tests__/layer*.test.tsx`. Tests use static file analysis (fs.readFileSync)
 rather than rendering components, so they run without a native environment.
 
+## Verifying before calling a task done
+
+Run `npm run verify` (typecheck + test + `npm audit`) and paste its output
+in the summary before reporting any task in this project complete. No lint
+step is wired in yet — `npx expo lint` sets ESLint up interactively on first
+run (installs `eslint` + `eslint-config-expo`); do that once by hand, then
+add the resulting `lint` script into `verify` in `package.json`.
+
 ## Error handling
 
 - `src/crashLogger.ts` — global JS error handler, must be the first import in `app/_layout.tsx`.

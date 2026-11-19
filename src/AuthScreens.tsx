@@ -73,6 +73,7 @@ interface RegisterProps {
 
 export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) => {
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', confirm: '' });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -94,7 +95,7 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
         setLoading(false);
         const code = (googleResponse as any).error?.code ?? '';
         if (code !== 'ERR_AUTH_DISMISSED') {
-          setServerError(googleResponse.error?.message || 'Google sign-in failed. Please try again.');
+          setServerError(googleResponse.error?.message || t('auth.login.errors.googleSignInFailed'));
         }
         return;
       }
@@ -107,7 +108,7 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
 
       // Native PKCE flow — exchange auth code for tokens (no client secret needed for native clients)
       const code = googleResponse.params?.code;
-      if (!code) { setLoading(false); setServerError('Google sign-in failed — no code received.'); return; }
+      if (!code) { setLoading(false); setServerError(t('auth.login.errors.googleNoCode')); return; }
       const platformClientId =
         Platform.OS === 'android' ? (process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? '')
         : Platform.OS === 'ios'   ? (process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ?? '')
@@ -119,10 +120,10 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
           { tokenEndpoint: 'https://oauth2.googleapis.com/token' },
         );
         if (tokens.idToken) { handleGoogleSignIn(tokens.idToken); }
-        else { setLoading(false); setServerError('Google sign-in failed — no ID token returned.'); }
+        else { setLoading(false); setServerError(t('auth.login.errors.googleNoToken')); }
       } catch {
         setLoading(false);
-        setServerError('Google sign-in failed. Please try again.');
+        setServerError(t('auth.login.errors.googleSignInFailed'));
       }
     };
     processGoogleResponse();
@@ -138,7 +139,7 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
     } catch (err: any) {
       feedback('error');
       const data = err.response?.data;
-      setServerError(data?.detail || 'Google sign-in failed. Please try again.');
+      setServerError(data?.detail || t('auth.login.errors.googleSignInFailed'));
     } finally {
       setLoading(false);
     }
@@ -147,11 +148,11 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
   const validate = () => {
     const e: Record<string, string> = {};
     const nameParts = form.name.trim().split(/\s+/);
-    if (nameParts.length < 2 || !nameParts[1]) e.name     = 'Enter your first and last name';
-    if (!form.email.includes('@'))              e.email    = 'Enter a valid email';
-    if (form.phone.replace(/\D/g, '').length < 10) e.phone = 'Enter a valid phone number';
-    if (form.password.length < 8)               e.password = 'Password must be at least 8 characters';
-    if (form.password !== form.confirm)         e.confirm  = 'Passwords do not match';
+    if (nameParts.length < 2 || !nameParts[1]) e.name     = t('auth.register.errors.nameTwoWords');
+    if (!form.email.includes('@'))              e.email    = t('auth.register.errors.invalidEmail');
+    if (form.phone.replace(/\D/g, '').length < 10) e.phone = t('auth.register.errors.invalidPhone');
+    if (form.password.length < 8)               e.password = t('auth.register.errors.passwordTooShort');
+    if (form.password !== form.confirm)         e.confirm  = t('auth.register.errors.passwordMismatch');
     setErrors(e);
     if (Object.keys(e).length > 0) feedback('error');
     return Object.keys(e).length === 0;
@@ -193,9 +194,9 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
           }
         }
         if (Object.keys(fieldErrors).length > 0) setErrors(fieldErrors);
-        setServerError(general || (Object.keys(fieldErrors).length === 0 ? 'Registration failed. Please try again.' : ''));
+        setServerError(general || (Object.keys(fieldErrors).length === 0 ? t('auth.register.errors.registrationFailed') : ''));
       } else {
-        setServerError('Something went wrong. Please try again.');
+        setServerError(t('auth.register.errors.somethingWentWrong'));
       }
     } finally {
       setLoading(false);
@@ -204,7 +205,7 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <LoadingOverlay visible={loading} message="Creating your account..." />
+      <LoadingOverlay visible={loading} message={t('auth.register.creatingAccount')} />
       <ScrollView
         style={{ flex: 1, backgroundColor: colors.background }}
         contentContainerStyle={layout.scrollContent}
@@ -212,7 +213,7 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
         showsVerticalScrollIndicator={false}
       >
         <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
-        <AuthHeader title="Create account" subtitle="Join Ajo — your circle, your record." />
+        <AuthHeader title={t('auth.register.title')} subtitle={t('auth.register.subtitle')} />
 
         {serverError ? (
           <View style={[layout.errorBanner, { backgroundColor: colors.errorLight, borderLeftColor: colors.error }]} accessibilityRole="alert" accessibilityLiveRegion="assertive">
@@ -222,35 +223,35 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
 
 
         <Input
-          label="Full Name" placeholder="Ada Okonkwo" value={form.name}
+          label={t('auth.register.fullNameLabel')} placeholder={t('auth.register.fullNamePlaceholder')} value={form.name}
           onChangeText={(v) => setForm({ ...form, name: v })} error={errors.name}
           autoCapitalize="words" leftIcon={<Ionicons name="person-outline" size={18} color={colors.primary} />}
-          accessibilityLabel="Full name"
+          accessibilityLabel={t('auth.register.fullNameA11y')}
         />
         <Input
-          label="Email Address" placeholder="ada@email.com" value={form.email}
+          label={t('auth.login.emailLabel')} placeholder={t('auth.login.emailPlaceholder')} value={form.email}
           onChangeText={(v) => setForm({ ...form, email: v })} error={errors.email}
           keyboardType="email-address" autoCapitalize="none"
           leftIcon={<Ionicons name="mail-outline" size={18} color={colors.primary} />}
-          accessibilityLabel="Email address"
+          accessibilityLabel={t('auth.login.emailA11y')}
         />
         <PhoneNumberInput
-          label="Phone Number"
+          label={t('auth.register.phoneLabel')}
           defaultValue={form.phone}
           onChangeFormattedText={(v) => setForm((prev) => ({ ...prev, phone: v }))}
           error={errors.phone}
-          accessibilityLabel="Phone number"
+          accessibilityLabel={t('auth.register.phoneA11y')}
         />
         <Input
-          label="Password" placeholder="Minimum 8 characters" value={form.password}
+          label={t('auth.login.passwordLabel')} placeholder={t('auth.register.passwordPlaceholder')} value={form.password}
           onChangeText={(v) => setForm({ ...form, password: v })} error={errors.password}
           secureTextEntry={!showPass} leftIcon={<Ionicons name="lock-closed-outline" size={18} color={colors.primary} />}
-          accessibilityLabel="Password" accessibilityHint="Minimum 8 characters"
+          accessibilityLabel={t('auth.login.passwordA11y')} accessibilityHint={t('auth.register.passwordHint')}
           rightIcon={
             <TouchableOpacity
               onPress={() => { feedback('light'); setShowPass(!showPass); }}
               accessibilityRole="button"
-              accessibilityLabel={showPass ? 'Hide password' : 'Show password'}
+              accessibilityLabel={showPass ? t('auth.login.hidePassword') : t('auth.login.showPassword')}
               accessibilityState={{ checked: showPass }}
             >
               <Ionicons name={showPass ? "eye-off-outline" : "eye-outline"} size={20} color={colors.textSecondary} />
@@ -258,46 +259,46 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
           }
         />
         <Input
-          label="Confirm Password" placeholder="Repeat your password" value={form.confirm}
+          label={t('auth.register.confirmPasswordLabel')} placeholder={t('auth.register.confirmPasswordPlaceholder')} value={form.confirm}
           onChangeText={(v) => setForm({ ...form, confirm: v })} error={errors.confirm}
           secureTextEntry={!showPass} leftIcon={<Ionicons name="lock-closed-outline" size={18} color={colors.primary} />}
-          accessibilityLabel="Confirm password"
+          accessibilityLabel={t('auth.register.confirmPasswordA11y')}
         />
 
         <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, textAlign: 'center', lineHeight: 18, marginBottom: 20, marginTop: 4 }}>
-          By creating an account, you agree to Ajo&apos;s{' '}
-          <Text style={{ color: colors.primary, fontWeight: '600' }}>Terms of Service</Text> and{' '}
-          <Text style={{ color: colors.primary, fontWeight: '600' }}>Privacy Policy</Text>.
+          {t('auth.register.termsPrefix')}{' '}
+          <Text style={{ color: colors.primary, fontWeight: '600' }}>{t('auth.register.termsOfService')}</Text> {t('auth.register.and')}{' '}
+          <Text style={{ color: colors.primary, fontWeight: '600' }}>{t('auth.register.privacyPolicy')}</Text>.
         </Text>
 
-        <Button label="Create Account" onPress={handleRegister} loading={loading} />
+        <Button label={t('auth.register.createAccount')} onPress={handleRegister} loading={loading} />
 
-        <Divider label="or" />
+        <Divider label={t('auth.login.or')} />
 
         <TouchableOpacity
           style={[layout.googleBtn, { borderColor: colors.border, backgroundColor: colors.surface }]}
           onPress={() => {
             feedback('light');
             if (!googlePromptAsync) {
-              setServerError('Google sign-in is not available on this device. Please use email & password.');
+              setServerError(t('auth.login.errors.googleUnavailable'));
               return;
             }
             googlePromptAsync();
           }}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="Sign in with Google"
+          accessibilityLabel={t('auth.login.signInWithGoogleA11y')}
         >
           <MaterialCommunityIcons name="google" size={20} color="#DB4437" />
           <Text style={{ fontSize: FontSize.base, fontWeight: '600', color: colors.textPrimary, marginLeft: 10 }}>
-            Continue with Google
+            {t('auth.login.continueWithGoogle')}
           </Text>
         </TouchableOpacity>
 
-        <Bouncy onPress={onLogin} style={[layout.switchRow, { marginTop: 20 }]} accessibilityRole="link" accessibilityLabel="Go to login">
+        <Bouncy onPress={onLogin} style={[layout.switchRow, { marginTop: 20 }]} accessibilityRole="link" accessibilityLabel={t('auth.register.goToLoginA11y')}>
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, textAlign: 'center' }}>
-            Already have an account?{' '}
-            <Text style={{ color: colors.primary, fontWeight: '700' }}>Log in</Text>
+            {t('auth.register.alreadyHaveAccount')}{' '}
+            <Text style={{ color: colors.primary, fontWeight: '700' }}>{t('auth.register.logIn')}</Text>
           </Text>
         </Bouncy>
       </ScrollView>
@@ -514,6 +515,7 @@ const maskPhone = (phone: string) => {
 
 export const OTPScreen: React.FC<OTPProps> = ({ email, phone_number, onSuccess, onBack }) => {
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
   const resolvedEmail = email || user?.email || '';
   const resolvedPhone = phone_number || user?.phone_number || '';
@@ -554,7 +556,7 @@ export const OTPScreen: React.FC<OTPProps> = ({ email, phone_number, onSuccess, 
       startTimer();
     } catch {
       feedback('error');
-      setError('Could not send code. Please try again.');
+      setError(t('auth.otp.couldNotSendCode'));
     } finally {
       setSwitching(false);
     }
@@ -588,7 +590,7 @@ export const OTPScreen: React.FC<OTPProps> = ({ email, phone_number, onSuccess, 
     } catch (err: any) {
       feedback('error');
       const data = err.response?.data;
-      const msg = data?.detail || data?.code?.[0] || data?.non_field_errors?.[0] || 'Invalid or expired code';
+      const msg = data?.detail || data?.code?.[0] || data?.non_field_errors?.[0] || t('auth.otp.invalidOrExpiredCode');
       setError(msg);
     } finally {
       setLoading(false);
@@ -609,18 +611,18 @@ export const OTPScreen: React.FC<OTPProps> = ({ email, phone_number, onSuccess, 
   };
 
   const contactDisplay = channel === 'email'
-    ? (resolvedEmail ? maskEmail(resolvedEmail) : 'your email')
-    : (resolvedPhone ? maskPhone(resolvedPhone) : 'your WhatsApp number');
+    ? (resolvedEmail ? maskEmail(resolvedEmail) : t('auth.otp.yourEmail'))
+    : (resolvedPhone ? maskPhone(resolvedPhone) : t('auth.otp.yourWhatsapp'));
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <LoadingOverlay visible={loading || switching} message={switching ? 'Sending code…' : 'Verifying…'} />
+      <LoadingOverlay visible={loading || switching} message={switching ? t('auth.otp.sendingCode') : t('auth.otp.verifying')} />
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
 
-      <Bouncy onPress={onBack} style={layout.backBtn} accessibilityRole="button" accessibilityLabel="Go back">
+      <Bouncy onPress={onBack} style={layout.backBtn} accessibilityRole="button" accessibilityLabel={t('auth.otp.goBackA11y')}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Ionicons name="arrow-back" size={24} color={colors.primary} />
-          <Text style={{ color: colors.primary, fontSize: FontSize.base, fontWeight: '600', marginLeft: 4 }}>Back</Text>
+          <Text style={{ color: colors.primary, fontSize: FontSize.base, fontWeight: '600', marginLeft: 4 }}>{t('auth.otp.back')}</Text>
         </View>
       </Bouncy>
 
@@ -630,7 +632,7 @@ export const OTPScreen: React.FC<OTPProps> = ({ email, phone_number, onSuccess, 
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <AuthHeader title="Verify your account" subtitle="Choose how you want to receive your code." />
+        <AuthHeader title={t('auth.otp.title')} subtitle={t('auth.otp.subtitle')} />
 
         {/* ── Channel toggle ── */}
         <View style={layout.channelRow}>
@@ -645,7 +647,7 @@ export const OTPScreen: React.FC<OTPProps> = ({ email, phone_number, onSuccess, 
             ]}
             disabled={switching}
             accessibilityRole="button"
-            accessibilityLabel="Receive code via email"
+            accessibilityLabel={t('auth.otp.receiveViaEmailA11y')}
             accessibilityState={{ selected: channel === 'email' }}
           >
             <Ionicons
@@ -654,7 +656,7 @@ export const OTPScreen: React.FC<OTPProps> = ({ email, phone_number, onSuccess, 
               color={channel === 'email' ? colors.white : colors.textSecondary}
             />
             <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: channel === 'email' ? colors.white : colors.textSecondary }}>
-              Email
+              {t('auth.otp.email')}
             </Text>
           </Bouncy>
 
@@ -696,7 +698,7 @@ export const OTPScreen: React.FC<OTPProps> = ({ email, phone_number, onSuccess, 
             color={colors.textSecondary}
           />
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary }}>
-            {'  '}Code sent to <Text style={{ fontWeight: '700', color: colors.textPrimary }}>{contactDisplay}</Text>
+            {'  '}{t('auth.otp.codeSentTo')} <Text style={{ fontWeight: '700', color: colors.textPrimary }}>{contactDisplay}</Text>
           </Text>
         </View>
 
@@ -717,25 +719,25 @@ export const OTPScreen: React.FC<OTPProps> = ({ email, phone_number, onSuccess, 
                 onChangeText={(v) => handleChange(v, idx)}
                 onFocus={() => { feedback('light'); setFocusIdx(idx); }}
                 keyboardType="numeric" maxLength={1} caretHidden
-                accessibilityLabel={`OTP digit ${idx + 1} of 6`}
+                accessibilityLabel={t('common.otpDigitOfTotal', { index: idx + 1, total: 6 })}
               />
             </View>
           ))}
         </View>
 
         <Button
-          label="Verify"
+          label={t('auth.otp.verify')}
           onPress={handleVerify}
           loading={loading}
           disabled={otp.join('').length < 6}
           style={{ marginTop: 32, marginBottom: 20 }}
         />
 
-        <Bouncy onPress={handleResend} disabled={timer > 0} style={layout.switchRow} accessibilityRole="button" accessibilityLabel={timer > 0 ? `Resend code in 0:${timer.toString().padStart(2, '0')}` : 'Resend code'} accessibilityState={{ disabled: timer > 0 }}>
+        <Bouncy onPress={handleResend} disabled={timer > 0} style={layout.switchRow} accessibilityRole="button" accessibilityLabel={timer > 0 ? t('auth.otp.resendIn', { seconds: timer.toString().padStart(2, '0') }) : t('auth.otp.resendCode')} accessibilityState={{ disabled: timer > 0 }}>
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, textAlign: 'center' }}>
             {timer > 0
-              ? `Resend code in 0:${timer.toString().padStart(2, '0')}`
-              : <Text style={{ color: colors.primary, fontWeight: '700' }}>Resend code</Text>}
+              ? t('auth.otp.resendIn', { seconds: timer.toString().padStart(2, '0') })
+              : <Text style={{ color: colors.primary, fontWeight: '700' }}>{t('auth.otp.resendCode')}</Text>}
           </Text>
         </Bouncy>
       </ScrollView>
@@ -755,6 +757,7 @@ type ForgotStep = 'email' | 'otp' | 'password' | 'done';
 
 export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) => {
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const [step, setStep]         = useState<ForgotStep>('email');
   const [email, setEmail]       = useState('');
   const [code, setCode]         = useState('');
@@ -767,7 +770,7 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) 
   // Step 1 — send OTP to email
   const handleSendCode = async () => {
     if (!email.trim()) {
-      setError('Please enter your email address.');
+      setError(t('auth.forgot.errors.enterEmail'));
       feedback('error');
       return;
     }
@@ -777,7 +780,7 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) 
       await authService.resendOtp(email.trim().toLowerCase(), 'email');
       setStep('otp');
     } catch (e: any) {
-      const msg = e?.response?.data?.email?.[0] ?? e?.response?.data?.detail ?? 'Failed to send code. Check your email and try again.';
+      const msg = e?.response?.data?.email?.[0] ?? e?.response?.data?.detail ?? t('auth.forgot.errors.failedSendCode');
       setError(msg);
       feedback('error');
     } finally {
@@ -788,7 +791,7 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) 
   // Step 2 — verify OTP, receive short-lived tokens
   const handleVerifyCode = async () => {
     if (code.length !== 6) {
-      setError('Please enter the 6-digit code.');
+      setError(t('auth.forgot.errors.enter6Digit'));
       feedback('error');
       return;
     }
@@ -799,7 +802,7 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) 
       accessTokenRef.current = result.access;
       setStep('password');
     } catch (e: any) {
-      const msg = e?.response?.data?.code?.[0] ?? e?.response?.data?.detail ?? 'Invalid or expired code.';
+      const msg = e?.response?.data?.code?.[0] ?? e?.response?.data?.detail ?? t('auth.forgot.errors.invalidExpiredCode');
       setError(msg);
       feedback('error');
     } finally {
@@ -810,12 +813,12 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) 
   // Step 3 — set new password
   const handleResetPassword = async () => {
     if (newPw.length < 8) {
-      setError('Password must be at least 8 characters.');
+      setError(t('auth.forgot.errors.passwordTooShort'));
       feedback('error');
       return;
     }
     if (newPw !== confirmPw) {
-      setError('Passwords do not match.');
+      setError(t('auth.forgot.errors.passwordMismatch'));
       feedback('error');
       return;
     }
@@ -826,7 +829,7 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) 
       feedback('success');
       setStep('done');
     } catch (e: any) {
-      const msg = e?.response?.data?.detail ?? 'Failed to reset password. Please try again.';
+      const msg = e?.response?.data?.detail ?? t('auth.forgot.errors.failedReset');
       setError(msg);
       feedback('error');
     } finally {
@@ -835,24 +838,24 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) 
   };
 
   const subtitleMap: Record<ForgotStep, string> = {
-    email:    "Enter your registered email and we'll send you a verification code.",
-    otp:      `Enter the 6-digit code sent to ${email}.`,
-    password: 'Choose a new password for your account.',
-    done:     'Your password has been reset successfully.',
+    email:    t('auth.forgot.subtitleEmail'),
+    otp:      t('auth.forgot.subtitleOtp', { email }),
+    password: t('auth.forgot.subtitlePassword'),
+    done:     t('auth.forgot.subtitleDone'),
   };
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.background }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
-      <TouchableOpacity style={layout.backBtn} onPress={onBack} accessibilityRole="button" accessibilityLabel="Go back">
-        <Text style={{ color: colors.primary, fontSize: FontSize.base, fontWeight: '600' }}>← Back</Text>
+      <TouchableOpacity style={layout.backBtn} onPress={onBack} accessibilityRole="button" accessibilityLabel={t('auth.otp.goBackA11y')}>
+        <Text style={{ color: colors.primary, fontSize: FontSize.base, fontWeight: '600' }}>{t('auth.forgot.back')}</Text>
       </TouchableOpacity>
       <ScrollView
         contentContainerStyle={layout.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <AuthHeader title="Reset Password" subtitle={subtitleMap[step]} />
+        <AuthHeader title={t('auth.forgot.title')} subtitle={subtitleMap[step]} />
 
         {!!error && step !== 'done' && (
           <View style={[layout.errorBanner, { backgroundColor: colors.errorLight, borderLeftColor: colors.error }]} accessibilityRole="alert" accessibilityLiveRegion="assertive">
@@ -863,34 +866,34 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) 
         {step === 'email' && (
           <>
             <Input
-              label="Email address"
+              label={t('auth.forgot.emailLabel')}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
-              placeholder="you@example.com"
+              placeholder={t('auth.forgot.emailPlaceholder')}
               leftIcon={<Ionicons name="mail-outline" size={18} color={colors.textDisabled} />}
-              accessibilityLabel="Email address"
+              accessibilityLabel={t('auth.forgot.emailLabel')}
             />
-            <Button label="Send Code" onPress={handleSendCode} loading={loading} style={{ marginTop: 8 }} />
+            <Button label={t('auth.forgot.sendCode')} onPress={handleSendCode} loading={loading} style={{ marginTop: 8 }} />
           </>
         )}
 
         {step === 'otp' && (
           <>
             <Input
-              label="Verification code"
+              label={t('auth.forgot.verificationCodeLabel')}
               value={code}
               onChangeText={setCode}
               keyboardType="number-pad"
               maxLength={6}
-              placeholder="123456"
+              placeholder={t('auth.forgot.verificationCodePlaceholder')}
               leftIcon={<Ionicons name="keypad-outline" size={18} color={colors.textDisabled} />}
-              accessibilityLabel="Verification code"
+              accessibilityLabel={t('auth.forgot.verificationCodeLabel')}
             />
-            <Button label="Verify Code" onPress={handleVerifyCode} loading={loading} style={{ marginTop: 8 }} />
-            <TouchableOpacity onPress={handleSendCode} style={{ alignItems: 'center', marginTop: 16 }} accessibilityRole="button" accessibilityLabel="Resend code">
-              <Text style={{ color: colors.primary, fontSize: FontSize.sm }}>Resend code</Text>
+            <Button label={t('auth.forgot.verifyCode')} onPress={handleVerifyCode} loading={loading} style={{ marginTop: 8 }} />
+            <TouchableOpacity onPress={handleSendCode} style={{ alignItems: 'center', marginTop: 16 }} accessibilityRole="button" accessibilityLabel={t('auth.forgot.resendCode')}>
+              <Text style={{ color: colors.primary, fontSize: FontSize.sm }}>{t('auth.forgot.resendCode')}</Text>
             </TouchableOpacity>
           </>
         )}
@@ -898,31 +901,31 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordProps> = ({ onBack }) 
         {step === 'password' && (
           <>
             <Input
-              label="New password"
+              label={t('auth.forgot.newPasswordLabel')}
               value={newPw}
               onChangeText={setNewPw}
               secureTextEntry
-              placeholder="Min. 8 characters"
+              placeholder={t('auth.forgot.newPasswordPlaceholder')}
               leftIcon={<Ionicons name="lock-closed-outline" size={18} color={colors.textDisabled} />}
-              accessibilityLabel="New password"
+              accessibilityLabel={t('auth.forgot.newPasswordLabel')}
             />
             <Input
-              label="Confirm new password"
+              label={t('auth.forgot.confirmNewPasswordLabel')}
               value={confirmPw}
               onChangeText={setConfirmPw}
               secureTextEntry
-              placeholder="Repeat your password"
+              placeholder={t('auth.forgot.confirmNewPasswordPlaceholder')}
               leftIcon={<Ionicons name="lock-closed-outline" size={18} color={colors.textDisabled} />}
-              accessibilityLabel="Confirm new password"
+              accessibilityLabel={t('auth.forgot.confirmNewPasswordLabel')}
             />
-            <Button label="Reset Password" onPress={handleResetPassword} loading={loading} style={{ marginTop: 8 }} />
+            <Button label={t('auth.forgot.resetPassword')} onPress={handleResetPassword} loading={loading} style={{ marginTop: 8 }} />
           </>
         )}
 
         {step === 'done' && (
           <View style={{ alignItems: 'center', paddingTop: 12 }}>
             <Ionicons name="checkmark-circle" size={56} color={colors.success} />
-            <Button label="Back to Login" onPress={onBack} variant="outline" style={{ marginTop: 28 }} />
+            <Button label={t('auth.forgot.backToLogin')} onPress={onBack} variant="outline" style={{ marginTop: 28 }} />
           </View>
         )}
       </ScrollView>

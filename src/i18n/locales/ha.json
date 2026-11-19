@@ -40,6 +40,83 @@
         "googleNoToken": "Shiga da Google ya kasa — ba a karɓi alama ba.",
         "googleUnavailable": "Shiga da Google ba ya samuwa a wannan na'urar. Da fatan za a yi amfani da imel da kalmar sirri."
       }
+    },
+    "register": {
+      "title": "Ƙirƙiri asusu",
+      "subtitle": "Shiga Ajo — da'irarku, bayananku.",
+      "creatingAccount": "Ana ƙirƙirar asusunku...",
+      "fullNameLabel": "Cikakken Suna",
+      "fullNamePlaceholder": "Ada Okonkwo",
+      "fullNameA11y": "Cikakken suna",
+      "phoneLabel": "Lambar Waya",
+      "phoneA11y": "Lambar waya",
+      "passwordPlaceholder": "Aƙalla haruffa 8",
+      "passwordHint": "Aƙalla haruffa 8",
+      "confirmPasswordLabel": "Tabbatar da Kalmar Sirri",
+      "confirmPasswordPlaceholder": "Maimaita kalmar sirrinku",
+      "confirmPasswordA11y": "Tabbatar da kalmar sirri",
+      "termsPrefix": "Ta hanyar ƙirƙirar asusu, kun yarda da",
+      "termsOfService": "Sharuɗɗan Sabis",
+      "and": "da",
+      "privacyPolicy": "Manufar Sirri",
+      "createAccount": "Ƙirƙiri Asusu",
+      "alreadyHaveAccount": "Kuna da asusu tuni?",
+      "logIn": "Shiga",
+      "goToLoginA11y": "Je zuwa shiga",
+      "errors": {
+        "nameTwoWords": "Shigar da sunan ku na farko da na ƙarshe",
+        "invalidEmail": "Shigar da imel mai inganci",
+        "invalidPhone": "Shigar da lambar waya mai inganci",
+        "passwordTooShort": "Kalmar sirri dole ta kasance aƙalla haruffa 8",
+        "passwordMismatch": "Kalmomin sirri ba su yi daidai ba",
+        "registrationFailed": "Rajista ta kasa. Da fatan za a sake gwadawa.",
+        "somethingWentWrong": "Wani abu ya yi kuskure. Da fatan za a sake gwadawa."
+      }
+    },
+    "otp": {
+      "title": "Tabbatar da asusunku",
+      "subtitle": "Zaɓi yadda kuke son karɓar lambar ku.",
+      "verifying": "Ana tabbatarwa…",
+      "sendingCode": "Ana aika lamba…",
+      "back": "Baya",
+      "email": "Imel",
+      "receiveViaEmailA11y": "Karɓi lamba ta imel",
+      "codeSentTo": "An aika lamba zuwa",
+      "verify": "Tabbatar",
+      "resendIn": "Sake aika lamba a cikin 0:{{seconds}}",
+      "resendCode": "Sake aika lamba",
+      "couldNotSendCode": "An kasa aika lamba. Da fatan za a sake gwadawa.",
+      "invalidOrExpiredCode": "Lambar ba daidai ba ko ta ƙare"
+    },
+    "forgot": {
+      "title": "Sake Saita Kalmar Sirri",
+      "subtitleEmail": "Shigar da imel ɗin da aka yi rajista da shi kuma za mu aiko muku da lambar tabbatarwa.",
+      "subtitleOtp": "Shigar da lambar ƙididdiga 6 da aka aika zuwa {{email}}.",
+      "subtitlePassword": "Zaɓi sabuwar kalmar sirri don asusunku.",
+      "subtitleDone": "An sake saita kalmar sirrinku cikin nasara.",
+      "back": "← Baya",
+      "emailLabel": "Adireshin imel",
+      "emailPlaceholder": "kai@misali.com",
+      "sendCode": "Aika Lamba",
+      "verificationCodeLabel": "Lambar tabbatarwa",
+      "verificationCodePlaceholder": "123456",
+      "verifyCode": "Tabbatar da Lamba",
+      "resendCode": "Sake aika lamba",
+      "newPasswordLabel": "Sabuwar kalmar sirri",
+      "newPasswordPlaceholder": "Aƙalla haruffa 8",
+      "confirmNewPasswordLabel": "Tabbatar da sabuwar kalmar sirri",
+      "confirmNewPasswordPlaceholder": "Maimaita kalmar sirrinku",
+      "resetPassword": "Sake Saita Kalmar Sirri",
+      "backToLogin": "Koma zuwa Shiga",
+      "errors": {
+        "enterEmail": "Da fatan za a shigar da adireshin imel ɗinku.",
+        "failedSendCode": "An kasa aika lamba. Duba imel ɗinku kuma sake gwadawa.",
+        "enter6Digit": "Da fatan za a shigar da lambar ƙididdiga 6.",
+        "invalidExpiredCode": "Lambar ba daidai ba ko ta ƙare.",
+        "passwordTooShort": "Kalmar sirri dole ta kasance aƙalla haruffa 8.",
+        "passwordMismatch": "Kalmomin sirri ba su yi daidai ba.",
+        "failedReset": "An kasa sake saita kalmar sirri. Da fatan za a sake gwadawa."
+      }
     }
   },
   "profile": {
@@ -84,5 +161,13 @@
   "home": {
     "welcomeBack": "Barka da dawowa",
     "defaultName": "kai"
+  },
+  "groupDetail": {
+    "errors": {
+      "couldNotLoad": "An kasa loda ƙungiya",
+      "membershipPending": "Buƙatar ku na shiga wannan ƙungiya tana jiran amincewa.",
+      "membershipRejected": "Ba a amince da buƙatar ku na shiga wannan ƙungiya ba.",
+      "tryAgain": "Sake gwadawa"
+    }
   }
 }

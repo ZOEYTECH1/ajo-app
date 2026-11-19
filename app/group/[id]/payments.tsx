@@ -7,6 +7,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../src/hooks/useTheme';
+import { useGroupSocket } from '../../../src/hooks/useGroupSocket';
 import { useAuthStore } from '../../../src/store/useAppStore';
 import { groupService, type Payment } from '../../../src/services/groupService';
 import { FontSize, Radius, Shadow } from '../../../src/theme';
@@ -300,6 +301,15 @@ export default function PaymentsRoute() {
     queryKey: ['payments', groupId, filter],
     queryFn: () => groupService.getPayments(groupId, filter === 'all' ? undefined : filter),
     enabled: !!groupId,
+  });
+
+  // Live updates so a new submission (or another reviewer's decision) shows
+  // up immediately instead of needing a manual reload -- see
+  // useGroupSocket.ts.
+  useGroupSocket(groupId, (e) => {
+    if (e.event === 'payment_submitted' || e.event === 'payment_approved' || e.event === 'payment_rejected') {
+      queryClient.invalidateQueries({ queryKey: ['payments', groupId] });
+    }
   });
 
   const isGroupAdmin = group?.admin.id === user?.id;

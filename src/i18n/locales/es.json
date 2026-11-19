@@ -39,6 +39,83 @@
         "googleNoToken": "Error al iniciar sesión con Google — no se recibió token.",
         "googleUnavailable": "El inicio de sesión con Google no está disponible en este dispositivo. Usa tu correo y contraseña."
       }
+    },
+    "register": {
+      "title": "Crear cuenta",
+      "subtitle": "Únete a Ajo — tu círculo, tu registro.",
+      "creatingAccount": "Creando tu cuenta...",
+      "fullNameLabel": "Nombre completo",
+      "fullNamePlaceholder": "Ada Okonkwo",
+      "fullNameA11y": "Nombre completo",
+      "phoneLabel": "Número de teléfono",
+      "phoneA11y": "Número de teléfono",
+      "passwordPlaceholder": "Mínimo 8 caracteres",
+      "passwordHint": "Mínimo 8 caracteres",
+      "confirmPasswordLabel": "Confirmar contraseña",
+      "confirmPasswordPlaceholder": "Repite tu contraseña",
+      "confirmPasswordA11y": "Confirmar contraseña",
+      "termsPrefix": "Al crear una cuenta, aceptas los",
+      "termsOfService": "Términos de Servicio",
+      "and": "y la",
+      "privacyPolicy": "Política de Privacidad",
+      "createAccount": "Crear Cuenta",
+      "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+      "logIn": "Inicia sesión",
+      "goToLoginA11y": "Ir a iniciar sesión",
+      "errors": {
+        "nameTwoWords": "Ingresa tu nombre y apellido",
+        "invalidEmail": "Ingresa un correo electrónico válido",
+        "invalidPhone": "Ingresa un número de teléfono válido",
+        "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
+        "passwordMismatch": "Las contraseñas no coinciden",
+        "registrationFailed": "Error en el registro. Inténtalo de nuevo.",
+        "somethingWentWrong": "Algo salió mal. Inténtalo de nuevo."
+      }
+    },
+    "otp": {
+      "title": "Verifica tu cuenta",
+      "subtitle": "Elige cómo quieres recibir tu código.",
+      "verifying": "Verificando…",
+      "sendingCode": "Enviando código…",
+      "back": "Atrás",
+      "email": "Correo",
+      "receiveViaEmailA11y": "Recibir código por correo electrónico",
+      "codeSentTo": "Código enviado a",
+      "verify": "Verificar",
+      "resendIn": "Reenviar código en 0:{{seconds}}",
+      "resendCode": "Reenviar código",
+      "couldNotSendCode": "No se pudo enviar el código. Inténtalo de nuevo.",
+      "invalidOrExpiredCode": "Código inválido o caducado"
+    },
+    "forgot": {
+      "title": "Restablecer contraseña",
+      "subtitleEmail": "Ingresa tu correo registrado y te enviaremos un código de verificación.",
+      "subtitleOtp": "Ingresa el código de 6 dígitos enviado a {{email}}.",
+      "subtitlePassword": "Elige una nueva contraseña para tu cuenta.",
+      "subtitleDone": "Tu contraseña se restableció con éxito.",
+      "back": "← Atrás",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "tu@ejemplo.com",
+      "sendCode": "Enviar código",
+      "verificationCodeLabel": "Código de verificación",
+      "verificationCodePlaceholder": "123456",
+      "verifyCode": "Verificar código",
+      "resendCode": "Reenviar código",
+      "newPasswordLabel": "Nueva contraseña",
+      "newPasswordPlaceholder": "Mín. 8 caracteres",
+      "confirmNewPasswordLabel": "Confirmar nueva contraseña",
+      "confirmNewPasswordPlaceholder": "Repite tu contraseña",
+      "resetPassword": "Restablecer contraseña",
+      "backToLogin": "Volver a iniciar sesión",
+      "errors": {
+        "enterEmail": "Ingresa tu dirección de correo electrónico.",
+        "failedSendCode": "Error al enviar el código. Verifica tu correo e inténtalo de nuevo.",
+        "enter6Digit": "Ingresa el código de 6 dígitos.",
+        "invalidExpiredCode": "Código inválido o caducado.",
+        "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
+        "passwordMismatch": "Las contraseñas no coinciden.",
+        "failedReset": "Error al restablecer la contraseña. Inténtalo de nuevo."
+      }
     }
   },
   "profile": {
@@ -83,5 +160,13 @@
   "home": {
     "welcomeBack": "Bienvenido de nuevo",
     "defaultName": "allí"
+  },
+  "groupDetail": {
+    "errors": {
+      "couldNotLoad": "No se pudo cargar el grupo",
+      "membershipPending": "Tu solicitud para unirte a este grupo sigue pendiente de aprobación.",
+      "membershipRejected": "Tu solicitud para unirte a este grupo no fue aprobada.",
+      "tryAgain": "Intentar de nuevo"
+    }
   }
 }

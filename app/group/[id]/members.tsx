@@ -7,6 +7,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../src/hooks/useTheme';
+import { useGroupSocket } from '../../../src/hooks/useGroupSocket';
 import { useAuthStore } from '../../../src/store/useAppStore';
 import { groupService, type Membership, type RemovalProposal } from '../../../src/services/groupService';
 import { FontSize, Radius, Shadow } from '../../../src/theme';
@@ -283,6 +284,16 @@ export default function MembersRoute() {
     queryKey: ['removals', groupId],
     queryFn: () => groupService.getRemovalProposals(groupId),
     enabled: !!groupId,
+  });
+
+  // Live updates so a new join request (or another admin's decision on one)
+  // shows up immediately instead of needing a manual reload -- see
+  // useGroupSocket.ts.
+  useGroupSocket(groupId, (e) => {
+    if (e.event === 'join_request' || e.event === 'membership_approved' || e.event === 'membership_rejected') {
+      queryClient.invalidateQueries({ queryKey: ['members', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['group', groupId] });
+    }
   });
 
   const isGroupAdmin = group?.admin.id === user?.id;

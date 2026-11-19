@@ -8,7 +8,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../src/hooks/useTheme';
+import { useGroupSocket } from '../../src/hooks/useGroupSocket';
 import { useAuthStore } from '../../src/store/useAppStore';
 import { groupService, type Payment, type Cycle, type Group, type CollectionSlot } from '../../src/services/groupService';
 import { FontSize, Radius, Shadow } from '../../src/theme';
@@ -288,11 +290,12 @@ export default function GroupDetailRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const groupId = Number(id);
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { data: group, isLoading: groupLoading, isError, refetch, isRefetching } = useQuery({
+  const { data: group, isLoading: groupLoading, isError, error: groupError, refetch, isRefetching } = useQuery({
     queryKey: ['group', groupId],
     queryFn: () => groupService.getGroupDetail(groupId),
     enabled: !!groupId,
@@ -308,6 +311,16 @@ export default function GroupDetailRoute() {
     queryKey: ['cycles', groupId],
     queryFn: () => groupService.getCycles(groupId),
     enabled: !!groupId,
+  });
+
+  // Live updates so this screen's pending-payment/member-count banners stay
+  // correct without a manual reload -- see useGroupSocket.ts.
+  useGroupSocket(groupId, (e) => {
+    if (e.event === 'join_request' || e.event === 'membership_approved' || e.event === 'membership_rejected') {
+      queryClient.invalidateQueries({ queryKey: ['group', groupId] });
+    } else {
+      queryClient.invalidateQueries({ queryKey: ['payments', groupId] });
+    }
   });
 
   const { data: collectionOrder } = useQuery({
@@ -383,15 +396,23 @@ export default function GroupDetailRoute() {
   }
 
   if (isError || !group) {
+    const code = (groupError as { response?: { data?: { code?: string } } } | undefined)
+      ?.response?.data?.code;
+    const message =
+      code === 'membership_pending' ? t('groupDetail.errors.membershipPending')
+      : code === 'membership_rejected' ? t('groupDetail.errors.membershipRejected')
+      : t('groupDetail.errors.couldNotLoad');
     return (
       <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
         <Ionicons name="warning-outline" size={48} color={colors.error} />
         <Text style={{ fontSize: FontSize.md, color: colors.textPrimary, fontWeight: '700', marginTop: 16, textAlign: 'center' }}>
-          Could not load group
+          {message}
         </Text>
-        <TouchableOpacity onPress={() => refetch()} style={{ marginTop: 16 }} accessibilityRole="button" accessibilityLabel="Try again">
-          <Text style={{ color: colors.primary, fontWeight: '600' }}>Try again</Text>
-        </TouchableOpacity>
+        {code !== 'membership_pending' && code !== 'membership_rejected' && (
+          <TouchableOpacity onPress={() => refetch()} style={{ marginTop: 16 }} accessibilityRole="button" accessibilityLabel={t('groupDetail.errors.tryAgain')}>
+            <Text style={{ color: colors.primary, fontWeight: '600' }}>{t('groupDetail.errors.tryAgain')}</Text>
+          </TouchableOpacity>
+        )}
       </View>
     );
   }

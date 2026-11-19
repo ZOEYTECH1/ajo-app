@@ -40,6 +40,83 @@
         "googleNoToken": "Wíwọlé pẹ̀lú Google kùnà — kò sí àmì tí a gbà.",
         "googleUnavailable": "Wíwọlé pẹ̀lú Google kò wà fún ẹ̀rọ yìí. Jọ̀wọ́ lo ímeèlì àti ọ̀rọ̀ àṣínà."
       }
+    },
+    "register": {
+      "title": "Ṣẹ̀dá àkáǹtì",
+      "subtitle": "Darapọ̀ mọ́ Ajo — àyíká rẹ, àkọsílẹ̀ rẹ.",
+      "creatingAccount": "Ń ṣẹ̀dá àkáǹtì rẹ...",
+      "fullNameLabel": "Orúkọ Kíkún",
+      "fullNamePlaceholder": "Ada Okonkwo",
+      "fullNameA11y": "Orúkọ kíkún",
+      "phoneLabel": "Nọ́mbà Fóònù",
+      "phoneA11y": "Nọ́mbà fóònù",
+      "passwordPlaceholder": "Ó kéré jù lẹ́tà mẹ́jọ",
+      "passwordHint": "Ó kéré jù lẹ́tà mẹ́jọ",
+      "confirmPasswordLabel": "Jẹ́rìí sí Ọ̀rọ̀ Àṣínà",
+      "confirmPasswordPlaceholder": "Tún ọ̀rọ̀ àṣínà rẹ ṣe",
+      "confirmPasswordA11y": "Jẹ́rìí sí ọ̀rọ̀ àṣínà",
+      "termsPrefix": "Nípa ṣíṣẹ̀dá àkáǹtì, o gbà pẹ̀lú",
+      "termsOfService": "Àwọn Òfin Iṣẹ́",
+      "and": "àti",
+      "privacyPolicy": "Òfin Ìpamọ́",
+      "createAccount": "Ṣẹ̀dá Àkáǹtì",
+      "alreadyHaveAccount": "Ṣé o ní àkáǹtì tẹ́lẹ̀?",
+      "logIn": "Wọlé",
+      "goToLoginA11y": "Lọ sí wíwọlé",
+      "errors": {
+        "nameTwoWords": "Tẹ orúkọ àkọ́kọ́ àti orúkọ ìdílé rẹ sí i",
+        "invalidEmail": "Tẹ ímeèlì tó tọ́ sí i",
+        "invalidPhone": "Tẹ nọ́mbà fóònù tó tọ́ sí i",
+        "passwordTooShort": "Ọ̀rọ̀ àṣínà gbọ́dọ̀ ní ó kéré jù lẹ́tà mẹ́jọ",
+        "passwordMismatch": "Àwọn ọ̀rọ̀ àṣínà kò dọ́gba",
+        "registrationFailed": "Ìforúkọsílẹ̀ kùnà. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan sí i.",
+        "somethingWentWrong": "Ohun kan ṣẹlẹ̀ àṣìṣe. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan sí i."
+      }
+    },
+    "otp": {
+      "title": "Jẹ́rìí sí àkáǹtì rẹ",
+      "subtitle": "Yan bí o ṣe fẹ́ gba koodu rẹ.",
+      "verifying": "Ń jẹ́rìí…",
+      "sendingCode": "Ń fi koodu ránṣẹ́…",
+      "back": "Padà",
+      "email": "Ímeèlì",
+      "receiveViaEmailA11y": "Gba koodu nípasẹ̀ ímeèlì",
+      "codeSentTo": "A fi koodu ránṣẹ́ sí",
+      "verify": "Jẹ́rìí",
+      "resendIn": "Tún fi koodu ránṣẹ́ ní 0:{{seconds}}",
+      "resendCode": "Tún fi koodu ránṣẹ́",
+      "couldNotSendCode": "A kò lè fi koodu ránṣẹ́. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan sí i.",
+      "invalidOrExpiredCode": "Koodu kò tọ̀nà tàbí ó ti parí"
+    },
+    "forgot": {
+      "title": "Tún Ọ̀rọ̀ Àṣínà Ṣe",
+      "subtitleEmail": "Tẹ ímeèlì tí o forúkọsílẹ̀ sí i, a óò sì fi koodu ìmúdájú ránṣẹ́ sí ọ.",
+      "subtitleOtp": "Tẹ koodu nọ́mbà mẹ́fà tí a fi ránṣẹ́ sí {{email}} sí i.",
+      "subtitlePassword": "Yan ọ̀rọ̀ àṣínà tuntun fún àkáǹtì rẹ.",
+      "subtitleDone": "A ti tún ọ̀rọ̀ àṣínà rẹ ṣe ní àṣeyọrí.",
+      "back": "← Padà",
+      "emailLabel": "Àdírẹ́sì ímeèlì",
+      "emailPlaceholder": "iwọ@àpẹẹrẹ.com",
+      "sendCode": "Fi Koodu Ránṣẹ́",
+      "verificationCodeLabel": "Koodu ìmúdájú",
+      "verificationCodePlaceholder": "123456",
+      "verifyCode": "Jẹ́rìí sí Koodu",
+      "resendCode": "Tún fi koodu ránṣẹ́",
+      "newPasswordLabel": "Ọ̀rọ̀ àṣínà tuntun",
+      "newPasswordPlaceholder": "Ó kéré jù lẹ́tà mẹ́jọ",
+      "confirmNewPasswordLabel": "Jẹ́rìí sí ọ̀rọ̀ àṣínà tuntun",
+      "confirmNewPasswordPlaceholder": "Tún ọ̀rọ̀ àṣínà rẹ ṣe",
+      "resetPassword": "Tún Ọ̀rọ̀ Àṣínà Ṣe",
+      "backToLogin": "Padà sí Wíwọlé",
+      "errors": {
+        "enterEmail": "Jọ̀wọ́ tẹ àdírẹ́sì ímeèlì rẹ sí i.",
+        "failedSendCode": "Fífi koodu ránṣẹ́ kùnà. Ṣayẹ̀wò ímeèlì rẹ kí o sì tún gbìyànjú.",
+        "enter6Digit": "Jọ̀wọ́ tẹ koodu nọ́mbà mẹ́fà sí i.",
+        "invalidExpiredCode": "Koodu kò tọ̀nà tàbí ó ti parí.",
+        "passwordTooShort": "Ọ̀rọ̀ àṣínà gbọ́dọ̀ ní ó kéré jù lẹ́tà mẹ́jọ.",
+        "passwordMismatch": "Àwọn ọ̀rọ̀ àṣínà kò dọ́gba.",
+        "failedReset": "Àtúnṣe ọ̀rọ̀ àṣínà kùnà. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan sí i."
+      }
     }
   },
   "profile": {
@@ -84,5 +161,13 @@
   "home": {
     "welcomeBack": "Káàbọ̀ padà",
     "defaultName": "ìwọ"
+  },
+  "groupDetail": {
+    "errors": {
+      "couldNotLoad": "Kíkó ẹgbẹ́ kùnà",
+      "membershipPending": "Ìbéèrè rẹ láti darapọ̀ mọ́ ẹgbẹ́ yìí ṣì ń dúró de ìfọwọ́sí.",
+      "membershipRejected": "A kò fọwọ́sí ìbéèrè rẹ láti darapọ̀ mọ́ ẹgbẹ́ yìí.",
+      "tryAgain": "Gbìyànjú lẹ́ẹ̀kan sí i"
+    }
   }
 }

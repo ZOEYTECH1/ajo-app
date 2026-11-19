@@ -39,6 +39,83 @@
         "googleNoToken": "Google-Anmeldung fehlgeschlagen — kein Token erhalten.",
         "googleUnavailable": "Die Google-Anmeldung ist auf diesem Gerät nicht verfügbar. Bitte nutze E-Mail und Passwort."
       }
+    },
+    "register": {
+      "title": "Konto erstellen",
+      "subtitle": "Tritt Ajo bei — dein Kreis, dein Nachweis.",
+      "creatingAccount": "Dein Konto wird erstellt...",
+      "fullNameLabel": "Vollständiger Name",
+      "fullNamePlaceholder": "Ada Okonkwo",
+      "fullNameA11y": "Vollständiger Name",
+      "phoneLabel": "Telefonnummer",
+      "phoneA11y": "Telefonnummer",
+      "passwordPlaceholder": "Mindestens 8 Zeichen",
+      "passwordHint": "Mindestens 8 Zeichen",
+      "confirmPasswordLabel": "Passwort bestätigen",
+      "confirmPasswordPlaceholder": "Passwort wiederholen",
+      "confirmPasswordA11y": "Passwort bestätigen",
+      "termsPrefix": "Mit der Kontoerstellung akzeptierst du Ajos",
+      "termsOfService": "Nutzungsbedingungen",
+      "and": "und die",
+      "privacyPolicy": "Datenschutzerklärung",
+      "createAccount": "Konto erstellen",
+      "alreadyHaveAccount": "Du hast bereits ein Konto?",
+      "logIn": "Anmelden",
+      "goToLoginA11y": "Zur Anmeldung",
+      "errors": {
+        "nameTwoWords": "Gib deinen Vor- und Nachnamen ein",
+        "invalidEmail": "Gib eine gültige E-Mail-Adresse ein",
+        "invalidPhone": "Gib eine gültige Telefonnummer ein",
+        "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen lang sein",
+        "passwordMismatch": "Die Passwörter stimmen nicht überein",
+        "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuche es erneut.",
+        "somethingWentWrong": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+      }
+    },
+    "otp": {
+      "title": "Konto bestätigen",
+      "subtitle": "Wähle, wie du deinen Code erhalten möchtest.",
+      "verifying": "Wird überprüft…",
+      "sendingCode": "Code wird gesendet…",
+      "back": "Zurück",
+      "email": "E-Mail",
+      "receiveViaEmailA11y": "Code per E-Mail erhalten",
+      "codeSentTo": "Code gesendet an",
+      "verify": "Bestätigen",
+      "resendIn": "Code erneut senden in 0:{{seconds}}",
+      "resendCode": "Code erneut senden",
+      "couldNotSendCode": "Code konnte nicht gesendet werden. Bitte versuche es erneut.",
+      "invalidOrExpiredCode": "Ungültiger oder abgelaufener Code"
+    },
+    "forgot": {
+      "title": "Passwort zurücksetzen",
+      "subtitleEmail": "Gib deine registrierte E-Mail-Adresse ein und wir senden dir einen Bestätigungscode.",
+      "subtitleOtp": "Gib den 6-stelligen Code ein, der an {{email}} gesendet wurde.",
+      "subtitlePassword": "Wähle ein neues Passwort für dein Konto.",
+      "subtitleDone": "Dein Passwort wurde erfolgreich zurückgesetzt.",
+      "back": "← Zurück",
+      "emailLabel": "E-Mail-Adresse",
+      "emailPlaceholder": "du@beispiel.com",
+      "sendCode": "Code senden",
+      "verificationCodeLabel": "Bestätigungscode",
+      "verificationCodePlaceholder": "123456",
+      "verifyCode": "Code bestätigen",
+      "resendCode": "Code erneut senden",
+      "newPasswordLabel": "Neues Passwort",
+      "newPasswordPlaceholder": "Mind. 8 Zeichen",
+      "confirmNewPasswordLabel": "Neues Passwort bestätigen",
+      "confirmNewPasswordPlaceholder": "Passwort wiederholen",
+      "resetPassword": "Passwort zurücksetzen",
+      "backToLogin": "Zurück zur Anmeldung",
+      "errors": {
+        "enterEmail": "Bitte gib deine E-Mail-Adresse ein.",
+        "failedSendCode": "Code konnte nicht gesendet werden. Überprüfe deine E-Mail und versuche es erneut.",
+        "enter6Digit": "Bitte gib den 6-stelligen Code ein.",
+        "invalidExpiredCode": "Ungültiger oder abgelaufener Code.",
+        "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen lang sein.",
+        "passwordMismatch": "Die Passwörter stimmen nicht überein.",
+        "failedReset": "Zurücksetzen des Passworts fehlgeschlagen. Bitte versuche es erneut."
+      }
     }
   },
   "profile": {
@@ -83,5 +160,13 @@
   "home": {
     "welcomeBack": "Willkommen zurück",
     "defaultName": "dort"
+  },
+  "groupDetail": {
+    "errors": {
+      "couldNotLoad": "Gruppe konnte nicht geladen werden",
+      "membershipPending": "Dein Antrag, dieser Gruppe beizutreten, wartet noch auf Genehmigung.",
+      "membershipRejected": "Dein Antrag, dieser Gruppe beizutreten, wurde nicht genehmigt.",
+      "tryAgain": "Erneut versuchen"
+    }
   }
 }

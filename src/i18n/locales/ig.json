@@ -84,5 +84,13 @@
   "home": {
     "welcomeBack": "Nnọọ ọzọ",
     "defaultName": "ebe ahụ"
+  },
+  "groupDetail": {
+    "errors": {
+      "couldNotLoad": "Ibu otu emeghị nke ọma",
+      "membershipPending": "Arịrịọ gị isonye n'otu a ka na-eche nkwado.",
+      "membershipRejected": "Anabataghị arịrịọ gị isonye n'otu a.",
+      "tryAgain": "Nwaa ọzọ"
+    }
   }
 }

@@ -39,6 +39,83 @@
         "googleNoToken": "Google sign-in failed — no ID token returned.",
         "googleUnavailable": "Google sign-in is not available on this device. Please use email & password."
       }
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Join Ajo — your circle, your record.",
+      "creatingAccount": "Creating your account...",
+      "fullNameLabel": "Full Name",
+      "fullNamePlaceholder": "Ada Okonkwo",
+      "fullNameA11y": "Full name",
+      "phoneLabel": "Phone Number",
+      "phoneA11y": "Phone number",
+      "passwordPlaceholder": "Minimum 8 characters",
+      "passwordHint": "Minimum 8 characters",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Repeat your password",
+      "confirmPasswordA11y": "Confirm password",
+      "termsPrefix": "By creating an account, you agree to Ajo's",
+      "termsOfService": "Terms of Service",
+      "and": "and",
+      "privacyPolicy": "Privacy Policy",
+      "createAccount": "Create Account",
+      "alreadyHaveAccount": "Already have an account?",
+      "logIn": "Log in",
+      "goToLoginA11y": "Go to login",
+      "errors": {
+        "nameTwoWords": "Enter your first and last name",
+        "invalidEmail": "Enter a valid email",
+        "invalidPhone": "Enter a valid phone number",
+        "passwordTooShort": "Password must be at least 8 characters",
+        "passwordMismatch": "Passwords do not match",
+        "registrationFailed": "Registration failed. Please try again.",
+        "somethingWentWrong": "Something went wrong. Please try again."
+      }
+    },
+    "otp": {
+      "title": "Verify your account",
+      "subtitle": "Choose how you want to receive your code.",
+      "verifying": "Verifying…",
+      "sendingCode": "Sending code…",
+      "back": "Back",
+      "email": "Email",
+      "receiveViaEmailA11y": "Receive code via email",
+      "codeSentTo": "Code sent to",
+      "verify": "Verify",
+      "resendIn": "Resend code in 0:{{seconds}}",
+      "resendCode": "Resend code",
+      "couldNotSendCode": "Could not send code. Please try again.",
+      "invalidOrExpiredCode": "Invalid or expired code"
+    },
+    "forgot": {
+      "title": "Reset Password",
+      "subtitleEmail": "Enter your registered email and we'll send you a verification code.",
+      "subtitleOtp": "Enter the 6-digit code sent to {{email}}.",
+      "subtitlePassword": "Choose a new password for your account.",
+      "subtitleDone": "Your password has been reset successfully.",
+      "back": "← Back",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "you@example.com",
+      "sendCode": "Send Code",
+      "verificationCodeLabel": "Verification code",
+      "verificationCodePlaceholder": "123456",
+      "verifyCode": "Verify Code",
+      "resendCode": "Resend code",
+      "newPasswordLabel": "New password",
+      "newPasswordPlaceholder": "Min. 8 characters",
+      "confirmNewPasswordLabel": "Confirm new password",
+      "confirmNewPasswordPlaceholder": "Repeat your password",
+      "resetPassword": "Reset Password",
+      "backToLogin": "Back to Login",
+      "errors": {
+        "enterEmail": "Please enter your email address.",
+        "failedSendCode": "Failed to send code. Check your email and try again.",
+        "enter6Digit": "Please enter the 6-digit code.",
+        "invalidExpiredCode": "Invalid or expired code.",
+        "passwordTooShort": "Password must be at least 8 characters.",
+        "passwordMismatch": "Passwords do not match.",
+        "failedReset": "Failed to reset password. Please try again."
+      }
     }
   },
   "profile": {
@@ -83,5 +160,13 @@
   "home": {
     "welcomeBack": "Welcome back",
     "defaultName": "there"
+  },
+  "groupDetail": {
+    "errors": {
+      "couldNotLoad": "Could not load group",
+      "membershipPending": "Your request to join this group is still awaiting approval.",
+      "membershipRejected": "Your request to join this group was not approved.",
+      "tryAgain": "Try again"
+    }
   }
 }

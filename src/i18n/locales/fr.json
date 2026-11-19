@@ -39,6 +39,83 @@
         "googleNoToken": "Échec de la connexion avec Google — aucun jeton reçu.",
         "googleUnavailable": "La connexion avec Google n'est pas disponible sur cet appareil. Utilisez votre e-mail et votre mot de passe."
       }
+    },
+    "register": {
+      "title": "Créer un compte",
+      "subtitle": "Rejoignez Ajo — votre cercle, votre registre.",
+      "creatingAccount": "Création de votre compte...",
+      "fullNameLabel": "Nom complet",
+      "fullNamePlaceholder": "Ada Okonkwo",
+      "fullNameA11y": "Nom complet",
+      "phoneLabel": "Numéro de téléphone",
+      "phoneA11y": "Numéro de téléphone",
+      "passwordPlaceholder": "8 caractères minimum",
+      "passwordHint": "8 caractères minimum",
+      "confirmPasswordLabel": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "Répétez votre mot de passe",
+      "confirmPasswordA11y": "Confirmer le mot de passe",
+      "termsPrefix": "En créant un compte, vous acceptez les",
+      "termsOfService": "Conditions d'utilisation",
+      "and": "et la",
+      "privacyPolicy": "Politique de confidentialité",
+      "createAccount": "Créer un compte",
+      "alreadyHaveAccount": "Vous avez déjà un compte ?",
+      "logIn": "Se connecter",
+      "goToLoginA11y": "Aller à la connexion",
+      "errors": {
+        "nameTwoWords": "Entrez votre prénom et votre nom",
+        "invalidEmail": "Entrez un e-mail valide",
+        "invalidPhone": "Entrez un numéro de téléphone valide",
+        "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères",
+        "passwordMismatch": "Les mots de passe ne correspondent pas",
+        "registrationFailed": "L'inscription a échoué. Veuillez réessayer.",
+        "somethingWentWrong": "Une erreur s'est produite. Veuillez réessayer."
+      }
+    },
+    "otp": {
+      "title": "Vérifiez votre compte",
+      "subtitle": "Choisissez comment recevoir votre code.",
+      "verifying": "Vérification…",
+      "sendingCode": "Envoi du code…",
+      "back": "Retour",
+      "email": "E-mail",
+      "receiveViaEmailA11y": "Recevoir le code par e-mail",
+      "codeSentTo": "Code envoyé à",
+      "verify": "Vérifier",
+      "resendIn": "Renvoyer le code dans 0:{{seconds}}",
+      "resendCode": "Renvoyer le code",
+      "couldNotSendCode": "Impossible d'envoyer le code. Veuillez réessayer.",
+      "invalidOrExpiredCode": "Code invalide ou expiré"
+    },
+    "forgot": {
+      "title": "Réinitialiser le mot de passe",
+      "subtitleEmail": "Entrez votre e-mail enregistré et nous vous enverrons un code de vérification.",
+      "subtitleOtp": "Entrez le code à 6 chiffres envoyé à {{email}}.",
+      "subtitlePassword": "Choisissez un nouveau mot de passe pour votre compte.",
+      "subtitleDone": "Votre mot de passe a été réinitialisé avec succès.",
+      "back": "← Retour",
+      "emailLabel": "Adresse e-mail",
+      "emailPlaceholder": "vous@exemple.com",
+      "sendCode": "Envoyer le code",
+      "verificationCodeLabel": "Code de vérification",
+      "verificationCodePlaceholder": "123456",
+      "verifyCode": "Vérifier le code",
+      "resendCode": "Renvoyer le code",
+      "newPasswordLabel": "Nouveau mot de passe",
+      "newPasswordPlaceholder": "8 caractères min.",
+      "confirmNewPasswordLabel": "Confirmer le nouveau mot de passe",
+      "confirmNewPasswordPlaceholder": "Répétez votre mot de passe",
+      "resetPassword": "Réinitialiser le mot de passe",
+      "backToLogin": "Retour à la connexion",
+      "errors": {
+        "enterEmail": "Veuillez saisir votre adresse e-mail.",
+        "failedSendCode": "Échec de l'envoi du code. Vérifiez votre e-mail et réessayez.",
+        "enter6Digit": "Veuillez saisir le code à 6 chiffres.",
+        "invalidExpiredCode": "Code invalide ou expiré.",
+        "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+        "passwordMismatch": "Les mots de passe ne correspondent pas.",
+        "failedReset": "Échec de la réinitialisation du mot de passe. Veuillez réessayer."
+      }
     }
   },
   "profile": {
@@ -83,5 +160,13 @@
   "home": {
     "welcomeBack": "Content de vous revoir",
     "defaultName": "là"
+  },
+  "groupDetail": {
+    "errors": {
+      "couldNotLoad": "Impossible de charger le groupe",
+      "membershipPending": "Votre demande d'adhésion à ce groupe est toujours en attente d'approbation.",
+      "membershipRejected": "Votre demande d'adhésion à ce groupe n'a pas été approuvée.",
+      "tryAgain": "Réessayer"
+    }
   }
 }

@@ -1,0 +1,88 @@
+{
+  "_note": "Machine-translated first pass (Phase 1 i18n) -- not reviewed by a native speaker. Needs native review before production reliance.",
+  "common": {
+    "processing": "Na-arụ ọrụ...",
+    "loadingPleaseWait": "Na-ebu, biko chere",
+    "otpDigitOfTotal": "Nọmba {{index}} nke {{total}}",
+    "logOut": "Pụọ",
+    "cancel": "Kagbuo",
+    "dismissDialog": "Mechie ndaowa"
+  },
+  "auth": {
+    "login": {
+      "title": "Nnọọ ọzọ",
+      "subtitle": "Banye n'akaụntụ Ajo gị.",
+      "loggingIn": "Na-abanye...",
+      "emailLabel": "Adreesị Email",
+      "emailPlaceholder": "ada@email.com",
+      "emailA11y": "Adreesị email",
+      "passwordLabel": "Okwuntughe",
+      "passwordPlaceholder": "Okwuntughe gị",
+      "passwordA11y": "Okwuntughe",
+      "showPassword": "Gosi okwuntughe",
+      "hidePassword": "Zoo okwuntughe",
+      "forgotPassword": "Chefuru okwuntughe?",
+      "forgotPasswordA11y": "Echefuru okwuntughe",
+      "forgotPasswordHint": "Pịa ugboro abụọ iji tọgharịa okwuntughe gị",
+      "logIn": "Banye",
+      "logInHint": "Pịa ugboro abụọ iji banye",
+      "or": "ma ọ bụ",
+      "continueWithGoogle": "Gaa n'ihu na Google",
+      "signInWithGoogleA11y": "Banye na Google",
+      "noAccount": "Ị nweghị akaụntụ?",
+      "signUp": "Debanye aha",
+      "goToRegisterA11y": "Gaa ndebanye aha",
+      "errors": {
+        "fillAllFields": "Biko dejupụta mpaghara niile",
+        "invalidCredentials": "Email ma ọ bụ okwuntughe ezighị ezi",
+        "googleSignInFailed": "Ịbanye na Google emeghị nke ọma. Biko nwaa ọzọ.",
+        "googleNoCode": "Ịbanye na Google emeghị nke ọma — enwetaghị koodu.",
+        "googleNoToken": "Ịbanye na Google emeghị nke ọma — enwetaghị token.",
+        "googleUnavailable": "Ịbanye na Google adịghị na ngwaọrụ a. Biko jiri email na okwuntughe gị."
+      }
+    }
+  },
+  "profile": {
+    "stats": {
+      "totalPayments": "Mkpokọta ụgwọ"
+    },
+    "actions": {
+      "privacy": "Amụma Nzuzo & Usoro",
+      "privacyHint": "Mepee amụma nzuzo na usoro ọrụ",
+      "changePassword": "Gbanwee okwuntughe",
+      "language": "Asụsụ",
+      "deleteAccount": "Hichapụ akaụntụ",
+      "deleteAccountHint": "Na-akwụsị akaụntụ gị kpamkpam"
+    },
+    "changePassword": {
+      "title": "Gbanwee Okwuntughe",
+      "success": "Agbanweela okwuntughe!",
+      "done": "Emezuola",
+      "currentPlaceholder": "Okwuntughe ugbu a",
+      "currentA11y": "Okwuntughe ugbu a",
+      "newPlaceholder": "Okwuntughe ọhụrụ (opekata mpe mkpụrụedemede 8)",
+      "newA11y": "Okwuntughe ọhụrụ",
+      "confirmPlaceholder": "Kwado okwuntughe ọhụrụ",
+      "confirmA11y": "Kwado okwuntughe ọhụrụ",
+      "cancel": "Kagbuo",
+      "save": "Chekwaa",
+      "saving": "Na-echekwa…"
+    },
+    "language": {
+      "title": "Asụsụ",
+      "subtitle": "Họrọ asụsụ a na-eji na ngwa ahụ."
+    },
+    "confirmLogout": {
+      "title": "Pụọ",
+      "message": "Ị ji n'aka na ị chọrọ ịpụ?"
+    },
+    "confirmDelete": {
+      "title": "Hichapụ akaụntụ",
+      "message": "Nke a ga-akwụsị akaụntụ gị kpamkpam. A ga-echekwa akụkọ ihe mere eme ụgwọ gị maka ndekọ otu. Enweghị ike imegharị nke a."
+    }
+  },
+  "home": {
+    "welcomeBack": "Nnọọ ọzọ",
+    "defaultName": "ebe ahụ"
+  }
+}

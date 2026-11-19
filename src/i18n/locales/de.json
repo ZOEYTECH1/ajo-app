@@ -1,0 +1,87 @@
+{
+  "common": {
+    "processing": "Wird verarbeitet...",
+    "loadingPleaseWait": "Wird geladen, bitte warten",
+    "otpDigitOfTotal": "Ziffer {{index}} von {{total}}",
+    "logOut": "Abmelden",
+    "cancel": "Abbrechen",
+    "dismissDialog": "Dialog schließen"
+  },
+  "auth": {
+    "login": {
+      "title": "Willkommen zurück",
+      "subtitle": "Melde dich bei deinem Ajo-Konto an.",
+      "loggingIn": "Anmeldung läuft...",
+      "emailLabel": "E-Mail-Adresse",
+      "emailPlaceholder": "ada@email.com",
+      "emailA11y": "E-Mail-Adresse",
+      "passwordLabel": "Passwort",
+      "passwordPlaceholder": "Dein Passwort",
+      "passwordA11y": "Passwort",
+      "showPassword": "Passwort anzeigen",
+      "hidePassword": "Passwort verbergen",
+      "forgotPassword": "Passwort vergessen?",
+      "forgotPasswordA11y": "Passwort vergessen",
+      "forgotPasswordHint": "Doppelt tippen, um dein Passwort zurückzusetzen",
+      "logIn": "Anmelden",
+      "logInHint": "Doppelt tippen, um dich anzumelden",
+      "or": "oder",
+      "continueWithGoogle": "Mit Google fortfahren",
+      "signInWithGoogleA11y": "Mit Google anmelden",
+      "noAccount": "Noch kein Konto?",
+      "signUp": "Registrieren",
+      "goToRegisterA11y": "Zur Registrierung",
+      "errors": {
+        "fillAllFields": "Bitte fülle alle Felder aus",
+        "invalidCredentials": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
+        "googleSignInFailed": "Google-Anmeldung fehlgeschlagen. Bitte versuche es erneut.",
+        "googleNoCode": "Google-Anmeldung fehlgeschlagen — kein Code erhalten.",
+        "googleNoToken": "Google-Anmeldung fehlgeschlagen — kein Token erhalten.",
+        "googleUnavailable": "Die Google-Anmeldung ist auf diesem Gerät nicht verfügbar. Bitte nutze E-Mail und Passwort."
+      }
+    }
+  },
+  "profile": {
+    "stats": {
+      "totalPayments": "Zahlungen insgesamt"
+    },
+    "actions": {
+      "privacy": "Datenschutz & Nutzungsbedingungen",
+      "privacyHint": "Öffnet Datenschutzerklärung und Nutzungsbedingungen",
+      "changePassword": "Passwort ändern",
+      "language": "Sprache",
+      "deleteAccount": "Konto löschen",
+      "deleteAccountHint": "Deaktiviert dein Konto dauerhaft"
+    },
+    "changePassword": {
+      "title": "Passwort ändern",
+      "success": "Passwort geändert!",
+      "done": "Fertig",
+      "currentPlaceholder": "Aktuelles Passwort",
+      "currentA11y": "Aktuelles Passwort",
+      "newPlaceholder": "Neues Passwort (mind. 8 Zeichen)",
+      "newA11y": "Neues Passwort",
+      "confirmPlaceholder": "Neues Passwort bestätigen",
+      "confirmA11y": "Neues Passwort bestätigen",
+      "cancel": "Abbrechen",
+      "save": "Speichern",
+      "saving": "Speichern…"
+    },
+    "language": {
+      "title": "Sprache",
+      "subtitle": "Wähle die in der App verwendete Sprache."
+    },
+    "confirmLogout": {
+      "title": "Abmelden",
+      "message": "Möchtest du dich wirklich abmelden?"
+    },
+    "confirmDelete": {
+      "title": "Konto löschen",
+      "message": "Dadurch wird dein Konto dauerhaft deaktiviert. Dein Zahlungsverlauf bleibt für Gruppenaufzeichnungen erhalten. Dies kann nicht rückgängig gemacht werden."
+    }
+  },
+  "home": {
+    "welcomeBack": "Willkommen zurück",
+    "defaultName": "dort"
+  }
+}

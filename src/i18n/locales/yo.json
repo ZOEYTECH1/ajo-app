@@ -1,0 +1,88 @@
+{
+  "_note": "Machine-translated first pass (Phase 1 i18n) -- not reviewed by a native speaker. Needs native review before production reliance.",
+  "common": {
+    "processing": "Ṣíṣe iṣẹ́...",
+    "loadingPleaseWait": "Ń kó, jọ̀wọ́ dúró",
+    "otpDigitOfTotal": "Nọ́mbà {{index}} nínú {{total}}",
+    "logOut": "Jáde",
+    "cancel": "Fagilé",
+    "dismissDialog": "Pa àsọyé náà"
+  },
+  "auth": {
+    "login": {
+      "title": "Káàbọ̀ padà",
+      "subtitle": "Wọlé sí àkáǹtì Ajo rẹ.",
+      "loggingIn": "Ń wọlé...",
+      "emailLabel": "Àdírẹ́sì Ímeèlì",
+      "emailPlaceholder": "ada@email.com",
+      "emailA11y": "Àdírẹ́sì ímeèlì",
+      "passwordLabel": "Ọ̀rọ̀ àṣínà",
+      "passwordPlaceholder": "Ọ̀rọ̀ àṣínà rẹ",
+      "passwordA11y": "Ọ̀rọ̀ àṣínà",
+      "showPassword": "Fi ọ̀rọ̀ àṣínà hàn",
+      "hidePassword": "Fi ọ̀rọ̀ àṣínà pamọ́",
+      "forgotPassword": "Ṣé o gbàgbé ọ̀rọ̀ àṣínà?",
+      "forgotPasswordA11y": "Gbàgbé ọ̀rọ̀ àṣínà",
+      "forgotPasswordHint": "Fọwọ́ kàn ẹ̀ẹ̀méjì láti tún ọ̀rọ̀ àṣínà rẹ ṣe",
+      "logIn": "Wọlé",
+      "logInHint": "Fọwọ́ kàn ẹ̀ẹ̀méjì láti wọlé",
+      "or": "tàbí",
+      "continueWithGoogle": "Tẹ̀síwájú pẹ̀lú Google",
+      "signInWithGoogleA11y": "Wọlé pẹ̀lú Google",
+      "noAccount": "O kò ní àkáǹtì?",
+      "signUp": "Forúkọsílẹ̀",
+      "goToRegisterA11y": "Lọ sí ìforúkọsílẹ̀",
+      "errors": {
+        "fillAllFields": "Jọ̀wọ́ kún gbogbo àwọn ààyè",
+        "invalidCredentials": "Ímeèlì tàbí ọ̀rọ̀ àṣínà kò tọ̀nà",
+        "googleSignInFailed": "Wíwọlé pẹ̀lú Google kùnà. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan sí i.",
+        "googleNoCode": "Wíwọlé pẹ̀lú Google kùnà — kò sí koodu tí a gbà.",
+        "googleNoToken": "Wíwọlé pẹ̀lú Google kùnà — kò sí àmì tí a gbà.",
+        "googleUnavailable": "Wíwọlé pẹ̀lú Google kò wà fún ẹ̀rọ yìí. Jọ̀wọ́ lo ímeèlì àti ọ̀rọ̀ àṣínà."
+      }
+    }
+  },
+  "profile": {
+    "stats": {
+      "totalPayments": "Àpapọ̀ owó tí a san"
+    },
+    "actions": {
+      "privacy": "Òfin Ìpamọ́ & Àwọn Òfin",
+      "privacyHint": "Ṣí òfin ìpamọ́ àti àwọn òfin iṣẹ́",
+      "changePassword": "Yí ọ̀rọ̀ àṣínà padà",
+      "language": "Èdè",
+      "deleteAccount": "Pa àkáǹtì rẹ́",
+      "deleteAccountHint": "Dá àkáǹtì rẹ dúró láìláàkọ́"
+    },
+    "changePassword": {
+      "title": "Yí Ọ̀rọ̀ Àṣínà Padà",
+      "success": "Ọ̀rọ̀ àṣínà ti yí padà!",
+      "done": "Parí",
+      "currentPlaceholder": "Ọ̀rọ̀ àṣínà lọ́wọ́lọ́wọ́",
+      "currentA11y": "Ọ̀rọ̀ àṣínà lọ́wọ́lọ́wọ́",
+      "newPlaceholder": "Ọ̀rọ̀ àṣínà tuntun (ó kéré jù lẹ́tà mẹ́jọ)",
+      "newA11y": "Ọ̀rọ̀ àṣínà tuntun",
+      "confirmPlaceholder": "Jẹ́rìí sí ọ̀rọ̀ àṣínà tuntun",
+      "confirmA11y": "Jẹ́rìí sí ọ̀rọ̀ àṣínà tuntun",
+      "cancel": "Fagilé",
+      "save": "Fi pamọ́",
+      "saving": "Ń fi pamọ́…"
+    },
+    "language": {
+      "title": "Èdè",
+      "subtitle": "Yan èdè tí a lò jákèjádò app náà."
+    },
+    "confirmLogout": {
+      "title": "Jáde",
+      "message": "Ṣé o dá ọ lójú pé o fẹ́ jáde?"
+    },
+    "confirmDelete": {
+      "title": "Pa àkáǹtì rẹ́",
+      "message": "Èyí yóò dá àkáǹtì rẹ dúró láìláàkọ́. A óò pa àkọsílẹ̀ owó tí o san mọ́ fún àkọsílẹ̀ ẹgbẹ́. A kò lè yí èyí padà."
+    }
+  },
+  "home": {
+    "welcomeBack": "Káàbọ̀ padà",
+    "defaultName": "ìwọ"
+  }
+}

@@ -24,6 +24,12 @@ export interface AjoUser {
   is_kyc_verified: boolean;
   profile_photo: string | null;
   date_joined: string;
+  // UI/notification/email language -- account-level, synced with the
+  // language switcher on both platforms. Drives the backend's own
+  // translated text (notifications, emails, API error messages); the
+  // frontend's own i18n (src/i18n) is set from this on login and kept in
+  // sync by src/store/localeStore.ts.
+  language?: string;
   // Which of the 3 top-level sections ("ajo" | "thrift" | "inventory") this
   // account uses -- account-level (not per-device), shared with ajo-web.
   // Empty array means the user hasn't picked yet.

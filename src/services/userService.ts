@@ -11,7 +11,7 @@ export const userService = {
     return res.data;
   },
 
-  updateProfile: async (data: { first_name?: string; last_name?: string; phone_number?: string }): Promise<AjoUser> => {
+  updateProfile: async (data: { first_name?: string; last_name?: string; phone_number?: string; language?: string }): Promise<AjoUser> => {
     const res = await api.patch('/api/auth/me/', data);
     return res.data;
   },

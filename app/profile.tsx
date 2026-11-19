@@ -7,6 +7,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../src/hooks/useTheme';
 import { useAuthStore } from '../src/store/useAppStore';
 import { authService } from '../src/services/authService';
@@ -14,7 +15,9 @@ import { userService } from '../src/services/userService';
 import { cloudinaryUrl } from '../src/lib/cloudinary';
 import { groupService } from '../src/services/groupService';
 import { FontSize, Radius, Shadow } from '../src/theme';
-import { LoadingOverlay, Skeleton } from '../src/components';
+import { LoadingOverlay, Skeleton, feedback } from '../src/components';
+import { useLocaleStore, SUPPORTED_LANGUAGES, type LanguageCode } from '../src/store/localeStore';
+import { formatCurrency } from '../src/utils/currency';
 
 // ─── Confirm modal ─────────────────────────────────────────────────────────────
 const ConfirmModal: React.FC<{
@@ -27,9 +30,10 @@ const ConfirmModal: React.FC<{
   onCancel: () => void;
 }> = ({ visible, title, message, confirmLabel, destructive, onConfirm, onCancel }) => {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <Pressable style={s.overlay} onPress={onCancel} accessibilityRole="button" accessibilityLabel="Dismiss dialog">
+      <Pressable style={s.overlay} onPress={onCancel} accessibilityRole="button" accessibilityLabel={t('common.dismissDialog')}>
         <Pressable style={[s.modalBox, { backgroundColor: colors.surface }]} onPress={() => {}} accessible={false}>
           <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary, marginBottom: 8 }}>
             {title}
@@ -41,10 +45,10 @@ const ConfirmModal: React.FC<{
             <TouchableOpacity
               onPress={onCancel}
               accessibilityRole="button"
-              accessibilityLabel="Cancel"
+              accessibilityLabel={t('common.cancel')}
               style={[s.modalBtn, { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 }]}
             >
-              <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textSecondary }}>Cancel</Text>
+              <Text style={{ fontSize: FontSize.sm, fontWeight: '600', color: colors.textSecondary }}>{t('common.cancel')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={onConfirm}
@@ -63,11 +67,29 @@ const ConfirmModal: React.FC<{
 
 export default function ProfileRoute() {
   const { colors, isDark } = useTheme();
+  const { t, i18n } = useTranslation();
   const { user, updateUser, logout } = useAuthStore();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const locale = useLocaleStore((st) => st.language);
+  const setLocale = useLocaleStore((st) => st.setLanguage);
 
   const [uploading, setUploading] = useState(false);
+  const [showLanguagePicker, setShowLanguagePicker] = useState(false);
+
+  const languageMutation = useMutation({
+    mutationFn: (code: LanguageCode) => userService.updateProfile({ language: code }),
+    onSuccess: (updated, code) => {
+      setLocale(code);
+      updateUser({ language: updated.language });
+    },
+  });
+
+  const selectLanguage = (code: LanguageCode) => {
+    feedback('light');
+    setShowLanguagePicker(false);
+    languageMutation.mutate(code);
+  };
   const [editing, setEditing] = useState(false);
   const [firstName, setFirstName] = useState(user?.first_name ?? '');
   const [lastName, setLastName] = useState(user?.last_name ?? '');
@@ -122,8 +144,7 @@ export default function ProfileRoute() {
   const approvedCount = history.filter((p) => p.status === 'approved').length;
   const pendingCount  = history.filter((p) => p.status === 'pending').length;
 
-  const fmtAmount = (n: number) =>
-    `₦${n.toLocaleString('en-NG', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  const fmtAmount = (n: number) => formatCurrency(n, i18n.language);
 
   const updateMutation = useMutation({
     mutationFn: () => userService.updateProfile({
@@ -181,9 +202,9 @@ export default function ProfileRoute() {
   const handleLogout = () => {
     setConfirmModal({
       visible: true,
-      title: 'Log out',
-      message: 'Are you sure you want to log out?',
-      confirmLabel: 'Log out',
+      title: t('profile.confirmLogout.title'),
+      message: t('profile.confirmLogout.message'),
+      confirmLabel: t('common.logOut'),
       destructive: false,
       onConfirm: () => {
         setConfirmModal((p) => ({ ...p, visible: false }));
@@ -197,9 +218,9 @@ export default function ProfileRoute() {
   const handleDeleteAccount = () => {
     setConfirmModal({
       visible: true,
-      title: 'Delete account',
-      message: 'This will permanently deactivate your account. Your payment history will be preserved for group records. This cannot be undone.',
-      confirmLabel: 'Delete account',
+      title: t('profile.confirmDelete.title'),
+      message: t('profile.confirmDelete.message'),
+      confirmLabel: t('profile.actions.deleteAccount'),
       destructive: true,
       onConfirm: () => {
         setConfirmModal((p) => ({ ...p, visible: false }));
@@ -377,43 +398,87 @@ export default function ProfileRoute() {
               {historyLoading ? '—' : (history?.length ?? 0)}
             </Text>
             <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
-              Total payments
+              {t('profile.stats.totalPayments')}
             </Text>
           </View>
         </View>
 
         {/* Account actions */}
         <View style={[s.actionsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <TouchableOpacity onPress={() => router.push('/account/privacy' as any)} style={s.actionRow} accessibilityRole="button" accessibilityLabel="Privacy Policy and Terms" accessibilityHint="Opens privacy policy and terms of service">
+          <TouchableOpacity onPress={() => router.push('/account/privacy' as any)} style={s.actionRow} accessibilityRole="button" accessibilityLabel={t('profile.actions.privacy')} accessibilityHint={t('profile.actions.privacyHint')}>
             <Ionicons name="shield-checkmark-outline" size={20} color={colors.textPrimary} />
-            <Text style={{ fontSize: FontSize.base, color: colors.textPrimary, marginLeft: 14, flex: 1 }}>Privacy Policy & Terms</Text>
+            <Text style={{ fontSize: FontSize.base, color: colors.textPrimary, marginLeft: 14, flex: 1 }}>{t('profile.actions.privacy')}</Text>
             <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
           </TouchableOpacity>
           <View style={{ height: 1, backgroundColor: colors.border }} />
-          <TouchableOpacity onPress={() => setShowChangePw(true)} style={s.actionRow} accessibilityRole="button" accessibilityLabel="Change password">
+          <TouchableOpacity onPress={() => setShowChangePw(true)} style={s.actionRow} accessibilityRole="button" accessibilityLabel={t('profile.actions.changePassword')}>
             <Ionicons name="lock-closed-outline" size={20} color={colors.textPrimary} />
-            <Text style={{ fontSize: FontSize.base, color: colors.textPrimary, marginLeft: 14, flex: 1 }}>Change password</Text>
+            <Text style={{ fontSize: FontSize.base, color: colors.textPrimary, marginLeft: 14, flex: 1 }}>{t('profile.actions.changePassword')}</Text>
             <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
           </TouchableOpacity>
           <View style={{ height: 1, backgroundColor: colors.border }} />
-          <TouchableOpacity onPress={handleLogout} style={s.actionRow} accessibilityRole="button" accessibilityLabel="Log out">
+          <TouchableOpacity onPress={() => setShowLanguagePicker(true)} style={s.actionRow} accessibilityRole="button" accessibilityLabel={t('profile.actions.language')}>
+            <Ionicons name="language-outline" size={20} color={colors.textPrimary} />
+            <Text style={{ fontSize: FontSize.base, color: colors.textPrimary, marginLeft: 14, flex: 1 }}>{t('profile.actions.language')}</Text>
+            <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginRight: 6 }}>
+              {SUPPORTED_LANGUAGES.find((l) => l.code === (locale ?? 'en'))?.label}
+            </Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
+          </TouchableOpacity>
+          <View style={{ height: 1, backgroundColor: colors.border }} />
+          <TouchableOpacity onPress={handleLogout} style={s.actionRow} accessibilityRole="button" accessibilityLabel={t('common.logOut')}>
             <Ionicons name="log-out-outline" size={20} color={colors.textPrimary} />
-            <Text style={{ fontSize: FontSize.base, color: colors.textPrimary, marginLeft: 14, flex: 1 }}>Log out</Text>
+            <Text style={{ fontSize: FontSize.base, color: colors.textPrimary, marginLeft: 14, flex: 1 }}>{t('common.logOut')}</Text>
             <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
           </TouchableOpacity>
           <View style={{ height: 1, backgroundColor: colors.border }} />
-          <TouchableOpacity onPress={handleDeleteAccount} style={s.actionRow} accessibilityRole="button" accessibilityLabel="Delete account" accessibilityHint="Permanently deactivates your account">
+          <TouchableOpacity onPress={handleDeleteAccount} style={s.actionRow} accessibilityRole="button" accessibilityLabel={t('profile.actions.deleteAccount')} accessibilityHint={t('profile.actions.deleteAccountHint')}>
             <Ionicons name="trash-outline" size={20} color={colors.error} />
-            <Text style={{ fontSize: FontSize.base, color: colors.error, marginLeft: 14, flex: 1 }}>Delete account</Text>
+            <Text style={{ fontSize: FontSize.base, color: colors.error, marginLeft: 14, flex: 1 }}>{t('profile.actions.deleteAccount')}</Text>
             <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
           </TouchableOpacity>
         </View>
 
+        {/* Language picker modal */}
+        <Modal visible={showLanguagePicker} transparent animationType="fade" onRequestClose={() => setShowLanguagePicker(false)}>
+          <Pressable style={s.overlay} onPress={() => setShowLanguagePicker(false)} accessibilityRole="button" accessibilityLabel={t('common.dismissDialog')}>
+            <Pressable style={[s.modalBox, { backgroundColor: colors.surface }]} onPress={() => {}} accessible={false}>
+              <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary, marginBottom: 4 }}>
+                {t('profile.language.title')}
+              </Text>
+              <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginBottom: 16 }}>
+                {t('profile.language.subtitle')}
+              </Text>
+              {SUPPORTED_LANGUAGES.map((l) => {
+                const active = (locale ?? 'en') === l.code;
+                return (
+                  <TouchableOpacity
+                    key={l.code}
+                    onPress={() => selectLanguage(l.code)}
+                    style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12 }}
+                    accessibilityRole="radio"
+                    accessibilityLabel={l.label}
+                    accessibilityState={{ checked: active }}
+                  >
+                    <Text style={{ fontSize: FontSize.base, color: active ? colors.primary : colors.textPrimary, fontWeight: active ? '700' : '400', flex: 1 }}>
+                      {l.label}
+                    </Text>
+                    {active && <Ionicons name="checkmark" size={20} color={colors.primary} />}
+                  </TouchableOpacity>
+                );
+              })}
+              <TouchableOpacity onPress={() => setShowLanguagePicker(false)} style={{ alignItems: 'center', marginTop: 12 }} accessibilityRole="button" accessibilityLabel={t('common.cancel')}>
+                <Text style={{ color: colors.primary, fontWeight: '600', fontSize: FontSize.sm }}>{t('common.cancel')}</Text>
+              </TouchableOpacity>
+            </Pressable>
+          </Pressable>
+        </Modal>
+
         {/* Change password modal */}
         <Modal visible={showChangePw} animationType="slide" transparent onRequestClose={() => setShowChangePw(false)}>
-          <Pressable style={s.overlay} onPress={() => setShowChangePw(false)} accessibilityRole="button" accessibilityLabel="Dismiss">
+          <Pressable style={s.overlay} onPress={() => setShowChangePw(false)} accessibilityRole="button" accessibilityLabel={t('common.dismissDialog')}>
             <Pressable style={[s.modalBox, { backgroundColor: colors.surface }]} onPress={(e) => e.stopPropagation()} accessible={false}>
-              <Text style={{ fontSize: FontSize.lg, fontWeight: '700', color: colors.textPrimary, marginBottom: 16 }}>Change Password</Text>
+              <Text style={{ fontSize: FontSize.lg, fontWeight: '700', color: colors.textPrimary, marginBottom: 16 }}>{t('profile.changePassword.title')}</Text>
               {!!pwError && (
                 <View style={{ backgroundColor: colors.errorLight, borderRadius: 8, padding: 10, marginBottom: 12 }}>
                   <Text style={{ color: colors.error, fontSize: FontSize.sm }}>{pwError}</Text>
@@ -422,9 +487,9 @@ export default function ProfileRoute() {
               {pwSuccess ? (
                 <View style={{ alignItems: 'center', paddingVertical: 12 }}>
                   <Ionicons name="checkmark-circle" size={48} color={colors.success} />
-                  <Text style={{ color: colors.success, marginTop: 8, fontWeight: '600' }}>Password changed!</Text>
-                  <TouchableOpacity onPress={() => { setShowChangePw(false); setPwSuccess(false); }} style={{ marginTop: 16 }} accessibilityRole="button" accessibilityLabel="Done">
-                    <Text style={{ color: colors.primary, fontWeight: '600' }}>Done</Text>
+                  <Text style={{ color: colors.success, marginTop: 8, fontWeight: '600' }}>{t('profile.changePassword.success')}</Text>
+                  <TouchableOpacity onPress={() => { setShowChangePw(false); setPwSuccess(false); }} style={{ marginTop: 16 }} accessibilityRole="button" accessibilityLabel={t('profile.changePassword.done')}>
+                    <Text style={{ color: colors.primary, fontWeight: '600' }}>{t('profile.changePassword.done')}</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -432,37 +497,37 @@ export default function ProfileRoute() {
                   <TextInput
                     value={currentPw}
                     onChangeText={setCurrentPw}
-                    placeholder="Current password"
+                    placeholder={t('profile.changePassword.currentPlaceholder')}
                     placeholderTextColor={colors.textTertiary}
                     secureTextEntry
                     style={[s.input, { color: colors.textPrimary, backgroundColor: colors.background, borderColor: colors.border, marginBottom: 10 }]}
-                    accessibilityLabel="Current password"
+                    accessibilityLabel={t('profile.changePassword.currentA11y')}
                   />
                   <TextInput
                     value={newPw}
                     onChangeText={setNewPw}
-                    placeholder="New password (min 8 chars)"
+                    placeholder={t('profile.changePassword.newPlaceholder')}
                     placeholderTextColor={colors.textTertiary}
                     secureTextEntry
                     style={[s.input, { color: colors.textPrimary, backgroundColor: colors.background, borderColor: colors.border, marginBottom: 10 }]}
-                    accessibilityLabel="New password"
+                    accessibilityLabel={t('profile.changePassword.newA11y')}
                   />
                   <TextInput
                     value={confirmPw}
                     onChangeText={setConfirmPw}
-                    placeholder="Confirm new password"
+                    placeholder={t('profile.changePassword.confirmPlaceholder')}
                     placeholderTextColor={colors.textTertiary}
                     secureTextEntry
                     style={[s.input, { color: colors.textPrimary, backgroundColor: colors.background, borderColor: colors.border, marginBottom: 16 }]}
-                    accessibilityLabel="Confirm new password"
+                    accessibilityLabel={t('profile.changePassword.confirmA11y')}
                   />
                   <View style={[s.row, { gap: 10 }]}>
-                    <TouchableOpacity onPress={() => setShowChangePw(false)} style={[s.modalBtn, { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 }]} accessibilityRole="button" accessibilityLabel="Cancel">
-                      <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm }}>Cancel</Text>
+                    <TouchableOpacity onPress={() => setShowChangePw(false)} style={[s.modalBtn, { backgroundColor: colors.background, borderColor: colors.border, borderWidth: 1 }]} accessibilityRole="button" accessibilityLabel={t('common.cancel')}>
+                      <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: FontSize.sm }}>{t('common.cancel')}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={handleChangePw} disabled={changePwMutation.isPending} style={[s.modalBtn, { backgroundColor: colors.primary }]} accessibilityRole="button" accessibilityLabel={changePwMutation.isPending ? 'Saving' : 'Save'}>
+                    <TouchableOpacity onPress={handleChangePw} disabled={changePwMutation.isPending} style={[s.modalBtn, { backgroundColor: colors.primary }]} accessibilityRole="button" accessibilityLabel={changePwMutation.isPending ? t('profile.changePassword.saving') : t('profile.changePassword.save')}>
                       <Text style={{ color: '#FFF', fontWeight: '700', fontSize: FontSize.sm }}>
-                        {changePwMutation.isPending ? 'Saving…' : 'Save'}
+                        {changePwMutation.isPending ? t('profile.changePassword.saving') : t('profile.changePassword.save')}
                       </Text>
                     </TouchableOpacity>
                   </View>

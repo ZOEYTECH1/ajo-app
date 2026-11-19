@@ -1,0 +1,87 @@
+{
+  "common": {
+    "processing": "Procesando...",
+    "loadingPleaseWait": "Cargando, espera un momento",
+    "otpDigitOfTotal": "Dígito {{index}} de {{total}}",
+    "logOut": "Cerrar sesión",
+    "cancel": "Cancelar",
+    "dismissDialog": "Cerrar cuadro de diálogo"
+  },
+  "auth": {
+    "login": {
+      "title": "Bienvenido de nuevo",
+      "subtitle": "Inicia sesión en tu cuenta de Ajo.",
+      "loggingIn": "Iniciando sesión...",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "ada@email.com",
+      "emailA11y": "Correo electrónico",
+      "passwordLabel": "Contraseña",
+      "passwordPlaceholder": "Tu contraseña",
+      "passwordA11y": "Contraseña",
+      "showPassword": "Mostrar contraseña",
+      "hidePassword": "Ocultar contraseña",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "forgotPasswordA11y": "Olvidé mi contraseña",
+      "forgotPasswordHint": "Toca dos veces para restablecer tu contraseña",
+      "logIn": "Iniciar sesión",
+      "logInHint": "Toca dos veces para iniciar sesión",
+      "or": "o",
+      "continueWithGoogle": "Continuar con Google",
+      "signInWithGoogleA11y": "Iniciar sesión con Google",
+      "noAccount": "¿No tienes una cuenta?",
+      "signUp": "Regístrate",
+      "goToRegisterA11y": "Ir a registro",
+      "errors": {
+        "fillAllFields": "Completa todos los campos",
+        "invalidCredentials": "Correo electrónico o contraseña inválidos",
+        "googleSignInFailed": "Error al iniciar sesión con Google. Inténtalo de nuevo.",
+        "googleNoCode": "Error al iniciar sesión con Google — no se recibió código.",
+        "googleNoToken": "Error al iniciar sesión con Google — no se recibió token.",
+        "googleUnavailable": "El inicio de sesión con Google no está disponible en este dispositivo. Usa tu correo y contraseña."
+      }
+    }
+  },
+  "profile": {
+    "stats": {
+      "totalPayments": "Pagos totales"
+    },
+    "actions": {
+      "privacy": "Política de privacidad y términos",
+      "privacyHint": "Abre la política de privacidad y los términos de servicio",
+      "changePassword": "Cambiar contraseña",
+      "language": "Idioma",
+      "deleteAccount": "Eliminar cuenta",
+      "deleteAccountHint": "Desactiva tu cuenta de forma permanente"
+    },
+    "changePassword": {
+      "title": "Cambiar contraseña",
+      "success": "¡Contraseña cambiada!",
+      "done": "Listo",
+      "currentPlaceholder": "Contraseña actual",
+      "currentA11y": "Contraseña actual",
+      "newPlaceholder": "Nueva contraseña (mín. 8 caracteres)",
+      "newA11y": "Nueva contraseña",
+      "confirmPlaceholder": "Confirmar nueva contraseña",
+      "confirmA11y": "Confirmar nueva contraseña",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "saving": "Guardando…"
+    },
+    "language": {
+      "title": "Idioma",
+      "subtitle": "Elige el idioma que se usa en toda la aplicación."
+    },
+    "confirmLogout": {
+      "title": "Cerrar sesión",
+      "message": "¿Seguro que quieres cerrar sesión?"
+    },
+    "confirmDelete": {
+      "title": "Eliminar cuenta",
+      "message": "Esto desactivará tu cuenta de forma permanente. Tu historial de pagos se conservará para los registros del grupo. Esta acción no se puede deshacer."
+    }
+  },
+  "home": {
+    "welcomeBack": "Bienvenido de nuevo",
+    "defaultName": "allí"
+  }
+}

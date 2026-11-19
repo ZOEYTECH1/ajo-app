@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, StatusBar, KeyboardAvoidingView,
@@ -315,6 +316,7 @@ interface LoginProps {
 
 export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onForgot }) => {
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -335,7 +337,7 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
         setLoading(false);
         const code = (googleResponse as any).error?.code ?? '';
         if (code !== 'ERR_AUTH_DISMISSED') {
-          setServerError(googleResponse.error?.message || 'Google sign-in failed. Please try again.');
+          setServerError(googleResponse.error?.message || t('auth.login.errors.googleSignInFailed'));
         }
         return;
       }
@@ -348,7 +350,7 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
 
       // Native PKCE flow — exchange auth code for tokens (no client secret needed for native clients)
       const code = googleResponse.params?.code;
-      if (!code) { setLoading(false); setServerError('Google sign-in failed — no code received.'); return; }
+      if (!code) { setLoading(false); setServerError(t('auth.login.errors.googleNoCode')); return; }
       const platformClientId =
         Platform.OS === 'android' ? (process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? '')
         : Platform.OS === 'ios'   ? (process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ?? '')
@@ -360,10 +362,10 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
           { tokenEndpoint: 'https://oauth2.googleapis.com/token' },
         );
         if (tokens.idToken) { handleGoogleSignIn(tokens.idToken); }
-        else { setLoading(false); setServerError('Google sign-in failed — no ID token returned.'); }
+        else { setLoading(false); setServerError(t('auth.login.errors.googleNoToken')); }
       } catch {
         setLoading(false);
-        setServerError('Google sign-in failed. Please try again.');
+        setServerError(t('auth.login.errors.googleSignInFailed'));
       }
     };
     processGoogleResponse();
@@ -379,7 +381,7 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
     } catch (err: any) {
       feedback('error');
       const data = err.response?.data;
-      setServerError(data?.detail || 'Google sign-in failed. Please try again.');
+      setServerError(data?.detail || t('auth.login.errors.googleSignInFailed'));
     } finally {
       setLoading(false);
     }
@@ -388,7 +390,7 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
   const handleLogin = async () => {
     if (!form.email || !form.password) {
       feedback('error');
-      setServerError('Please fill in all fields');
+      setServerError(t('auth.login.errors.fillAllFields'));
       return;
     }
     setServerError('');
@@ -400,7 +402,7 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
     } catch (err: any) {
       feedback('error');
       const data = err.response?.data;
-      const msg = data?.detail || data?.non_field_errors?.[0] || 'Invalid email or password';
+      const msg = data?.detail || data?.non_field_errors?.[0] || t('auth.login.errors.invalidCredentials');
       setServerError(msg);
     } finally {
       setLoading(false);
@@ -409,7 +411,7 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <LoadingOverlay visible={loading} message="Logging you in..." />
+      <LoadingOverlay visible={loading} message={t('auth.login.loggingIn')} />
       <ScrollView
         style={{ flex: 1, backgroundColor: colors.background }}
         contentContainerStyle={layout.scrollContent}
@@ -417,7 +419,7 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
         showsVerticalScrollIndicator={false}
       >
         <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
-        <AuthHeader title="Welcome back" subtitle="Log in to your Ajo account." />
+        <AuthHeader title={t('auth.login.title')} subtitle={t('auth.login.subtitle')} />
 
         {serverError ? (
           <View style={[layout.errorBanner, { backgroundColor: colors.errorLight, borderLeftColor: colors.error }]} accessibilityRole="alert" accessibilityLiveRegion="assertive">
@@ -426,22 +428,22 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
         ) : null}
 
         <Input
-          label="Email Address" placeholder="ada@email.com" value={form.email}
+          label={t('auth.login.emailLabel')} placeholder={t('auth.login.emailPlaceholder')} value={form.email}
           onChangeText={(v) => setForm({ ...form, email: v })}
           keyboardType="email-address" autoCapitalize="none"
           leftIcon={<Ionicons name="mail-outline" size={18} color={colors.primary} />}
-          accessibilityLabel="Email address"
+          accessibilityLabel={t('auth.login.emailA11y')}
         />
         <Input
-          label="Password" placeholder="Your password" value={form.password}
+          label={t('auth.login.passwordLabel')} placeholder={t('auth.login.passwordPlaceholder')} value={form.password}
           onChangeText={(v) => setForm({ ...form, password: v })}
           secureTextEntry={!showPass} leftIcon={<Ionicons name="lock-closed-outline" size={18} color={colors.primary} />}
-          accessibilityLabel="Password"
+          accessibilityLabel={t('auth.login.passwordA11y')}
           rightIcon={
             <TouchableOpacity
               onPress={() => { feedback('light'); setShowPass(!showPass); }}
               accessibilityRole="button"
-              accessibilityLabel={showPass ? 'Hide password' : 'Show password'}
+              accessibilityLabel={showPass ? t('auth.login.hidePassword') : t('auth.login.showPassword')}
               accessibilityState={{ checked: showPass }}
             >
               <Ionicons name={showPass ? "eye-off-outline" : "eye-outline"} size={20} color={colors.textSecondary} />
@@ -449,38 +451,38 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
           }
         />
 
-        <Bouncy onPress={onForgot} style={{ alignSelf: 'flex-end', marginTop: -8, marginBottom: 20 }} accessibilityRole="button" accessibilityLabel="Forgot password" accessibilityHint="Double tap to reset your password">
-          <Text style={{ color: colors.primary, fontWeight: '600' }}>Forgot password?</Text>
+        <Bouncy onPress={onForgot} style={{ alignSelf: 'flex-end', marginTop: -8, marginBottom: 20 }} accessibilityRole="button" accessibilityLabel={t('auth.login.forgotPasswordA11y')} accessibilityHint={t('auth.login.forgotPasswordHint')}>
+          <Text style={{ color: colors.primary, fontWeight: '600' }}>{t('auth.login.forgotPassword')}</Text>
         </Bouncy>
 
-        <Button label="Log In" onPress={handleLogin} loading={loading} accessibilityHint="Double tap to log in" />
+        <Button label={t('auth.login.logIn')} onPress={handleLogin} loading={loading} accessibilityHint={t('auth.login.logInHint')} />
 
-        <Divider label="or" />
+        <Divider label={t('auth.login.or')} />
 
         <TouchableOpacity
           style={[layout.googleBtn, { borderColor: colors.border, backgroundColor: colors.surface }]}
           onPress={() => {
             feedback('light');
             if (!googlePromptAsync) {
-              setServerError('Google sign-in is not available on this device. Please use email & password.');
+              setServerError(t('auth.login.errors.googleUnavailable'));
               return;
             }
             googlePromptAsync();
           }}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="Sign in with Google"
+          accessibilityLabel={t('auth.login.signInWithGoogleA11y')}
         >
           <MaterialCommunityIcons name="google" size={20} color="#DB4437" />
           <Text style={{ fontSize: FontSize.base, fontWeight: '600', color: colors.textPrimary, marginLeft: 10 }}>
-            Continue with Google
+            {t('auth.login.continueWithGoogle')}
           </Text>
         </TouchableOpacity>
 
-        <Bouncy onPress={onRegister} style={[layout.switchRow, { marginTop: 20 }]} accessibilityRole="link" accessibilityLabel="Go to register">
+        <Bouncy onPress={onRegister} style={[layout.switchRow, { marginTop: 20 }]} accessibilityRole="link" accessibilityLabel={t('auth.login.goToRegisterA11y')}>
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, textAlign: 'center' }}>
-            Don&apos;t have an account?{' '}
-            <Text style={{ color: colors.primary, fontWeight: '700' }}>Sign up</Text>
+            {t('auth.login.noAccount')}{' '}
+            <Text style={{ color: colors.primary, fontWeight: '700' }}>{t('auth.login.signUp')}</Text>
           </Text>
         </Bouncy>
       </ScrollView>

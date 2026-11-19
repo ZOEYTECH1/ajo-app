@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../src/hooks/useTheme';
 import { useAuthStore, useModuleStore, type ModuleKey } from '../src/store/useAppStore';
@@ -230,6 +231,7 @@ const DiscoverCard: React.FC<{ module: ModuleKey; onActivate: () => void }> = ({
 // ─── Home Screen ──────────────────────────────────────────────────────────────
 export default function HomeRoute() {
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const { user, logout } = useAuthStore();
   const { selectedModules, primaryModule, addModule, setSelectedModules, resetModules } = useModuleStore();
   const router = useRouter();
@@ -375,9 +377,9 @@ export default function HomeRoute() {
         <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
         <View style={[s.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           <View>
-            <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginBottom: 2 }}>Welcome back</Text>
+            <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginBottom: 2 }}>{t('home.welcomeBack')}</Text>
             <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }}>
-              {user?.first_name ?? 'there'} {user?.last_name ?? ''}
+              {user?.first_name ?? t('home.defaultName')} {user?.last_name ?? ''}
             </Text>
           </View>
         </View>
@@ -400,7 +402,7 @@ export default function HomeRoute() {
             {user?.first_name ?? 'there'} {user?.last_name ?? ''}
           </Text>
         </View>
-        <TouchableOpacity onPress={handleLogout} style={s.headerIcon} hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }} accessibilityRole="button" accessibilityLabel="Log out">
+        <TouchableOpacity onPress={handleLogout} style={s.headerIcon} hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }} accessibilityRole="button" accessibilityLabel={t('common.logOut')}>
           <Ionicons name="log-out-outline" size={22} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>

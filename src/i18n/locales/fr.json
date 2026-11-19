@@ -1,0 +1,87 @@
+{
+  "common": {
+    "processing": "Traitement en cours...",
+    "loadingPleaseWait": "Chargement, veuillez patienter",
+    "otpDigitOfTotal": "Chiffre {{index}} sur {{total}}",
+    "logOut": "Se déconnecter",
+    "cancel": "Annuler",
+    "dismissDialog": "Fermer la boîte de dialogue"
+  },
+  "auth": {
+    "login": {
+      "title": "Content de vous revoir",
+      "subtitle": "Connectez-vous à votre compte Ajo.",
+      "loggingIn": "Connexion en cours...",
+      "emailLabel": "Adresse e-mail",
+      "emailPlaceholder": "ada@email.com",
+      "emailA11y": "Adresse e-mail",
+      "passwordLabel": "Mot de passe",
+      "passwordPlaceholder": "Votre mot de passe",
+      "passwordA11y": "Mot de passe",
+      "showPassword": "Afficher le mot de passe",
+      "hidePassword": "Masquer le mot de passe",
+      "forgotPassword": "Mot de passe oublié ?",
+      "forgotPasswordA11y": "Mot de passe oublié",
+      "forgotPasswordHint": "Appuyez deux fois pour réinitialiser votre mot de passe",
+      "logIn": "Se connecter",
+      "logInHint": "Appuyez deux fois pour vous connecter",
+      "or": "ou",
+      "continueWithGoogle": "Continuer avec Google",
+      "signInWithGoogleA11y": "Se connecter avec Google",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "signUp": "S'inscrire",
+      "goToRegisterA11y": "Aller à l'inscription",
+      "errors": {
+        "fillAllFields": "Veuillez remplir tous les champs",
+        "invalidCredentials": "E-mail ou mot de passe invalide",
+        "googleSignInFailed": "Échec de la connexion avec Google. Veuillez réessayer.",
+        "googleNoCode": "Échec de la connexion avec Google — aucun code reçu.",
+        "googleNoToken": "Échec de la connexion avec Google — aucun jeton reçu.",
+        "googleUnavailable": "La connexion avec Google n'est pas disponible sur cet appareil. Utilisez votre e-mail et votre mot de passe."
+      }
+    }
+  },
+  "profile": {
+    "stats": {
+      "totalPayments": "Paiements totaux"
+    },
+    "actions": {
+      "privacy": "Politique de confidentialité et CGU",
+      "privacyHint": "Ouvre la politique de confidentialité et les conditions d'utilisation",
+      "changePassword": "Changer le mot de passe",
+      "language": "Langue",
+      "deleteAccount": "Supprimer le compte",
+      "deleteAccountHint": "Désactive définitivement votre compte"
+    },
+    "changePassword": {
+      "title": "Changer le mot de passe",
+      "success": "Mot de passe modifié !",
+      "done": "Terminé",
+      "currentPlaceholder": "Mot de passe actuel",
+      "currentA11y": "Mot de passe actuel",
+      "newPlaceholder": "Nouveau mot de passe (8 caractères min.)",
+      "newA11y": "Nouveau mot de passe",
+      "confirmPlaceholder": "Confirmer le nouveau mot de passe",
+      "confirmA11y": "Confirmer le nouveau mot de passe",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…"
+    },
+    "language": {
+      "title": "Langue",
+      "subtitle": "Choisissez la langue utilisée dans l'application."
+    },
+    "confirmLogout": {
+      "title": "Se déconnecter",
+      "message": "Voulez-vous vraiment vous déconnecter ?"
+    },
+    "confirmDelete": {
+      "title": "Supprimer le compte",
+      "message": "Cela désactivera définitivement votre compte. Votre historique de paiements sera conservé pour les registres du groupe. Cette action est irréversible."
+    }
+  },
+  "home": {
+    "welcomeBack": "Content de vous revoir",
+    "defaultName": "là"
+  }
+}

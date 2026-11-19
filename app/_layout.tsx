@@ -1,5 +1,6 @@
 import '../src/crashLogger'; // must be first — installs global error handler before any other import runs
 import '../src/sentry';     // initialise Sentry (no-op when EXPO_PUBLIC_SENTRY_DSN is unset)
+import '../src/i18n';       // initialise i18next before any screen renders translated text
 import { captureException } from '../src/sentry';
 import { Stack, useSegments, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';

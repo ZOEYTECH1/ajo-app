@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -132,8 +133,9 @@ interface LoadingOverlayProps {
   message?: string;
 }
 
-export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ visible, message = 'Processing...' }) => {
+export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ visible, message }) => {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   if (!visible) return null;
 
@@ -142,13 +144,13 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ visible, message
       <View
         style={[s.overlayBg, { backgroundColor: colors.overlay }]}
         accessible={true}
-        accessibilityLabel="Loading, please wait"
+        accessibilityLabel={t('common.loadingPleaseWait')}
         accessibilityLiveRegion="polite"
       >
         <View style={[s.loaderCard, { backgroundColor: colors.surface, ...Shadow.strong(colors.black) }]}>
           <AjoLoader size={72} />
           <Text style={[s.loadingText, { color: colors.textPrimary, marginTop: 20 }]}>
-            {message}
+            {message ?? t('common.processing')}
           </Text>
         </View>
       </View>
@@ -484,7 +486,8 @@ interface OTPBoxProps {
 
 export const OTPBox: React.FC<OTPBoxProps> = ({ value, focused, index, total = 6 }) => {
   const { colors } = useTheme();
-  const label = index !== undefined ? `OTP digit ${index + 1} of ${total}` : undefined;
+  const { t } = useTranslation();
+  const label = index !== undefined ? t('common.otpDigitOfTotal', { index: index + 1, total }) : undefined;
   return (
     <View
       style={[

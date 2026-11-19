@@ -1,0 +1,87 @@
+{
+  "common": {
+    "processing": "Processing...",
+    "loadingPleaseWait": "Loading, please wait",
+    "otpDigitOfTotal": "OTP digit {{index}} of {{total}}",
+    "logOut": "Log out",
+    "cancel": "Cancel",
+    "dismissDialog": "Dismiss dialog"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Log in to your Ajo account.",
+      "loggingIn": "Logging you in...",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "ada@email.com",
+      "emailA11y": "Email address",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Your password",
+      "passwordA11y": "Password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "forgotPassword": "Forgot password?",
+      "forgotPasswordA11y": "Forgot password",
+      "forgotPasswordHint": "Double tap to reset your password",
+      "logIn": "Log In",
+      "logInHint": "Double tap to log in",
+      "or": "or",
+      "continueWithGoogle": "Continue with Google",
+      "signInWithGoogleA11y": "Sign in with Google",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "goToRegisterA11y": "Go to register",
+      "errors": {
+        "fillAllFields": "Please fill in all fields",
+        "invalidCredentials": "Invalid email or password",
+        "googleSignInFailed": "Google sign-in failed. Please try again.",
+        "googleNoCode": "Google sign-in failed — no code received.",
+        "googleNoToken": "Google sign-in failed — no ID token returned.",
+        "googleUnavailable": "Google sign-in is not available on this device. Please use email & password."
+      }
+    }
+  },
+  "profile": {
+    "stats": {
+      "totalPayments": "Total payments"
+    },
+    "actions": {
+      "privacy": "Privacy Policy & Terms",
+      "privacyHint": "Opens privacy policy and terms of service",
+      "changePassword": "Change password",
+      "language": "Language",
+      "deleteAccount": "Delete account",
+      "deleteAccountHint": "Permanently deactivates your account"
+    },
+    "changePassword": {
+      "title": "Change Password",
+      "success": "Password changed!",
+      "done": "Done",
+      "currentPlaceholder": "Current password",
+      "currentA11y": "Current password",
+      "newPlaceholder": "New password (min 8 chars)",
+      "newA11y": "New password",
+      "confirmPlaceholder": "Confirm new password",
+      "confirmA11y": "Confirm new password",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving…"
+    },
+    "language": {
+      "title": "Language",
+      "subtitle": "Choose the language used across the app."
+    },
+    "confirmLogout": {
+      "title": "Log out",
+      "message": "Are you sure you want to log out?"
+    },
+    "confirmDelete": {
+      "title": "Delete account",
+      "message": "This will permanently deactivate your account. Your payment history will be preserved for group records. This cannot be undone."
+    }
+  },
+  "home": {
+    "welcomeBack": "Welcome back",
+    "defaultName": "there"
+  }
+}

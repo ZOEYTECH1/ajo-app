@@ -63,7 +63,8 @@
         {
           "cameraPermission": "Scribe needs camera access to scan product barcodes."
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "extra": {
       "router": {},

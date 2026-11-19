@@ -1,0 +1,88 @@
+{
+  "_note": "Machine-translated first pass (Phase 1 i18n) -- not reviewed by a native speaker. Needs native review before production reliance.",
+  "common": {
+    "processing": "Ana aiwatarwa...",
+    "loadingPleaseWait": "Ana lodawa, da fatan za a jira",
+    "otpDigitOfTotal": "Lamba {{index}} daga {{total}}",
+    "logOut": "Fita",
+    "cancel": "Soke",
+    "dismissDialog": "Rufe akwatin tattaunawa"
+  },
+  "auth": {
+    "login": {
+      "title": "Barka da dawowa",
+      "subtitle": "Shiga cikin asusun Ajo ɗinku.",
+      "loggingIn": "Ana shiga...",
+      "emailLabel": "Adireshin Imel",
+      "emailPlaceholder": "ada@email.com",
+      "emailA11y": "Adireshin imel",
+      "passwordLabel": "Kalmar sirri",
+      "passwordPlaceholder": "Kalmar sirrinku",
+      "passwordA11y": "Kalmar sirri",
+      "showPassword": "Nuna kalmar sirri",
+      "hidePassword": "Ɓoye kalmar sirri",
+      "forgotPassword": "Kun manta kalmar sirri?",
+      "forgotPasswordA11y": "Manta kalmar sirri",
+      "forgotPasswordHint": "Danna sau biyu don sake saita kalmar sirrinku",
+      "logIn": "Shiga",
+      "logInHint": "Danna sau biyu don shiga",
+      "or": "ko",
+      "continueWithGoogle": "Ci gaba da Google",
+      "signInWithGoogleA11y": "Shiga da Google",
+      "noAccount": "Ba ku da asusu?",
+      "signUp": "Yi rajista",
+      "goToRegisterA11y": "Je zuwa rajista",
+      "errors": {
+        "fillAllFields": "Da fatan za a cika dukkan filayen",
+        "invalidCredentials": "Imel ko kalmar sirri ba daidai ba",
+        "googleSignInFailed": "Shiga da Google ya kasa. Da fatan za a sake gwadawa.",
+        "googleNoCode": "Shiga da Google ya kasa — ba a karɓi lamba ba.",
+        "googleNoToken": "Shiga da Google ya kasa — ba a karɓi alama ba.",
+        "googleUnavailable": "Shiga da Google ba ya samuwa a wannan na'urar. Da fatan za a yi amfani da imel da kalmar sirri."
+      }
+    }
+  },
+  "profile": {
+    "stats": {
+      "totalPayments": "Jimillar biyan kuɗi"
+    },
+    "actions": {
+      "privacy": "Manufar Sirri & Sharuɗɗa",
+      "privacyHint": "Yana buɗe manufar sirri da sharuɗɗan sabis",
+      "changePassword": "Canza kalmar sirri",
+      "language": "Harshe",
+      "deleteAccount": "Share asusu",
+      "deleteAccountHint": "Yana dakatar da asusunku na dindindin"
+    },
+    "changePassword": {
+      "title": "Canza Kalmar Sirri",
+      "success": "An canza kalmar sirri!",
+      "done": "An gama",
+      "currentPlaceholder": "Kalmar sirri ta yanzu",
+      "currentA11y": "Kalmar sirri ta yanzu",
+      "newPlaceholder": "Sabuwar kalmar sirri (aƙalla haruffa 8)",
+      "newA11y": "Sabuwar kalmar sirri",
+      "confirmPlaceholder": "Tabbatar da sabuwar kalmar sirri",
+      "confirmA11y": "Tabbatar da sabuwar kalmar sirri",
+      "cancel": "Soke",
+      "save": "Ajiye",
+      "saving": "Ana ajiyewa…"
+    },
+    "language": {
+      "title": "Harshe",
+      "subtitle": "Zaɓi harshen da za a yi amfani da shi a cikin manhajar."
+    },
+    "confirmLogout": {
+      "title": "Fita",
+      "message": "Kun tabbata kuna son fita?"
+    },
+    "confirmDelete": {
+      "title": "Share asusu",
+      "message": "Wannan zai dakatar da asusunku na dindindin. Za a ajiye tarihin biyan kuɗinku don bayanan ƙungiya. Ba za a iya soke wannan ba."
+    }
+  },
+  "home": {
+    "welcomeBack": "Barka da dawowa",
+    "defaultName": "kai"
+  }
+}

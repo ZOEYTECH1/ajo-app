@@ -274,7 +274,7 @@ export default function ProductDetailScreen() {
               accessibilityHint="You will be alerted when stock drops below this number"
             />
             <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 4 }}>
-              You'll be notified when stock drops below this number. Default is 5.
+              You&apos;ll be notified when stock drops below this number. Default is 5.
             </Text>
             <Text style={[s.modalLabel, { color: colors.textSecondary, marginTop: 14 }]}>Expiry date (optional)</Text>
             <TouchableOpacity
@@ -317,7 +317,7 @@ export default function ProductDetailScreen() {
               </>
             )}
             <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 4 }}>
-              You'll get a push alert 30 days and 7 days before expiry.
+              You&apos;ll get a push alert 30 days and 7 days before expiry.
             </Text>
             <TouchableOpacity
               onPress={() => saveEdit()}
@@ -691,7 +691,7 @@ export default function ProductDetailScreen() {
                         : <>
                             <Ionicons name="lock-closed-outline" size={16} color="#fff" />
                             <Text style={{ fontSize: FontSize.sm, color: '#fff', fontWeight: '700', marginLeft: 8 }}>
-                              Close today's stock
+                              Close today&apos;s stock
                             </Text>
                           </>
                       }

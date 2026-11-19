@@ -101,7 +101,7 @@ export default function JoinThriftRoute() {
               Join a thrift group
             </Text>
             <Text style={{ fontSize: FontSize.base, color: colors.textSecondary, marginTop: 8, textAlign: 'center', lineHeight: 22, marginBottom: 32 }}>
-              Ask your collector for the 8-character invite code, then enter the amount you'll contribute each period.
+              Ask your collector for the 8-character invite code, then enter the amount you&apos;ll contribute each period.
             </Text>
 
             <Input
@@ -131,7 +131,7 @@ export default function JoinThriftRoute() {
             <View style={[s.infoBox, { backgroundColor: colors.primaryTint }]}>
               <Ionicons name="information-circle-outline" size={18} color={colors.primary} style={{ marginTop: 1 }} />
               <Text style={{ flex: 1, fontSize: FontSize.xs, color: colors.primary, marginLeft: 8, lineHeight: 18 }}>
-                The collector will review your amount. If it doesn't match what was agreed, they'll flag it and ask you to correct it before approving your membership.
+                The collector will review your amount. If it doesn&apos;t match what was agreed, they&apos;ll flag it and ask you to correct it before approving your membership.
               </Text>
             </View>
 

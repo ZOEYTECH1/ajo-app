@@ -124,7 +124,7 @@ function DisputeCard({ item, onViewGroup }: { item: QueuePayment; onViewGroup: (
           </Text>
           {!!item.dispute_reason && (
             <Text style={[s.cardMeta, { color: colors.error }]} numberOfLines={2}>
-              "{item.dispute_reason}"
+              &quot;{item.dispute_reason}&quot;
             </Text>
           )}
         </View>
@@ -169,7 +169,7 @@ function FlagModal({
         <View style={[s.sheet, { backgroundColor: colors.surface }]}>
           <Text style={[s.sheetTitle, { color: colors.textPrimary }]} accessibilityRole="header">Flag Contribution Amount</Text>
           <Text style={[s.sheetSub, { color: colors.textSecondary }]}>
-            Tell the payer what's wrong with the amount they requested.
+            Tell the payer what&apos;s wrong with the amount they requested.
           </Text>
           <TextInput
             style={[s.input, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.background }]}

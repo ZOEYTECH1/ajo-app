@@ -51,11 +51,8 @@ rather than rendering components, so they run without a native environment.
 
 ## Verifying before calling a task done
 
-Run `npm run verify` (typecheck + test + `npm audit`) and paste its output
-in the summary before reporting any task in this project complete. No lint
-step is wired in yet — `npx expo lint` sets ESLint up interactively on first
-run (installs `eslint` + `eslint-config-expo`); do that once by hand, then
-add the resulting `lint` script into `verify` in `package.json`.
+Run `npm run verify` (lint + typecheck + test + `npm audit`) and paste its
+output in the summary before reporting any task in this project complete.
 
 ## Error handling
 

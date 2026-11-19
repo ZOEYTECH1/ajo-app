@@ -96,7 +96,7 @@ export default function WarehouseReceiveScreen() {
             </View>
             <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: '#1B5E20', marginBottom: 4 }}>Goods Received</Text>
             <Text style={{ fontSize: FontSize.sm, color: '#2E7D32', textAlign: 'center' }}>
-              <Text style={{ fontWeight: '700' }}>{successInfo.qty} units</Text> of "{successInfo.productName}" added.{'\n'}New stock: <Text style={{ fontWeight: '700' }}>{successInfo.newStock} units</Text>
+              <Text style={{ fontWeight: '700' }}>{successInfo.qty} units</Text> of &quot;{successInfo.productName}&quot; added.{'\n'}New stock: <Text style={{ fontWeight: '700' }}>{successInfo.newStock} units</Text>
             </Text>
             <View style={{ flexDirection: 'row', gap: 12, marginTop: 16 }}>
               <TouchableOpacity

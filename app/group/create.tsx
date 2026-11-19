@@ -405,7 +405,7 @@ export default function CreateGroupRoute() {
             onChange={(d) => setStartDate(d)}
           />
           <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary, marginTop: -4 }}>
-            The first cycle's end date is set automatically based on the contribution frequency and collection day.
+            The first cycle&apos;s end date is set automatically based on the contribution frequency and collection day.
           </Text>
 
           <View style={{ marginTop: 16 }}>

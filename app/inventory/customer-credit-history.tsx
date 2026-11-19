@@ -141,7 +141,7 @@ function CreditEntryCard({
 
       {!!entry.note && (
         <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 8, fontStyle: 'italic' }}>
-          "{entry.note}"
+          &quot;{entry.note}&quot;
         </Text>
       )}
 

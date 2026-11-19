@@ -584,7 +584,7 @@ export default function ExpensesScreen() {
                 No expenses yet
               </Text>
               <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 6, textAlign: 'center' }}>
-                Tap "Add" to record rent, transport, supplies and more.
+                Tap &quot;Add&quot; to record rent, transport, supplies and more.
               </Text>
             </View>
           )}
@@ -782,7 +782,7 @@ export default function ExpensesScreen() {
                 {/* Character countdown — shown right below the input */}
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
                   <Text style={{ fontSize: 11, color: colors.textTertiary }}>
-                    If named, we'll ask to save it as a regular category.
+                    If named, we&apos;ll ask to save it as a regular category.
                   </Text>
                   <Text style={{
                     fontSize: 12, fontWeight: '700',

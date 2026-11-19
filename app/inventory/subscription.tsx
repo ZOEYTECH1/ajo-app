@@ -128,7 +128,7 @@ export default function InventorySubscriptionScreen() {
         {/* What's included */}
         <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border, ...Shadow.card(colors.black) }]}>
           <Text style={{ fontSize: FontSize.md, fontWeight: '800', color: colors.textPrimary, marginBottom: 12 }}>
-            What's included
+            What&apos;s included
           </Text>
           {[
             'Add unlimited products & categories',

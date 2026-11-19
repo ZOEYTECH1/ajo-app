@@ -540,7 +540,7 @@ export default function GroupDetailRoute() {
             >
               <Ionicons name="alert-circle-outline" size={18} color={colors.warningDark} />
               <Text style={{ fontSize: FontSize.sm, color: colors.warningDark, flex: 1, marginLeft: 8, fontWeight: '600' }}>
-                {group.admin.first_name}'s payment is awaiting your review — you were randomly picked this round
+                {group.admin.first_name}&apos;s payment is awaiting your review — you were randomly picked this round
               </Text>
               <Ionicons name="chevron-forward" size={16} color={colors.warningDark} />
             </TouchableOpacity>

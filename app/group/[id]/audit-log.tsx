@@ -88,7 +88,7 @@ export default function AuditLogRoute() {
             Audit Log
           </Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 1 }}>
-            This group's full activity trail
+            This group&apos;s full activity trail
           </Text>
         </View>
       </View>
@@ -103,7 +103,7 @@ export default function AuditLogRoute() {
         <View style={s.empty}>
           <Ionicons name="wifi-outline" size={56} color={colors.primaryTint} />
           <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary, marginTop: 16 }}>
-            Couldn't load the audit log
+            Couldn&apos;t load the audit log
           </Text>
           <Text style={{ fontSize: FontSize.base, color: colors.textSecondary, marginTop: 8, textAlign: 'center' }}>
             Pull down to retry.

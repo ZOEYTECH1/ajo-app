@@ -236,7 +236,7 @@ export default function ProductRequestsScreen() {
                     )}
                     {req.note ? (
                       <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 4, fontStyle: 'italic' }} numberOfLines={2}>
-                        "{req.note}"
+                        &quot;{req.note}&quot;
                       </Text>
                     ) : null}
                     <Text style={{ fontSize: 11, color: colors.textTertiary, marginTop: 6 }}>

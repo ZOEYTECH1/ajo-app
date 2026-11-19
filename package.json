@@ -49,6 +49,8 @@
     "@testing-library/react-native": "^14.0.1",
     "@types/jest": "29.5.14",
     "@types/react": "~19.2.2",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~57.0.2",
     "jest": "^29.7.0",
     "jest-expo": "~57.0.5",
     "react-native-svg-transformer": "^1.5.3",
@@ -64,8 +66,10 @@
     "web": "expo start --web",
     "test": "jest",
     "typecheck": "tsc --noEmit",
+    "lint": "expo lint",
     "audit": "npm audit",
-    "verify": "npm run typecheck && npm test && npm run audit"
+    "verify": "npm run lint && npm run typecheck && npm test && npm run audit",
+    "lint": "expo lint"
   },
   "jest": {
     "preset": "jest-expo",

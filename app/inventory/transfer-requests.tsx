@@ -291,7 +291,7 @@ function ReviewModal({ request, bizId, onClose }: { request: StockTransferReques
             From {request.requesting_business.name}
           </Text>
           {request.note ? (
-            <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, fontStyle: 'italic', marginBottom: 16 }}>"{request.note}"</Text>
+            <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, fontStyle: 'italic', marginBottom: 16 }}>&quot;{request.note}&quot;</Text>
           ) : null}
 
           {request.items.map((it) => (
@@ -448,7 +448,7 @@ export default function TransferRequestsScreen() {
                   ))}
                 </View>
                 {req.note ? (
-                  <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, fontStyle: 'italic', marginTop: 6 }} numberOfLines={2}>"{req.note}"</Text>
+                  <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, fontStyle: 'italic', marginTop: 6 }} numberOfLines={2}>&quot;{req.note}&quot;</Text>
                 ) : null}
                 <Text style={{ fontSize: 11, color: colors.textTertiary, marginTop: 8 }}>
                   {req.requested_by_name ? `By ${req.requested_by_name} · ` : ''}{fmtDate(req.created_at)}

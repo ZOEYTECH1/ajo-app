@@ -209,7 +209,7 @@ export default function BillingScreen() {
       <View style={[s.rateBanner, { backgroundColor: colors.primaryTint }]}>
         <Ionicons name="information-circle-outline" size={16} color={colors.primary} />
         <Text style={{ fontSize: FontSize.xs, color: colors.primary, marginLeft: 8, flex: 1, lineHeight: 18 }}>
-          Platform fee is 0.5%–1.5% of your circle's total recorded payments, based on volume. Generated automatically once a circle completes.
+          Platform fee is 0.5%–1.5% of your circle&apos;s total recorded payments, based on volume. Generated automatically once a circle completes.
         </Text>
       </View>
 
@@ -223,7 +223,7 @@ export default function BillingScreen() {
               No invoices yet
             </Text>
             <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginTop: 6, textAlign: 'center', lineHeight: 20 }}>
-              An invoice generates automatically once a circle completes, or tap "Generate Invoice" once one has.
+              An invoice generates automatically once a circle completes, or tap &quot;Generate Invoice&quot; once one has.
             </Text>
           </View>
         ) : (

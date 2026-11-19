@@ -94,7 +94,7 @@ export default function WarehouseDispatchScreen() {
             </View>
             <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: '#BF360C', marginBottom: 4 }}>Stock Dispatched</Text>
             <Text style={{ fontSize: FontSize.sm, color: '#E64A19', textAlign: 'center' }}>
-              <Text style={{ fontWeight: '700' }}>{successInfo.qty} units</Text> of "{successInfo.productName}" dispatched.{'\n'}Remaining stock: <Text style={{ fontWeight: '700' }}>{successInfo.remaining} units</Text>
+              <Text style={{ fontWeight: '700' }}>{successInfo.qty} units</Text> of &quot;{successInfo.productName}&quot; dispatched.{'\n'}Remaining stock: <Text style={{ fontWeight: '700' }}>{successInfo.remaining} units</Text>
             </Text>
             <View style={{ flexDirection: 'row', gap: 12, marginTop: 16 }}>
               <TouchableOpacity

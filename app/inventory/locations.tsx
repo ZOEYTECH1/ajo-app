@@ -224,7 +224,7 @@ export default function LocationsScreen() {
         <View style={{ flex: 1, marginLeft: 16 }}>
           <Text style={{ fontSize: FontSize.lg, fontWeight: '800', color: colors.textPrimary }} accessibilityRole="header">My Locations</Text>
           <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 2 }}>
-            Select the location you're working at
+            Select the location you&apos;re working at
           </Text>
         </View>
         <TouchableOpacity

@@ -194,7 +194,7 @@ export default function PartnersScreen() {
                         </TouchableOpacity>
                       </View>
                     ) : (
-                      <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary, marginTop: 10 }}>Awaiting a manager's response</Text>
+                      <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary, marginTop: 10 }}>Awaiting a manager&apos;s response</Text>
                     )}
                   </View>
                 ))}

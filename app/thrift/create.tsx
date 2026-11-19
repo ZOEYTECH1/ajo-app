@@ -218,7 +218,7 @@ export default function CreateThriftRoute() {
         {/* Organisation affiliation */}
         <Text style={[s.label, { color: colors.textPrimary, marginTop: 24 }]}>Organisation affiliation <Text style={{ fontWeight: '400', color: colors.textSecondary }}>(optional)</Text></Text>
         <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginBottom: 12 }}>
-          Tap to select if you collect on behalf of a partner organisation. Leave blank if you're independent.
+          Tap to select if you collect on behalf of a partner organisation. Leave blank if you&apos;re independent.
         </Text>
 
         {/* Org list — member orgs first, then remaining partner orgs */}
@@ -280,7 +280,7 @@ export default function CreateThriftRoute() {
               leftIcon={<Ionicons name="key-outline" size={18} color={colors.primary} />}
             />
             <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 6, lineHeight: 18 }}>
-              The admin of this organisation must invite you first. If you haven't received a token, contact them.
+              The admin of this organisation must invite you first. If you haven&apos;t received a token, contact them.
             </Text>
           </View>
         )}

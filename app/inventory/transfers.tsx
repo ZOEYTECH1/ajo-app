@@ -201,7 +201,7 @@ function TransferCard({
 
       {!!transfer.notes && (
         <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, marginTop: 8, fontStyle: 'italic' }}>
-          "{transfer.notes}"
+          &quot;{transfer.notes}&quot;
         </Text>
       )}
     </View>

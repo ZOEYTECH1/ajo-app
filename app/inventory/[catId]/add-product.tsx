@@ -302,7 +302,7 @@ export default function AddProductScreen() {
         {/* Expiry date */}
         <Text style={[s.label, { color: colors.textSecondary, marginTop: 4 }]}>Expiry date (optional)</Text>
         <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary, marginBottom: 10 }}>
-          You'll get a push alert 30 days and 7 days before this product expires.
+          You&apos;ll get a push alert 30 days and 7 days before this product expires.
         </Text>
         <TouchableOpacity
           onPress={() => setShowExpiryPicker(true)}

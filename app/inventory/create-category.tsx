@@ -84,7 +84,7 @@ export default function CreateCategoryScreen() {
             What type of goods do you sell?
           </Text>
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, marginBottom: 20 }}>
-            Write it in your own words — e.g. "Recharge cards", "Baby clothes", "Spare parts"
+            Write it in your own words — e.g. &quot;Recharge cards&quot;, &quot;Baby clothes&quot;, &quot;Spare parts&quot;
           </Text>
           <TextInput
             value={customName}

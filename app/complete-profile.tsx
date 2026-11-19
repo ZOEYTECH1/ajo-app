@@ -160,7 +160,7 @@ export default function CompleteProfileRoute() {
 
             <Bouncy onPress={handleResend} style={{ alignItems: 'center', marginTop: 20 }} accessibilityRole="button" accessibilityLabel="Resend verification code">
               <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary }}>
-                Didn't receive a code?{' '}
+                Didn&apos;t receive a code?{' '}
                 <Text style={{ color: colors.primary, fontWeight: '700' }}>Resend</Text>
               </Text>
             </Bouncy>

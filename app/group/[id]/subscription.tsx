@@ -87,7 +87,7 @@ function ResultCard({
         </Text>
       ) : (
         <Text style={{ fontSize: FontSize.base, color: colors.textSecondary, marginTop: 8, textAlign: 'center', lineHeight: 22 }}>
-          We couldn't confirm the payment. If you completed it, wait a moment and try verifying again.
+          We couldn&apos;t confirm the payment. If you completed it, wait a moment and try verifying again.
         </Text>
       )}
       <View style={{ width: '100%', marginTop: 32 }}>

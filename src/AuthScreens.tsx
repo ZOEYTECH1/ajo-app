@@ -264,7 +264,7 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onSuccess, onLogin }) 
         />
 
         <Text style={{ fontSize: FontSize.xs, color: colors.textSecondary, textAlign: 'center', lineHeight: 18, marginBottom: 20, marginTop: 4 }}>
-          By creating an account, you agree to Ajo's{' '}
+          By creating an account, you agree to Ajo&apos;s{' '}
           <Text style={{ color: colors.primary, fontWeight: '600' }}>Terms of Service</Text> and{' '}
           <Text style={{ color: colors.primary, fontWeight: '600' }}>Privacy Policy</Text>.
         </Text>
@@ -479,7 +479,7 @@ export const LoginScreen: React.FC<LoginProps> = ({ onSuccess, onRegister, onFor
 
         <Bouncy onPress={onRegister} style={[layout.switchRow, { marginTop: 20 }]} accessibilityRole="link" accessibilityLabel="Go to register">
           <Text style={{ fontSize: FontSize.sm, color: colors.textSecondary, textAlign: 'center' }}>
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Text style={{ color: colors.primary, fontWeight: '700' }}>Sign up</Text>
           </Text>
         </Bouncy>

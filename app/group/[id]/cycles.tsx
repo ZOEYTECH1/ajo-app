@@ -175,7 +175,7 @@ const StartCycleModal: React.FC<{
           </TouchableOpacity>
 
           <Text style={{ fontSize: FontSize.xs, color: colors.textTertiary, marginTop: 10 }}>
-            The cycle's end date is set automatically based on the group's contribution frequency and collection day.
+            The cycle&apos;s end date is set automatically based on the group&apos;s contribution frequency and collection day.
           </Text>
 
           {/* Native date picker */}

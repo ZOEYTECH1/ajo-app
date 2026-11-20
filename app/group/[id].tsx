@@ -313,10 +313,27 @@ export default function GroupDetailRoute() {
     enabled: !!groupId,
   });
 
+  // Only used for the pending-join-requests banner below -- a non-admin's
+  // request is served the approved list instead (GroupMembersView ignores
+  // the status filter for them), so this is harmless to fetch regardless
+  // of role, same as payments/cycles above. Deliberately a different query
+  // key from members.tsx's ['members', groupId] (which fetches the full,
+  // unfiltered list) -- sharing a key with a different queryFn/params would
+  // have the two screens clobber each other's cached shape.
+  const { data: pendingMembersList } = useQuery({
+    queryKey: ['members-pending', groupId],
+    queryFn: () => groupService.getMembers(groupId, 'pending'),
+    enabled: !!groupId,
+  });
+  const pendingMembersCount = pendingMembersList?.length ?? 0;
+
   // Live updates so this screen's pending-payment/member-count banners stay
   // correct without a manual reload -- see useGroupSocket.ts.
   useGroupSocket(groupId, (e) => {
-    if (e.event === 'join_request' || e.event === 'membership_approved' || e.event === 'membership_rejected' || e.event === 'sub_admin_assigned') {
+    if (e.event === 'join_request' || e.event === 'membership_approved' || e.event === 'membership_rejected') {
+      queryClient.invalidateQueries({ queryKey: ['group', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['members-pending', groupId] });
+    } else if (e.event === 'sub_admin_assigned') {
       queryClient.invalidateQueries({ queryKey: ['group', groupId] });
     } else {
       queryClient.invalidateQueries({ queryKey: ['payments', groupId] });
@@ -567,6 +584,22 @@ export default function GroupDetailRoute() {
                 {group.is_on_trial ? 'Trial active — upgrade to continue' : 'Subscription inactive — renew now'}
               </Text>
               <Ionicons name="chevron-forward" size={16} color={group.is_on_trial ? colors.primary : colors.error} />
+            </TouchableOpacity>
+          )}
+
+          {/* ── Pending join requests (admin only) ── */}
+          {isGroupAdmin && pendingMembersCount > 0 && (
+            <TouchableOpacity
+              onPress={() => router.push(`/group/${groupId}/members` as any)}
+              style={[s.alertBanner, { backgroundColor: colors.primaryTint, borderColor: colors.primaryBorder }]}
+              accessibilityRole="button"
+              accessibilityLabel={`${pendingMembersCount} join request${pendingMembersCount > 1 ? 's' : ''} awaiting review`}
+            >
+              <Ionicons name="people-outline" size={18} color={colors.primary} />
+              <Text style={{ fontSize: FontSize.sm, color: colors.primary, flex: 1, marginLeft: 8, fontWeight: '600' }}>
+                {pendingMembersCount} join request{pendingMembersCount > 1 ? 's' : ''} awaiting your review
+              </Text>
+              <Ionicons name="chevron-forward" size={16} color={colors.primary} />
             </TouchableOpacity>
           )}
 

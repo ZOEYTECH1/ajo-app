@@ -304,6 +304,7 @@ export default function MembersRoute() {
   useGroupSocket(groupId, (e) => {
     if (e.event === 'join_request' || e.event === 'membership_approved' || e.event === 'membership_rejected') {
       queryClient.invalidateQueries({ queryKey: ['members', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['members-pending', groupId] });
       queryClient.invalidateQueries({ queryKey: ['group', groupId] });
     } else if (e.event === 'sub_admin_assigned') {
       queryClient.invalidateQueries({ queryKey: ['group', groupId] });
@@ -318,6 +319,7 @@ export default function MembersRoute() {
     onSuccess: () => {
       feedback('success');
       queryClient.invalidateQueries({ queryKey: ['members', groupId] });
+      queryClient.invalidateQueries({ queryKey: ['members-pending', groupId] });
       queryClient.invalidateQueries({ queryKey: ['group', groupId] });
       // Approving assigns a new collection_slot — the Collection Schedule
       // shown on the group detail page reads a separate cached query and

@@ -305,6 +305,8 @@ export default function MembersRoute() {
     if (e.event === 'join_request' || e.event === 'membership_approved' || e.event === 'membership_rejected') {
       queryClient.invalidateQueries({ queryKey: ['members', groupId] });
       queryClient.invalidateQueries({ queryKey: ['group', groupId] });
+    } else if (e.event === 'sub_admin_assigned') {
+      queryClient.invalidateQueries({ queryKey: ['group', groupId] });
     }
   });
 

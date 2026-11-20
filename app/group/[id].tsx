@@ -316,11 +316,18 @@ export default function GroupDetailRoute() {
   // Live updates so this screen's pending-payment/member-count banners stay
   // correct without a manual reload -- see useGroupSocket.ts.
   useGroupSocket(groupId, (e) => {
-    if (e.event === 'join_request' || e.event === 'membership_approved' || e.event === 'membership_rejected') {
+    if (e.event === 'join_request' || e.event === 'membership_approved' || e.event === 'membership_rejected' || e.event === 'sub_admin_assigned') {
       queryClient.invalidateQueries({ queryKey: ['group', groupId] });
     } else {
       queryClient.invalidateQueries({ queryKey: ['payments', groupId] });
     }
+  });
+
+  const assignSubAdminMutation = useMutation({
+    mutationFn: () => groupService.assignSubAdmin(groupId),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['group', groupId], data);
+    },
   });
 
   const { data: collectionOrder } = useQuery({
@@ -465,9 +472,34 @@ export default function GroupDetailRoute() {
               <Text style={{ fontSize: FontSize.xs, color: 'rgba(255,255,255,0.65)', marginTop: 6 }}>
                 Admin: {group.admin.first_name} {group.admin.last_name}
               </Text>
-              <Text style={{ fontSize: FontSize.xs, color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>
-                Sub-admin: {group.sub_admin ? `${group.sub_admin.first_name} ${group.sub_admin.last_name}` : 'Not yet assigned'}
-              </Text>
+              {group.sub_admin ? (
+                <Text style={{ fontSize: FontSize.xs, color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>
+                  Sub-admin: {group.sub_admin.first_name} {group.sub_admin.last_name}
+                </Text>
+              ) : isGroupAdmin ? (
+                <>
+                  <TouchableOpacity
+                    onPress={() => assignSubAdminMutation.mutate()}
+                    disabled={assignSubAdminMutation.isPending}
+                    style={{ marginTop: 4 }}
+                    accessibilityRole="button"
+                    accessibilityLabel="Assign sub-admin"
+                  >
+                    <Text style={{ fontSize: FontSize.xs, color: '#FFF', fontWeight: '700', textDecorationLine: 'underline' }}>
+                      {assignSubAdminMutation.isPending ? 'Assigning…' : 'Assign sub-admin'}
+                    </Text>
+                  </TouchableOpacity>
+                  {assignSubAdminMutation.isError && (
+                    <Text style={{ fontSize: FontSize.xs, color: '#FFD1D1', marginTop: 2 }}>
+                      {(assignSubAdminMutation.error as any)?.response?.data?.detail ?? 'Could not assign a sub-admin. Try again.'}
+                    </Text>
+                  )}
+                </>
+              ) : (
+                <Text style={{ fontSize: FontSize.xs, color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>
+                  Sub-admin: Not yet assigned
+                </Text>
+              )}
               {(activeCycle || roundJustCompleted) && (
                 <View style={[s.roundHeaderPill, { backgroundColor: 'rgba(255,255,255,0.18)' }]}>
                   <Ionicons name={roundJustCompleted ? 'trophy' : 'sync'} size={12} color="#FFF" />

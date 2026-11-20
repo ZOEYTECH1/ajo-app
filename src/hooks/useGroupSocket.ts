@@ -6,7 +6,8 @@ export type AjoGroupEvent =
   | { event: 'payment_submitted'; payment_id: number; submitted_by: string; amount: string }
   | { event: 'payment_approved' | 'payment_rejected'; payment_id: number; reviewed_by: string }
   | { event: 'join_request'; membership_id: number; applicant_name: string }
-  | { event: 'membership_approved' | 'membership_rejected'; membership_id: number; member_name: string };
+  | { event: 'membership_approved' | 'membership_rejected'; membership_id: number; member_name: string }
+  | { event: 'sub_admin_assigned'; sub_admin_id: number; sub_admin_name: string };
 
 function wsUrlFor(groupId: string | number, token: string): string {
   const httpBase = api.defaults.baseURL ?? '';

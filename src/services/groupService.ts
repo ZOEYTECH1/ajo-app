@@ -317,6 +317,11 @@ export const groupService = {
     return res.data;
   },
 
+  assignSubAdmin: async (groupId: number): Promise<Group> => {
+    const res = await api.post(`/api/groups/${groupId}/assign-sub-admin/`);
+    return res.data;
+  },
+
   // ── Collection order ─────────────────────────────────────────────────────────
 
   getCollectionOrder: async (groupId: number): Promise<CollectionSlot[]> => {

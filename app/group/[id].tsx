@@ -465,6 +465,9 @@ export default function GroupDetailRoute() {
               <Text style={{ fontSize: FontSize.xs, color: 'rgba(255,255,255,0.65)', marginTop: 6 }}>
                 Admin: {group.admin.first_name} {group.admin.last_name}
               </Text>
+              <Text style={{ fontSize: FontSize.xs, color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>
+                Sub-admin: {group.sub_admin ? `${group.sub_admin.first_name} ${group.sub_admin.last_name}` : 'Not yet assigned'}
+              </Text>
               {(activeCycle || roundJustCompleted) && (
                 <View style={[s.roundHeaderPill, { backgroundColor: 'rgba(255,255,255,0.18)' }]}>
                   <Ionicons name={roundJustCompleted ? 'trophy' : 'sync'} size={12} color="#FFF" />

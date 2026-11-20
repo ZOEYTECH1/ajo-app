@@ -160,10 +160,12 @@ const statusColor = (status: string, colors: any) => ({
 const MemberRow: React.FC<{
   membership: Membership;
   isAdmin: boolean;
+  adminId?: number;
+  subAdminId?: number | null;
   onApprove: (m: Membership) => void;
   onReject:  (m: Membership) => void;
   onProposeRemoval: (m: Membership) => void;
-}> = ({ membership, isAdmin, onApprove, onReject, onProposeRemoval }) => {
+}> = ({ membership, isAdmin, adminId, subAdminId, onApprove, onReject, onProposeRemoval }) => {
   const { colors } = useTheme();
   const sc = statusColor(membership.status, colors);
   const streak = membership.consecutive_default_streak ?? 0;
@@ -182,6 +184,16 @@ const MemberRow: React.FC<{
           <Text style={{ fontSize: FontSize.sm, fontWeight: '700', color: colors.textPrimary }}>
             {membership.user.first_name} {membership.user.last_name}
           </Text>
+          {membership.user.id === adminId && (
+            <View style={[s.streakBadge, { backgroundColor: colors.primaryTint }]}>
+              <Text style={{ fontSize: 10, fontWeight: '800', color: colors.primary }}>Admin</Text>
+            </View>
+          )}
+          {membership.user.id === subAdminId && (
+            <View style={[s.streakBadge, { backgroundColor: colors.warningLight }]}>
+              <Text style={{ fontSize: 10, fontWeight: '800', color: colors.warningDark }}>Sub-admin</Text>
+            </View>
+          )}
           {isSuggestedForRemoval && (
             <View style={[s.streakBadge, { backgroundColor: colors.errorLight }]}>
               <Ionicons name="flame" size={11} color={colors.error} />
@@ -498,7 +510,7 @@ export default function MembersRoute() {
                 <Text style={sectionLabel(colors)}>Pending Requests ({pending.length})</Text>
                 <View style={[s.sectionCard, { backgroundColor: colors.surface, ...Shadow.card(colors.black) }]}>
                   {pending.map((m) => (
-                    <MemberRow key={m.id} membership={m} isAdmin={isGroupAdmin} onApprove={handleApprove} onReject={handleReject} onProposeRemoval={handleProposeRemoval} />
+                    <MemberRow key={m.id} membership={m} isAdmin={isGroupAdmin} adminId={group?.admin.id} subAdminId={group?.sub_admin?.id ?? null} onApprove={handleApprove} onReject={handleReject} onProposeRemoval={handleProposeRemoval} />
                   ))}
                 </View>
               </>
@@ -516,7 +528,7 @@ export default function MembersRoute() {
             ) : (
               <View style={[s.sectionCard, { backgroundColor: colors.surface, ...Shadow.card(colors.black) }]}>
                 {approved.map((m) => (
-                  <MemberRow key={m.id} membership={m} isAdmin={isGroupAdmin} onApprove={handleApprove} onReject={handleReject} onProposeRemoval={handleProposeRemoval} />
+                  <MemberRow key={m.id} membership={m} isAdmin={isGroupAdmin} adminId={group?.admin.id} subAdminId={group?.sub_admin?.id ?? null} onApprove={handleApprove} onReject={handleReject} onProposeRemoval={handleProposeRemoval} />
                 ))}
               </View>
             )}
@@ -527,7 +539,7 @@ export default function MembersRoute() {
                 <Text style={sectionLabel(colors)}>Rejected ({rejected.length})</Text>
                 <View style={[s.sectionCard, { backgroundColor: colors.surface, ...Shadow.card(colors.black) }]}>
                   {rejected.map((m) => (
-                    <MemberRow key={m.id} membership={m} isAdmin={isGroupAdmin} onApprove={handleApprove} onReject={handleReject} onProposeRemoval={handleProposeRemoval} />
+                    <MemberRow key={m.id} membership={m} isAdmin={isGroupAdmin} adminId={group?.admin.id} subAdminId={group?.sub_admin?.id ?? null} onApprove={handleApprove} onReject={handleReject} onProposeRemoval={handleProposeRemoval} />
                   ))}
                 </View>
               </>

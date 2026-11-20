@@ -93,6 +93,23 @@ export const deleteCategory = (catId: number): Promise<void> =>
 export const getProducts = (catId: number): Promise<InventoryProduct[]> =>
   api.get(`/api/inventory/categories/${catId}/products/`).then(r => r.data);
 
+export const getProductsPage = (
+  catId: number,
+  pageOrUrl: string | null,
+  search?: string,
+  stock?: 'in' | 'low' | 'out',
+): Promise<PaginatedResult<InventoryProduct>> => {
+  if (pageOrUrl) return api.get(pageOrUrl).then(r => r.data);
+  // page: 1 must be explicit -- see getTransfersPage's comment for why.
+  return api.get(`/api/inventory/categories/${catId}/products/`, {
+    params: {
+      page: 1,
+      ...(search ? { search } : {}),
+      ...(stock ? { stock } : {}),
+    },
+  }).then(r => r.data);
+};
+
 export const createProduct = (
   catId: number,
   data: {

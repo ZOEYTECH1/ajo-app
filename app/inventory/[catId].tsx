@@ -5,17 +5,18 @@ import {
   Modal, TextInput, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/hooks/useTheme';
 import { FontSize, Radius, Shadow } from '../../src/theme';
 import {
-  getCategories, getProducts, deleteCategory, updateCategory,
+  getCategories, getProductsPage, deleteCategory, updateCategory,
   type CustomFieldDef,
 } from '../../src/services/inventoryService';
 import ErrorBanner from '../../src/components/ErrorBanner';
 import { getCategoryEmoji, formatStock, stockColor } from '../../src/utils/inventoryHelpers';
 import { useInventoryStore } from '../../src/store/useAppStore';
+import { useDebounce } from '../../src/hooks/useDebounce';
 
 export default function CategoryDetailScreen() {
   const { catId } = useLocalSearchParams<{ catId: string }>();
@@ -45,11 +46,26 @@ export default function CategoryDetailScreen() {
   const cat = categories?.find(c => c.id === catIdNum);
   const emoji = cat ? getCategoryEmoji(cat.name) : '📦';
 
-  const { data: products, isLoading, isError, error, refetch: refetchProducts } = useQuery({
-    queryKey: ['inventory-products', catIdNum],
-    queryFn: () => getProducts(catIdNum),
+  const debouncedSearch = useDebounce(search);
+
+  const {
+    data, isLoading, isError, error, refetch: refetchProducts,
+    fetchNextPage, hasNextPage, isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['inventory-products', catIdNum, debouncedSearch, stockFilter],
+    queryFn: ({ pageParam }) => getProductsPage(
+      catIdNum,
+      pageParam as string | null,
+      debouncedSearch || undefined,
+      stockFilter !== 'all' ? stockFilter : undefined,
+    ),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.next ?? undefined,
     enabled: !!catIdNum,
   });
+
+  const products = data?.pages.flatMap(p => p.results) ?? [];
+  const totalProductCount = data?.pages[0]?.count ?? 0;
 
   const { mutate: delCat, isPending: deleting } = useMutation({
     mutationFn: () => deleteCategory(catIdNum),
@@ -129,21 +145,13 @@ export default function CategoryDetailScreen() {
     );
   };
 
-  const totalValue = (products ?? []).reduce(
-    (sum, p) => sum + parseFloat(p.price) * p.quantity,
-    0,
-  );
-
-  const filteredProducts = (products ?? []).filter(p => {
-    const threshold = p.low_stock_threshold ?? 5;
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
-    const matchesStock =
-      stockFilter === 'all' ? true :
-      stockFilter === 'out' ? p.quantity === 0 :
-      stockFilter === 'low' ? p.quantity > 0 && p.quantity < threshold :
-      p.quantity >= threshold;
-    return matchesSearch && matchesStock;
-  });
+  // Only an honest figure once every page is actually loaded -- products
+  // past the first page haven't been fetched yet, so summing just what's
+  // loaded so far would silently understate stock value for any category
+  // with more than one page.
+  const totalValue = !hasNextPage
+    ? products.reduce((sum, p) => sum + parseFloat(p.price) * p.quantity, 0)
+    : null;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -329,22 +337,25 @@ export default function CategoryDetailScreen() {
       </Modal>
 
       {/* Summary bar */}
-      {!isLoading && (products ?? []).length > 0 && (
+      {!isLoading && totalProductCount > 0 && (
         <View style={[s.summaryBar, { backgroundColor: '#FFF3E0' }]}>
           <View style={s.summaryItem}>
-            <Text style={s.summaryVal}>{(products ?? []).length}</Text>
+            <Text style={s.summaryVal}>{totalProductCount}</Text>
             <Text style={s.summaryLbl}>Products</Text>
           </View>
           <View style={[s.summaryDivider, { backgroundColor: '#E65100' + '40' }]} />
           <View style={s.summaryItem}>
-            <Text style={s.summaryVal}>₦{totalValue.toLocaleString()}</Text>
+            <Text style={s.summaryVal}>{totalValue !== null ? `₦${totalValue.toLocaleString()}` : '—'}</Text>
             <Text style={s.summaryLbl}>Stock Value</Text>
           </View>
         </View>
       )}
 
-      {/* Search + filter row */}
-      {!isLoading && (products ?? []).length > 0 && (
+      {/* Search + filter row -- stays visible while actively searching/
+          filtering even if the current criteria match zero products, so
+          there's always a way back to clear it; only hidden for a category
+          that's genuinely never had any products. */}
+      {!isLoading && (totalProductCount > 0 || !!debouncedSearch || stockFilter !== 'all') && (
         <View style={[s.searchRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
           <View style={[s.searchBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
             <Ionicons name="search-outline" size={16} color={colors.textTertiary} />
@@ -393,7 +404,7 @@ export default function CategoryDetailScreen() {
           <View style={{ alignItems: 'center', paddingVertical: 40 }}>
             <ActivityIndicator size="large" color="#E65100" />
           </View>
-        ) : (products ?? []).length === 0 ? (
+        ) : totalProductCount === 0 && !debouncedSearch && stockFilter === 'all' ? (
           <View style={{ alignItems: 'center', paddingVertical: 40 }}>
             <Ionicons name="cube-outline" size={56} color="#FFF3E0" />
             <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginTop: 16 }}>
@@ -403,7 +414,7 @@ export default function CategoryDetailScreen() {
               Tap the + button to add your first product in this category.
             </Text>
           </View>
-        ) : filteredProducts.length === 0 ? (
+        ) : products.length === 0 ? (
           <View style={{ alignItems: 'center', paddingVertical: 40 }}>
             <Ionicons name="search-outline" size={44} color={colors.border} />
             <Text style={{ fontSize: FontSize.md, fontWeight: '700', color: colors.textPrimary, marginTop: 16 }}>
@@ -423,11 +434,11 @@ export default function CategoryDetailScreen() {
               <Text style={[s.thText, { width: 72, textAlign: 'center' }]}>Status</Text>
             </View>
 
-            {filteredProducts.map((p, idx) => {
+            {products.map((p, idx) => {
               const threshold = p.low_stock_threshold ?? 5;
               const color = p.quantity === 0 ? '#C62828' : p.quantity < threshold ? '#F57C00' : '#2E7D32';
               const statusLabel = p.quantity === 0 ? 'Out' : p.quantity < threshold ? 'Low' : 'OK';
-              const isLast = idx === filteredProducts.length - 1;
+              const isLast = idx === products.length - 1;
               return (
                 <TouchableOpacity
                   key={p.id}
@@ -474,6 +485,20 @@ export default function CategoryDetailScreen() {
               );
             })}
           </View>
+        )}
+        {hasNextPage && (
+          <TouchableOpacity
+            onPress={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+            style={{ alignItems: 'center', paddingVertical: 20 }}
+            accessibilityRole="button"
+            accessibilityLabel="Load more products"
+          >
+            {isFetchingNextPage
+              ? <ActivityIndicator color="#E65100" />
+              : <Text style={{ color: '#E65100', fontWeight: '700', fontSize: FontSize.sm }}>Load More</Text>
+            }
+          </TouchableOpacity>
         )}
       </ScrollView>
 
